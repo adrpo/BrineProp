@@ -2,7 +2,7 @@ BrineProp
 =========
 BrineProp is a modelica package that calculates the thermodynamic properties of a specified brine, i.e., an aqueous solution of salts and gases, with a potential gas phase, including degassing/evaporation and solution/condensation.
 
-An Excel version is available in the [download section](https://github.com/Heineken/BrineProp/releases). Its VBA code can also be found in `/VBA`.
+An Excel version is available in the [download section](https://gitext.gfz-potsdam.de/francke/BrineProp/tags). Its VBA code can also be found in `/VBA`.
 
 Compatibility
 -------------
@@ -28,7 +28,7 @@ Documentation
 * in PhD thesis *[Thermo-hydraulic model of the two-phase flow in the brine circuit of a geothermal power plant](http://nbn-resolving.de/urn:nbn:de:kobv:83-opus4-47126)*
 
 ## Development and contribution
-Feedback/contributions welcome to [@Heineken](https://github.com/Heineken) or as [pull request](https://github.com/Heineken/BrineProp/pulls).
+Feedback/contributions welcome to the developer or as pull request.
 
 ## License
 Licensed by Helmholtz Centre Potsdam, GFZ German Research Centre for Geosciences under the [Modelica License 2](https://www.modelica.org/licenses/ModelicaLicense2) or newer.
