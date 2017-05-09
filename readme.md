@@ -28,7 +28,8 @@ Documentation
 * in PhD thesis *[Thermo-hydraulic model of the two-phase flow in the brine circuit of a geothermal power plant](http://nbn-resolving.de/urn:nbn:de:kobv:83-opus4-47126)*
 
 ## Development and contribution
-Feedback/contributions welcome to the developer or as pull request.
+Feedback and contributions are welcome by mail to the francke@gfz-potsdam.de or as pull request (for GFZ GitLab users),
+access to a forked repo elsewhere or a Git patchfile.
 
 ## License
 Licensed by Helmholtz Centre Potsdam, GFZ German Research Centre for Geosciences under the [Modelica License 2](https://www.modelica.org/licenses/ModelicaLicense2) or newer.
