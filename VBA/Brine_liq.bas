@@ -113,8 +113,8 @@ Private Function appMolarX_KCl_White(T As Double, ByVal mola As Double, what As 
     Dim M As Double: M = 628.8
     
     If outOfRangeMode > 0 Then
-        Dim T_min As Double: T_min = 306
-        Dim T_max As Double: T_max = 603
+        Dim T_min As Double: T_min = 325
+        Dim T_max As Double: T_max = 600
 
         Dim MsgTxt As String
         If Not ((ignoreLimit_h_KCl_Tmin Or T >= T_min) And T <= T_max) Then
@@ -169,7 +169,7 @@ Private Function appMolarX_CaCl2_White(T As Double, ByVal mola As Double, what A
     If what = "cp" Then
         appMolarX_CaCl2_White = (mola ^ b + c) * (k - l * (M - T) ^ (-1))
     ElseIf what = "h" Then
-        Const T0 = 298.15 'Temperature at which HeatOfSolution is take
+        Const T0 = 298.15 'Temperature at which HeatOfSolution is taken
         Const Delta_h_solution_CaCl2 = 81850 '[J/mol_CaCl2] @ 298.15K Sinke1985 http://dx.doi.org/10.1016/0021-9614(85)90083-7
         appMolarX_CaCl2_White = Delta_h_solution_CaCl2 + (mola ^ b + c) * (k * (T - T0) + l * Log((M - T) / (M - T0)))
     End If
