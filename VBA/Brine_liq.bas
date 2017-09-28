@@ -15,8 +15,8 @@ Public Const nX = nX_salt + 1
 Private ignoreLimitSalt_p(1 To nX_salt) As Boolean 'TODO Limithandling vereinheitlichen
 Private ignoreLimitSalt_T(1 To nX_salt) As Boolean
 Private ignoreLimitSalt_visc(1 To nX_salt) As Boolean
-Private Const ignoreLimit_h_KCl_Tmin = True 'ignore Tmin in appMolarEnthalpy_KCl_White and appMolarHeatCapacity_KCl_White
-Private Const ignoreLimit_h_CaCl2_Tmin = True 'ignore Tmin in appMolarEnthalpy_CaCl2_White and appMolarHeatCapacity_CaCl2_White
+Private Const ignoreLimit_h_KCl_Tmin = False 'ignore Tmin in appMolarEnthalpy_KCl_White and appMolarHeatCapacity_KCl_White
+Private Const ignoreLimit_h_CaCl2_Tmin = False 'ignore Tmin in appMolarEnthalpy_CaCl2_White and appMolarHeatCapacity_CaCl2_White
 
 Public Salts(1 To 3) As SaltProps
 
@@ -30,14 +30,14 @@ End Sub
 
 Private Sub DefineLimits()
     ignoreLimitSalt_p(1) = False
-    ignoreLimitSalt_p(2) = True
-    ignoreLimitSalt_p(3) = True
+    ignoreLimitSalt_p(2) = False
+    ignoreLimitSalt_p(3) = False
     ignoreLimitSalt_T(1) = False
     ignoreLimitSalt_T(2) = False
     ignoreLimitSalt_T(3) = False
     ignoreLimitSalt_visc(1) = False
     ignoreLimitSalt_visc(2) = False
-    ignoreLimitSalt_visc(3) = True
+    ignoreLimitSalt_visc(3) = False
 End Sub
 
 Function specificHeatCapacityCp(p As Double, T As Double, Xin)  'calculation of liquid specific heat capacity from apparent molar heat capacities
