@@ -190,6 +190,7 @@ End Function
 Private Function T_Scale_h_Driesner(p As Double, T As Double, X_NaCl_ As Double, Optional ByRef q_2 As Double) 'enthalpy calculation according to Driesner 2007 et al: 0-1000°C; 0.1-500MPa (doi:10.1016/j.gca.2007.05.026)"
   If Not X_NaCl_ > 0 Then 'pure water -> trivial
     T_Scale_h_Driesner = T
+    q_2 = 1
     Exit Function
   End If
   
