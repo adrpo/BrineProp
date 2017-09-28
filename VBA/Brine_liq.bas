@@ -483,7 +483,7 @@ End Function
 
 
 
-Function density(p As Double, T As Double, Xin) ', p_sat_MPa As Double) 'Brine density'
+Function density(p As Double, T As Double, Xin, Optional ignore_plimit = False, Optional ignore_Tlimit = False, Optional ignore_Xlimit = False) ', p_sat_MPa As Double) 'Brine density'
 ' density calculation of an aqueous salt solution according to Shide Mao and Zhenhao Duan (2008) 0-300degC; 0.1-100MPa; 0-6 mol/kg"
 '  Mixing rule acc. to Laliberte&Cooper2004
 ' http://dx.doi.org/10.1016/j.jct.2008.03.005
@@ -588,6 +588,8 @@ Function density(p As Double, T As Double, Xin) ', p_sat_MPa As Double) 'Brine d
       density = rho_H2O * 1000
       Exit Function
     End If
+        
+    On Error GoTo ErrorExit
     
     Dim j As Integer
     For j = 1 To nX_salt
@@ -600,7 +602,7 @@ Function density(p As Double, T As Double, Xin) ', p_sat_MPa As Double) 'Brine d
         Else
             If outOfRangeMode > 0 Then
               Dim MsgTxt As String
-                If Not (M(j) >= 0 And M(j) <= Salts(j).mola_max_rho) Then
+                If Not (ignore_Xlimit Or (M(j) >= 0 And M(j) <= Salts(j).mola_max_rho)) Then
                   MsgTxt = Salts(j).name & " molality " & M(j) & " out of limits {0..." & Salts(j).mola_max_rho & "} mol/kg (Density)"
                   Debug.Print MsgTxt
                   If outOfRangeMode = 1 Then
@@ -610,7 +612,7 @@ Function density(p As Double, T As Double, Xin) ', p_sat_MPa As Double) 'Brine d
                     Exit Function
                   End If
                 End If
-                If Not (ignoreLimitSalt_p(j) Or (p >= Salts(j).p_min_rho And p <= Salts(j).p_max_rho)) Then
+                If Not (ignore_plimit Or ignoreLimitSalt_p(j) Or (p >= Salts(j).p_min_rho And p <= Salts(j).p_max_rho)) Then
                   MsgTxt = "#p=" & p_bar & " bar, but for " & Salts(j).name & " must be within " & Salts(j).p_min_rho * 0.00001 & "..." & Salts(j).p_max_rho * 0.00001 & " bar (Density)"
                   Debug.Print MsgTxt
                   If outOfRangeMode = 1 Then
@@ -620,7 +622,7 @@ Function density(p As Double, T As Double, Xin) ', p_sat_MPa As Double) 'Brine d
                     Exit Function
                   End If
                 End If
-                If Not (ignoreLimitSalt_T(j) Or (T >= Salts(j).T_min_rho And T <= Salts(j).T_max_rho)) Then
+                If Not (ignore_Tlimit Or ignoreLimitSalt_T(j) Or (T >= Salts(j).T_min_rho And T <= Salts(j).T_max_rho)) Then
                   MsgTxt = "#T=" & T - 273.15 & "°C but for " & Salts(j).name & " must be within " & Salts(j).T_min_rho - 273.15 & "..." & Salts(j).T_max_rho - 273.15 & "°C (Density)"
                   If outOfRangeMode = 1 Then
                     Debug.Print MsgTxt
@@ -710,17 +712,24 @@ Function density(p As Double, T As Double, Xin) ', p_sat_MPa As Double) 'Brine d
         End If
   Next j
   
-        v_ = x(UBound(x)) / (rho_H2O * 1000)
+    v_ = x(UBound(x)) / (rho_H2O * 1000)
     For j = 1 To nX - 1
         v_ = v_ + x(j) * (V_Phi(j) / 10 ^ 6 / (M_salt(j) / 1000)) 'Mixing rule Laliberte&Cooper2004 equ. 5&6
     Next j
-    density = 1 / v_
+    If v_ > 0 Then
+        density = 1 / v_
+    Else
+        density = "#Negative Density (Brine_liq.density)."
+    End If
+    Exit Function
+ErrorExit:
+    density = "#Error in density calculation. Out of range with ignore flags set? (Brine_liq.density)"
 End Function
 
 
 
-Function resistivity(p As Double, T As Double, Xin, Optional ignore_Xlimit = False) 'electrical density'
-    Dim d: d = density(p, T, Xin)
+Function resistivity(p As Double, T As Double, Xin, Optional ignore_plimit = False, Optional ignore_Tlimit = False, Optional ignore_Xlimit = False) 'electrical density'
+    Dim d: d = density(p, T, Xin, ignore_plimit, ignore_Tlimit, ignore_Xlimit)
     If VarType(d) = vbString Then
         resistivity = d & " (Brine_liq.resistivity)"
         Exit Function
@@ -757,7 +766,7 @@ Function resistivity(p As Double, T As Double, Xin, Optional ignore_Xlimit = Fal
                     Exit Function
                   End If
                 End If
-                If Not (ignoreLimitSalt_T(j) Or (T - 273.15 >= 22 And T - 273.15 <= 375)) Then
+                If Not (ignoreLimitSalt_T(j) Or ignore_Tlimit Or (T - 273.15 >= 22 And T - 273.15 <= 375)) Then
                   MsgTxt = "#T=" & T - 273.15 & "°C but for resistivity must be within 22...375 °C"
                   If outOfRangeMode = 1 Then
                     Debug.Print MsgTxt
