@@ -237,8 +237,8 @@ algorithm
     X_l=X,
     s=specificEntropy_pTX(p,T),
     x=x,
-    d_l=  Modelica.Media.Water.IF97_Utilities.rhol_T(T),
-    d_g=  Modelica.Media.Water.IF97_Utilities.rhov_T(T));
+    d_l = Modelica.Media.Water.IF97_Utilities.rhol_T(T),
+    d_g = Modelica.Media.Water.IF97_Utilities.rhov_T(T));
 //    GVF=-1,
 end setState_pTX;
 
@@ -370,8 +370,8 @@ algorithm
     X_l=X,
     s=0,
     x=x,
-    d_l=  Modelica.Media.Water.IF97_Utilities.rhol_p(p),
-    d_g=  Modelica.Media.Water.IF97_Utilities.rhov_p(p));
+    d_l = Modelica.Media.Water.IF97_Utilities.rhol_p(p),
+    d_g = Modelica.Media.Water.IF97_Utilities.rhov_p(p));
 //    s=specificEntropy_pTX(p,h)
 
 end setState_phX;

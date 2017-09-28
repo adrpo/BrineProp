@@ -104,7 +104,7 @@ package BrineProp "Media models for p-h-T-rho-eta properties of aqueous solution
 
 </html>",
  revisions="<html></html>"),
-    version="0.4.1",
-    versionDate="2014-12-03",
-    uses(DataFiles(version="1.0"),Modelica(version="3.2.1")));
+    version="0.5.5",
+    versionDate="2017-09-28",
+    uses(DataFiles(version="1.0"), Modelica(version="3.2.2")));
 end BrineProp;

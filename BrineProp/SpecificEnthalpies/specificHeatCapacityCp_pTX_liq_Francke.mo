@@ -27,16 +27,14 @@ protected
 //  SI.MassFraction X_[:]=state.X "mass fraction m_NaCl/m_Sol";
 //    SI.MassFraction X_[:]=cat(1,state.X[1:end-1],{1-sum(state.X[1:end-1])}) "Doesn't work in function in OM";
 //    SI.MassFraction X_[size(state.X,1)] "OM workaround for cat";
-    SI.MassFraction X_[nX_salt+1]
-    "OM workaround for cat TODO: still necessary?";
+    SI.MassFraction X_[nX_salt+1] "OM workaround for cat TODO: still necessary?";
 algorithm
     if debugmode then
       print("Running specificHeatCapacityCp_pTX_liq_Francke("+String(p/1e5)+" bar,"+String(T-273.15)+"degC, X="+Modelica.Math.Matrices.toString(transpose([X]))+")");
     end if;
     X_[1:end-1]:=X[1:end-1] "OM workaround for cat";
     X_[end]:=1-sum(X[1:end-1]) "OM workaround for cat";
-    b:=Utilities.massFractionsToMolalities(X_, cat(
-    1,MM_vec,fill(-1, size(X_, 1) - size(MM_vec, 1))));
+    b:=Utilities.massFractionsToMolalities(X_, cat(1,MM_vec,fill(-1, size(X_, 1) - size(MM_vec, 1))));
 //    assert(X[end]>0, "No water in brine.");
     cp_Driesner:=specificHeatCapacity_pTX_Driesner(p,T,X_[1]/(X_[1] + X_[end]));
 
