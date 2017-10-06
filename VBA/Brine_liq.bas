@@ -96,13 +96,13 @@ Function specificHeatCapacityCp(p As Double, T As Double, Xin)  'calculation of 
 End Function
 
 
-Private Function appMolarHeatCapacity_KCl_White(T As Double, ByVal mola As Double) '2D-fit Reproduction of measurements of heat capacity of KCl solution
-    appMolarHeatCapacity_KCl_White = appMolarX_KCl_White(T, mola, "cp")
+Private Function appMolarHeatCapacity_KCl_White(T As Double, ByVal mola As Double, Optional ignore_Tlimit = False) '2D-fit Reproduction of measurements of heat capacity of KCl solution
+    appMolarHeatCapacity_KCl_White = appMolarX_KCl_White(T, mola, "cp", ignore_Tlimit)
 End Function
-Private Function appMolarEnthalpy_KCl_White(T As Double, ByVal mola As Double) '2D-fit Reproduction of measurements of heat capacity of KCl solution
-    appMolarEnthalpy_KCl_White = appMolarX_KCl_White(T, mola, "h")
+Private Function appMolarEnthalpy_KCl_White(T As Double, ByVal mola As Double, Optional ignore_Tlimit = False) '2D-fit Reproduction of measurements of heat capacity of KCl solution
+    appMolarEnthalpy_KCl_White = appMolarX_KCl_White(T, mola, "h", ignore_Tlimit)
 End Function
-Private Function appMolarX_KCl_White(T As Double, ByVal mola As Double, what As String) '2D-fit Reproduction of measurements of heat capacity of KCl solution
+Private Function appMolarX_KCl_White(T As Double, ByVal mola As Double, what As String, Optional ignore_Tlimit = False) '2D-fit Reproduction of measurements of heat capacity of KCl solution
 'White, D., Ryan, M., Armstrong, M.C., Gates, J. and Wood, R. (1987b) 'Heat capacities of aqueous KCl
 'from 325 to 600 K at 17.9 MPa', The Journal of Chemical Thermodynamics, vol. 19, no. 10, oct, pp. 1023-1030,
 'DOI: 10.1016/0021-9614(87)90012-7.
@@ -117,7 +117,7 @@ Private Function appMolarX_KCl_White(T As Double, ByVal mola As Double, what As 
         Dim T_max As Double: T_max = 600
 
         Dim MsgTxt As String
-        If Not ((ignoreLimit_h_KCl_Tmin Or T >= T_min) And T <= T_max) Then
+        If Not (ignore_Tlimit Or (ignoreLimit_h_KCl_Tmin Or T >= T_min) And T <= T_max) Then
             MsgTxt = "#T=" & T - 273.15 & "°C, must be within " & T_min - 273.15 & "..." & T_max - 273.15 & "°C  (appMolarX_KCl_White)"
             Debug.Print MsgTxt
             If outOfRangeMode = 2 Then
@@ -135,13 +135,13 @@ Private Function appMolarX_KCl_White(T As Double, ByVal mola As Double, what As 
     End If
 End Function
 
-Private Function appMolarHeatCapacity_CaCl2_White(T As Double, ByVal mola As Double) '2D-fit Reproduction of measurements of heat capacity of KCl solution
+Private Function appMolarHeatCapacity_CaCl2_White(T As Double, ByVal mola As Double, Optional ignore_Tlimit = False) '2D-fit Reproduction of measurements of heat capacity of KCl solution
     appMolarHeatCapacity_CaCl2_White = appMolarX_CaCl2_White(T, mola, "cp")
 End Function
-Private Function appMolarEnthalpy_CaCl2_White(T As Double, ByVal mola As Double) '2D-fit Reproduction of measurements of heat capacity of KCl solution
-    appMolarEnthalpy_CaCl2_White = appMolarX_CaCl2_White(T, mola, "h")
+Private Function appMolarEnthalpy_CaCl2_White(T As Double, ByVal mola As Double, Optional ignore_Tlimit = False) '2D-fit Reproduction of measurements of heat capacity of KCl solution
+    appMolarEnthalpy_CaCl2_White = appMolarX_CaCl2_White(T, mola, "h", ignore_Tlimit)
 End Function
-Private Function appMolarX_CaCl2_White(T As Double, ByVal mola As Double, what As String) '2D-fit Reproduction of measurements of heat capacity of KCl solution
+Private Function appMolarX_CaCl2_White(T As Double, ByVal mola As Double, what As String, Optional ignore_Tlimit = False) '2D-fit Reproduction of measurements of heat capacity of KCl solution
 'White, D., Doberstein, A., Gates, J., Tillett, D. and Wood, R. (1987a) 'Heat capacity of aqueous CaCl2
 'from 306 to 603 K at 17.5 MPa', The Journal of Chemical Thermodynamics, vol. 19, no. 3, mar, pp. 251-259,
 'DOI: 10.1016/0021-9614(87)90132-7.
@@ -156,7 +156,7 @@ Private Function appMolarX_CaCl2_White(T As Double, ByVal mola As Double, what A
         Dim T_max As Double: T_max = 603
 
         Dim MsgTxt As String
-        If Not ((ignoreLimit_h_CaCl2_Tmin Or T >= T_min) And T <= T_max) Then
+        If Not (ignore_Tlimit Or (ignoreLimit_h_CaCl2_Tmin Or T >= T_min) And T <= T_max) Then
             MsgTxt = "#T=" & T - 273.15 & "°C, must be within " & T_min - 273.15 & "..." & T_max - 273.15 & "°C  (appMolarX_CaCl2_White)"
             Debug.Print MsgTxt
             If outOfRangeMode = 2 Then
@@ -187,7 +187,7 @@ Function specificHeatCapacity_pTX_Driesner(p As Double, T As Double, x_NaCl As D
   End If
 End Function
 
-Private Function T_Scale_h_Driesner(p As Double, T As Double, X_NaCl_ As Double, Optional ByRef q_2 As Double) 'enthalpy calculation according to Driesner 2007 et al: 0-1000°C; 0.1-500MPa (doi:10.1016/j.gca.2007.05.026)"
+Private Function T_Scale_h_Driesner(p As Double, T As Double, X_NaCl_ As Double, Optional ByRef q_2 As Double, Optional ignore_plimit = False, Optional ignore_Tlimit = False) 'enthalpy calculation according to Driesner 2007 et al: 0-1000°C; 0.1-500MPa (doi:10.1016/j.gca.2007.05.026)"
   If Not X_NaCl_ > 0 Then 'pure water -> trivial
     T_Scale_h_Driesner = T
     q_2 = 1
@@ -213,7 +213,7 @@ Private Function T_Scale_h_Driesner(p As Double, T As Double, X_NaCl_ As Double,
 
    If outOfRangeMode > 0 Then
     Dim MsgTxt As String
-      If Not (p_bar >= p_min And p_bar <= p_max) Then
+      If Not (ignore_plimit Or p_bar >= p_min And p_bar <= p_max) Then
         MsgTxt = "#Pressure is " & p_bar & " bar, but must be between " & p_min & " bar and " & p_max & " bar  (T_Scale_h_Driesner)"
         Debug.Print MsgTxt
         If outOfRangeMode = 2 Then
@@ -221,7 +221,7 @@ Private Function T_Scale_h_Driesner(p As Double, T As Double, X_NaCl_ As Double,
             Exit Function
         End If
       End If
-      If Not (T_C >= T_min And T_C <= T_max) Then
+      If Not (ignore_Tlimit Or T_C >= T_min And T_C <= T_max) Then
         MsgTxt = "#Temperature is " & T_C & "°C, but must be between " & T_min & "°C and " & T_max & "°C  (T_Scale_h_Driesner)"
         Debug.Print MsgTxt
         If outOfRangeMode = 2 Then
@@ -230,7 +230,6 @@ Private Function T_Scale_h_Driesner(p As Double, T As Double, X_NaCl_ As Double,
         End If
       End If
    End If
-
 
   If X_NaCl_ = 0 Then
     x_NaCl = 0
@@ -258,7 +257,7 @@ Private Function T_Scale_h_Driesner(p As Double, T As Double, X_NaCl_ As Double,
 End Function
 
 
-Function specificEnthalpy(p As Double, T As Double, Xin) 'enthalpy calculation
+Function specificEnthalpy(p As Double, T As Double, Xin, Optional ignore_plimit = False, Optional ignore_Tlimit = False, Optional ignore_Xlimit = False) 'enthalpy calculation
 'based on Driesner enthalpy function NaCl and pressure independent 2D-fits (T,b) for cp measurement data for KCl and CaCl2 solutions
     If DebugMode Then
         Debug.Print "Running SpecificEnthalpy_vec(" & p / 100000# & " bar," & T - 273.15 & " °C, X={" & Xin(1) & Xin(2) & Xin(3); "})"
@@ -277,7 +276,7 @@ Function specificEnthalpy(p As Double, T As Double, Xin) 'enthalpy calculation
     Dim b '() As Double:
     b = massFractionsToMolalities(X, MM_vec)
     
-    Dim h_Driesner: h_Driesner = SpecificEnthalpy_Driesner(p, T, X(1) / (X(1) + X(nX)))
+    Dim h_Driesner: h_Driesner = SpecificEnthalpy_Driesner(p, T, X(1) / (X(1) + X(nX)), ignore_plimit, ignore_Tlimit, ignore_Xlimit)
     
     If VarType(h_Driesner) = vbString Then 'Error
         specificEnthalpy = h_Driesner
@@ -298,14 +297,14 @@ Function specificEnthalpy(p As Double, T As Double, Xin) 'enthalpy calculation
     
     'H_appmol(1) = 0 'included in Driesner enthalpy
     If X(2) > 0 Then
-        H_appmol(2) = appMolarEnthalpy_KCl_White(T, b(2))
+        H_appmol(2) = appMolarEnthalpy_KCl_White(T, b(2), ignore_Tlimit)
         If VarType(H_appmol(2)) = vbString Then
             specificEnthalpy = H_appmol(2)
             Exit Function
         End If
     End If
     If X(3) > 0 Then
-        H_appmol(3) = appMolarEnthalpy_CaCl2_White(T, b(3))
+        H_appmol(3) = appMolarEnthalpy_CaCl2_White(T, b(3), ignore_Tlimit)
         If VarType(H_appmol(3)) = vbString Then
             specificEnthalpy = H_appmol(3)
             Exit Function
@@ -319,17 +318,14 @@ End Function
 
 
 
-Private Function SpecificEnthalpy_Driesner(p As Double, T As Double, x_NaCl As Double) 'enthalpy calculation according to Driesner 2007 et al: 0-1000°C; 0.1-500MPa (doi:10.1016/j.gca.2007.05.026)"
-  Dim T_Scale_h:  T_Scale_h = T_Scale_h_Driesner(p, T, x_NaCl)
+Private Function SpecificEnthalpy_Driesner(p As Double, T As Double, x_NaCl As Double, Optional ignore_plimit = False, Optional ignore_Tlimit = False, Optional ignore_Xlimit = False) 'enthalpy calculation according to Driesner 2007 et al: 0-1000°C; 0.1-500MPa (doi:10.1016/j.gca.2007.05.026)"
+    Dim T_Scale_h: T_Scale_h = T_Scale_h_Driesner(p, T, x_NaCl, , ignore_plimit, ignore_Tlimit)
     If VarType(T_Scale_h) = vbString Then
         SpecificEnthalpy_Driesner = T_Scale_h
     Else
         SpecificEnthalpy_Driesner = IAPWS.SpecificEnthalpy_pT(p, CDbl(T_Scale_h)) 'J/(kg)
     End If
 End Function
-
-
-
 
 
 Private Function HeatOfSolution_KCl_Sanahuja1986(T As Double)
