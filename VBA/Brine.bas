@@ -28,87 +28,106 @@ Public Const i_CaCl2 = 3 'reference number
 'Public Const i_SrCl2 = 5 'reference number
 
 
-' ###### obsolete type stuff, changed to class
-Public Type BrineProps_Type
-    p   As Double 'Absolute pressure of medium
-    T   As Double  'Temperature of medium
-    'h   As Double 'Specific enthalpy
-    'h_g As Double 'Specific enthalpy gas phase
-    'h_l As Double 'Specific enthalpy liquid phase
-    x_ As Double 'gas mass fraction
-    'cp_l As Double 'Specific heat capacity liquid phase
-    X_l() As Double '(nX) composition of liquid phase
-    X_g() As Double '(nX_gas + 1)  composition of gas phase
-    Xi_l() As Double '(nX_salt) 'salt mass fractions in liquid phase
-    Xi_g() As Double '(nX_gas) gas mass fractions in gas phase
-    'p_H2O  As Double
-    p_gas() As Double '(nX_gas + 1) As Double
-    ' p_degas_vec() As Double '(nX_gas + 1) As Double   'should be in SatProp, but is calculated in setState which returns a state
-    p_degas As Double
-    phase As Integer '0 - unknown, 1 - one phase, 2 - two phases
-    'nu_l As Double
-    'nu_g As Double
-    error As Variant 'String
-End Type
+'' ###### obsolete type stuff, changed to class
+'Public Type BrineProps_Type
+'    p   As Double 'Absolute pressure of medium
+'    T   As Double  'Temperature of medium
+'    'h   As Double 'Specific enthalpy
+'    'h_g As Double 'Specific enthalpy gas phase
+'    'h_l As Double 'Specific enthalpy liquid phase
+'    x_ As Double 'gas mass fraction
+'    'cp_l As Double 'Specific heat capacity liquid phase
+'    X_l() As Double '(nX) composition of liquid phase
+'    X_g() As Double '(nX_gas + 1)  composition of gas phase
+'    Xi_l() As Double '(nX_salt) 'salt mass fractions in liquid phase
+'    Xi_g() As Double '(nX_gas) gas mass fractions in gas phase
+'    'p_H2O  As Double
+'    p_gas() As Double '(nX_gas + 1) As Double
+'    ' p_degas_vec() As Double '(nX_gas + 1) As Double   'should be in SatProp, but is calculated in setState which returns a state
+'    p_degas As Double
+'    phase As Integer '0 - unknown, 1 - one phase, 2 - two phases
+'    'nu_l As Double
+'    'nu_g As Double
+'    error As Variant 'String
+'End Type
+'
+'Function JSON2VLEstate(VLE_JSON As String) As BrineProps_Type 'create VLE struct from JSON String
+'' single lookup
+'    With JSON2VLEstate
+'        .p = GetValueFromJSON(VLE_JSON, "p")
+'        .T = GetValueFromJSON(VLE_JSON, "T")
+'        '.Xi = String2Vector(GetValueFromJSON(VLE_JSON, "Xi"))
+'        .phase = GetValueFromJSON(VLE_JSON, "phase")
+'        .p_gas = GetValueFromJSON(VLE_JSON, "p_gas")
+'        .p_degas = GetValueFromJSON(VLE_JSON, "p_degas")
+'        .X_l = String2Vector(GetValueFromJSON(VLE_JSON, "X_l"))
+'        .X_g = String2Vector(GetValueFromJSON(VLE_JSON, "X_g"))
+'        .x_ = GetValueFromJSON(VLE_JSON, "x")
+'        .error = GetValueFromJSON(VLE_JSON, "error")
+'    End With
+'End Function
+'
+'Function JSON2VLEstate2(VLE_JSON As String) As BrineProps_Type 'create VLE struct from JSON String
+'' all values at once
+'    Dim equations() As String
+'    Dim equation
+'    Dim keyval() As String
+'    Dim key As String
+'    equations = Split(Mid(VLE_JSON, 2, Len(VLE_JSON) - 2), ",") ' remove curly braces
+'    For Each equation In equations
+'        keyval = Split(equation, ":")
+'        key = Trim(keyval(0))
+'        With JSON2VLEstate2
+'            If key = "p" Then
+'                .p = keyval(1)
+'            ElseIf key = "T" Then
+'                .T = keyval(1)
+'            ElseIf key = "phase" Then
+'                .phase = keyval(1)
+'            ElseIf key = "p_gas" Then
+'                .p_gas = String2Vector(keyval(1))
+'            ElseIf key = "p_degas" Then
+'                .p_degas = keyval(1)
+'            ElseIf key = "X_l" Then
+'                .X_l = String2Vector(keyval(1))
+'            ElseIf key = "X_g" Then
+'                .X_g = String2Vector(keyval(1))
+'            ElseIf key = "x" Then
+'                .x_ = keyval(1)
+'            ElseIf key = "error" Then
+'                .error = keyval(1)
+'            End If
+'        End With
+'    Next equation
+'End Function
+'Private Function getVLEstate_Type(ByRef pOrVLEstate, T As Double, Xi, phase As Integer) As BrineProps_Type 'make VLE struct from String or calculate from state vars if no String is passed
+''Private Function getVLEstate_Type(ByRef pOrVLEstate, Optional T As Double = -1, Optional Xi = -1, Optional phase As Integer = 0) As BrineProps_Type 'make VLE struct from String or calculate
+'    If VarType(pOrVLEstate) = vbString Then
+'        getVLEstate_Type = JSON2VLEstate2(CStr(pOrVLEstate))
+'    Else
+'        getVLEstate_Type = VLE(CDbl(pOrVLEstate), T, Xi, phase)
+'    End If
+'End Function
 
-Function JSON2VLEstate(VLE_JSON As String) As BrineProps_Type 'create VLE struct from JSON String
-' single lookup
-    With JSON2VLEstate
-        .p = GetValueFromJSON(VLE_JSON, "p")
-        .T = GetValueFromJSON(VLE_JSON, "T")
-        '.Xi = String2Vector(GetValueFromJSON(VLE_JSON, "Xi"))
-        .phase = GetValueFromJSON(VLE_JSON, "phase")
-        .p_gas = GetValueFromJSON(VLE_JSON, "p_gas")
-        .p_degas = GetValueFromJSON(VLE_JSON, "p_degas")
-        .X_l = String2Vector(GetValueFromJSON(VLE_JSON, "X_l"))
-        .X_g = String2Vector(GetValueFromJSON(VLE_JSON, "X_g"))
-        .x_ = GetValueFromJSON(VLE_JSON, "x")
-        .error = GetValueFromJSON(VLE_JSON, "error")
-    End With
-End Function
+'Function VLEasClass(VLEstate As BrineProps_Type) As BrinePropsClass 'assemble VLE state variables as JSON String
+'    Set VLEasClass = New BrinePropsClass
+'    With VLEstate
+'        If Len(.error) > 0 Then
+'            VLEasClass.error = .error
+'        Else
+'            VLEasClass.p = .p
+'            VLEasClass.T = .T
+'            VLEasClass.X = .x_
+'            VLEasClass.p_degas = .p_degas
+'            VLEasClass.p_gas = .p_gas
+'            VLEasClass.X_l = .X_l
+'            VLEasClass.X_g = .X_g
+'            VLEasClass.phase = IIf(.x_ > 0 And .x_ < 1, 2, 1)
+'        End If
+'    End With
+'End Function
 
-Function JSON2VLEstate2(VLE_JSON As String) As BrineProps_Type 'create VLE struct from JSON String
-' all values at once
-    Dim equations() As String
-    Dim equation
-    Dim keyval() As String
-    Dim key As String
-    equations = Split(Mid(VLE_JSON, 2, Len(VLE_JSON) - 2), ",") ' remove curly braces
-    For Each equation In equations
-        keyval = Split(equation, ":")
-        key = Trim(keyval(0))
-        With JSON2VLEstate2
-            If key = "p" Then
-                .p = keyval(1)
-            ElseIf key = "T" Then
-                .T = keyval(1)
-            ElseIf key = "phase" Then
-                .phase = keyval(1)
-            ElseIf key = "p_gas" Then
-                .p_gas = String2Vector(keyval(1))
-            ElseIf key = "p_degas" Then
-                .p_degas = keyval(1)
-            ElseIf key = "X_l" Then
-                .X_l = String2Vector(keyval(1))
-            ElseIf key = "X_g" Then
-                .X_g = String2Vector(keyval(1))
-            ElseIf key = "x" Then
-                .x_ = keyval(1)
-            ElseIf key = "error" Then
-                .error = keyval(1)
-            End If
-        End With
-    Next equation
-End Function
-Private Function getVLEstate_Type(ByRef pOrVLEstate, T As Double, Xi, phase As Integer) As BrineProps_Type 'make VLE struct from String or calculate from state vars if no String is passed
-'Private Function getVLEstate_Type(ByRef pOrVLEstate, Optional T As Double = -1, Optional Xi = -1, Optional phase As Integer = 0) As BrineProps_Type 'make VLE struct from String or calculate
-    If VarType(pOrVLEstate) = vbString Then
-        getVLEstate_Type = JSON2VLEstate2(CStr(pOrVLEstate))
-    Else
-        getVLEstate_Type = VLE(CDbl(pOrVLEstate), T, Xi, phase)
-    End If
-End Function
-' ######## end obsolete
+'' ######## end obsolete
 
 
 Function saturationPressure_H2O(p As Double, T As Double, Xin, Optional ByRef p_H2O) 'brine water vapour pressure
@@ -526,12 +545,14 @@ Function dynamicViscosity_gas(pOrVLEstate, Optional T As Double = -1, Optional X
     End If
 End Function
 
-Private Function VLE(p As Double, T As Double, Xi, Optional phase As Integer = 0) As BrineProps_Type
+Private Function VLE(p As Double, T As Double, Xi, Optional phase As Integer = 0) As BrinePropsClass
     ' VLE algorithm
     ' finds the VLE iteratively by varying the normalized quantity of gas in the gasphase, calculates the densities"
     ' Input: p,T,Xi
     ' Output: x, X_l, X_g
     
+    Set VLE = New BrinePropsClass
+
     Const zmax = 1000 'maximum number of iterations
     Dim nX_ As Integer ' () As Double
     'If VarType(Xi) = vbString Then
@@ -721,12 +742,11 @@ Break:
 '    Dim Xi_l() As Double: Xi_l = ToDouble(SubArray(X_l, 1, nX_salt))
 '    Dim Xi_g() As Double: Xi_g = ToDouble(SubArray(X_g, 1, nX_gas))
     
-    Dim VLEstate As BrineProps_Type
-'    Dim VLEstate: Set VLEstate = New BrinePropsClass
-    With VLEstate
+'    Dim VLEstate As BrineProps_Type
+    With VLE
         .p = p
         .T = T
-        .x_ = x_ 'mass fraction
+        .X = x_ 'mass fraction
         .X_l = X_l
         .X_g = X_g
         '.Xi_l = Xi_l 'only salts
@@ -735,7 +755,7 @@ Break:
         .p_gas = p_gas
         .phase = IIf(x_ > 0 And x_ < 1, 2, 1)
     End With
-    VLE = VLEstate
+'    VLE = VLEstate
     
 End Function
 
@@ -765,25 +785,6 @@ Function VLEasJSON(p As Double, T As Double, Xi, Optional phase As Integer = 0) 
     End With
     ' VLEasJSON = Left(VLEasJSON, Len(VLEasJSON) - 1) & "}" ' crop last semicolon
     'VLEasJSON = VLEasJSON & "}"
-End Function
-
-
-Function VLEasClass(VLEstate As BrineProps_Type) As BrinePropsClass 'assemble VLE state variables as JSON String
-    Set VLEasClass = New BrinePropsClass
-    With VLEstate
-        If Len(.error) > 0 Then
-            VLEasClass.error = .error
-        Else
-            VLEasClass.p = .p
-            VLEasClass.T = .T
-            VLEasClass.X = .x_
-            VLEasClass.p_degas = .p_degas
-            VLEasClass.p_gas = .p_gas
-            VLEasClass.X_l = .X_l
-            VLEasClass.X_g = .X_g
-            VLEasClass.phase = IIf(.x_ > 0 And .x_ < 1, 2, 1)
-        End If
-    End With
 End Function
 
 
@@ -828,7 +829,8 @@ Private Function getVLEstate(ByRef pOrVLEstate, T As Double, Xi, phase As Intege
     If VarType(pOrVLEstate) = vbString Then
         Set getVLEstate = JSON2VLEobject(CStr(pOrVLEstate))
     Else
-        Set getVLEstate = VLEasClass(VLE(CDbl(pOrVLEstate), T, Xi, phase))
+'        Set getVLEstate = VLEasClass(VLE(CDbl(pOrVLEstate), T, Xi, phase))
+        Set getVLEstate = VLE(CDbl(pOrVLEstate), T, Xi, phase)
     End If
 End Function
 
@@ -839,9 +841,10 @@ Private Function getValueFromVLE(ByRef pOrVLEstate, T As Double, Xi, phase As In
         val = String2Vector(GetValueFromJSON(CStr(pOrVLEstate), varname), n) 'extract desired value from JSON string
         If n = 1 Then getValueFromVLE = val(1)
     Else 'if no String is passed
-        Dim VLE_type As BrineProps_Type: VLE_type = VLE(CDbl(pOrVLEstate), T, Xi, phase)
         Dim VLE_class As BrinePropsClass
-        Set VLE_class = VLEasClass(VLE_type)
+'        Dim VLE_type As BrineProps_Type: VLE_type = VLE(CDbl(pOrVLEstate), T, Xi, phase)
+'        Set VLE_class = VLEasClass(VLE_type)
+        Set VLE_class = VLE(CDbl(pOrVLEstate), T, Xi, phase)
         If Len(VLE_class.error) > 0 Then ' if error
             getValueFromVLE = VLE_class.error 'return error message
         Else
