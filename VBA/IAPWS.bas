@@ -581,7 +581,7 @@ Private Function h5_pT(p, T) As Double
     ' Basic Equation for Region 5
     ' Eq 32,33, Page 36, Tables 37-41
     'R = 0.461526 'kJ/(kg K)
-    Dim tau As Double, Pi As Double, gamma0_tau As Double, gammar_tau As Double
+    Dim tau As Double, Pi As Double, gamma0_tau As Double, gammar_tau As Double, i As Integer
     tau = 1000 / T
     Pi = p
     gamma0_tau = 0
