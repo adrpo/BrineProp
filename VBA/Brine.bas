@@ -791,37 +791,49 @@ End Function
 
 Function JSON2VLEobject(VLE_JSON As String) As BrinePropsClass 'create VLE struct from JSON String
 ' all values at once
-    Set JSON2VLEobject = New BrinePropsClass
+    Dim VLEobj: Set VLEobj = New BrinePropsClass
     Dim equations() As String
-    Dim equation
+    Dim equation, valAsArray, valToWrite
     Dim keyval() As String
     Dim key As String
     equations = Split(Mid(VLE_JSON, 2, Len(VLE_JSON) - 2), ",") ' remove curly braces
     For Each equation In equations
         keyval = Split(equation, ":")
         key = Trim(keyval(0))
-        With JSON2VLEobject
-            If key = "p" Then
-                .p = keyval(1)
-            ElseIf key = "T" Then
-                .T = keyval(1)
-            ElseIf key = "phase" Then
-                .phase = keyval(1)
-            ElseIf key = "p_gas" Then
-                .p_gas = String2Vector(keyval(1))
-            ElseIf key = "p_degas" Then
-                .p_degas = keyval(1)
-            ElseIf key = "X_l" Then
-                .X_l = String2Vector(keyval(1))
-            ElseIf key = "X_g" Then
-                .X_g = String2Vector(keyval(1))
-            ElseIf key = "x" Then
-                .X = keyval(1)
-            ElseIf key = "error" Then
-                .error = keyval(1)
-            End If
-        End With
+'        With JSON2VLEobject
+'            If key = "p" Then
+'                .p = keyval(1)
+'            ElseIf key = "T" Then
+'                .T = keyval(1)
+'            ElseIf key = "phase" Then
+'                .phase = keyval(1)
+'            ElseIf key = "p_gas" Then
+'                .p_gas = String2Vector(keyval(1))
+'            ElseIf key = "p_degas" Then
+'                .p_degas = keyval(1)
+'            ElseIf key = "X_l" Then
+'                .X_l = String2Vector(keyval(1))
+'            ElseIf key = "X_g" Then
+'                .X_g = String2Vector(keyval(1))
+'            ElseIf key = "x" Then
+'                .X = keyval(1)
+'            ElseIf key = "error" Then
+'                .error = keyval(1)
+'            End If
+'        End With
+
+        If key = "" Then
+            GoTo nextIteration
+        ElseIf key = "error" Then
+            valToWrite = keyval(1) 'write as String
+        Else
+            valAsArray = String2Vector(keyval(1)) ' convert String to vector
+            valToWrite = IIf(UBound(valAsArray) > 1, valAsArray, valAsArray(1)) ' if only one element -> extract
+        End If
+        CallByName VLEobj, key, VbLet, valToWrite
+nextIteration:
     Next equation
+    Set JSON2VLEobject = VLEobj
 End Function
 
 
