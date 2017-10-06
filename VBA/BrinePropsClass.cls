@@ -12,7 +12,7 @@ Attribute VB_Exposed = False
     'h   As Double 'Specific enthalpy
     'h_g As Double 'Specific enthalpy gas phase
     'h_l As Double 'Specific enthalpy liquid phase
-    Public X As Double 'gas mass fraction
+    Public x As Double 'gas mass fraction
     'cp_l As Double 'Specific heat capacity liquid phase
     Private pX_l() As Double '(nX) composition of liquid phase (set and returned via property functions)
     Private pX_g() As Double '(nX_gas + 1)  composition of gas phase (set and returned via property functions)
