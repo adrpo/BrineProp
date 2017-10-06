@@ -846,9 +846,8 @@ End Function
 Private Function getValueFromVLE(ByRef pOrVLEstate, T As Double, Xi, phase As Integer, Optional varname As String = "") 'get single var or calculate'make VLE struct from String or calculate
     If VarType(pOrVLEstate) = vbString Then
         Dim n As Integer
-        Dim val
-        val = String2Vector(GetValueFromJSON(CStr(pOrVLEstate), varname), n) 'extract desired value from JSON string
-        If n = 1 Then getValueFromVLE = val(1)
+        Dim val: val = String2Vector(GetValueFromJSON(CStr(pOrVLEstate), varname), n)       'extract desired value from JSON string
+        getValueFromVLE = IIf(n = 1, val(1), Vector2String(val))
     Else 'if no String is passed
         Dim VLE_class As BrinePropsClass
 '        Dim VLE_type As BrineProps_Type: VLE_type = VLE(CDbl(pOrVLEstate), T, Xi, phase)
