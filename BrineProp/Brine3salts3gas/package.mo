@@ -65,9 +65,10 @@ package Brine3salts3gas "Two-phase aqueous solution of NaCl, KCl, CaCl2, N2, CO2
 
   //  PowerPlant.Media.Brine.Salt_Data_Duan.density_Duan2008_pTX;
 protected
-    parameter Integer[:] liqIndex=cat(1,1:nX_salt,{nX});
+    constant Integer[:] liqIndex=cat(1,1:nX_salt,{nX});
+    Real X_[:] =  cat(1, X[1:nX_salt], {1-sum(X[1:nX_salt])}); //recalculate water mass fraction when gases are omitted (which they are in the density function)
   algorithm
-    d := density_Duan2008_pTX(p,T,X[liqIndex],MM[liqIndex],
+    d := density_Duan2008_pTX(p,T,X_,MM[liqIndex],
     saltConstants);
 
   //   print("density_liquid_pTX: "+String(p*1e-5)+" bar,"+String(T)+" K->"+String(d)+"kg/m^3");

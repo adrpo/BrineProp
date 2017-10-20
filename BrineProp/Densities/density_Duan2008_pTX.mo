@@ -92,7 +92,7 @@ protected
 algorithm
   assert(size(Salt_Constants,1)==size(X,1)-1,"Number of components not matching between Salt_Constants("+String(size(Salt_Constants,1))+") and X("+String(size(X,1))+")");
   if debugmode then
-      print("\nRunning density_Duan2008_pTX("+String(p/1e5)+" bar,"+String(T-273.15)+" degC, X="+Modelica.Math.Matrices.toString(transpose([X]))+")");
+      print("\nRunning density_Duan2008_pTX("+String(p/1e5)+" bar,"+String(T-273.15)+" degC, X="+Modelica.Math.Matrices.toString(transpose([X]))+",MM_vec="+Modelica.Math.Matrices.toString(transpose([MM_vec]))+")");
   end if;
 //  print("nX_salts="+String(nX_salt)+", veclength="+String(size(ignoreLimitSalt_p,1)) + ", ignoreLimitSalt_p="+String(ignoreLimitSalt_p[1]));
 
