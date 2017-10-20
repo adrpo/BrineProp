@@ -3,7 +3,6 @@ package Brine3salts3gas "Two-phase aqueous solution of NaCl, KCl, CaCl2, N2, CO2
 
 //TODO: use Fluid limits
 
-
   extends SaltDataDuan;
                        // "for the molar masses below"
 
@@ -26,16 +25,11 @@ package Brine3salts3gas "Two-phase aqueous solution of NaCl, KCl, CaCl2, N2, CO2
     final MM_gas = {M_CO2,M_N2,M_CH4},
     final nM_gas = {nM_CO2,nM_N2,nM_CH4}); //iGas not final, because reassigned in Brine5salts3gas
 
-
-
-
   redeclare function extends setState_pTX "to avoid check error"
   end setState_pTX;
 
-
   redeclare function extends setState_phX "to avoid check error"
   end setState_phX;
-
 
   redeclare function extends solubilities_pTX
   "solubility calculation of CO2 in seawater Duan, Sun(2003), returns gas concentration in kg/kg H2O"
@@ -58,7 +52,6 @@ package Brine3salts3gas "Two-phase aqueous solution of NaCl, KCl, CaCl2, N2, CO2
   //  print(Modelica.Math.Matrices.toString({MM_vec}));
   end solubilities_pTX;
 
-
   redeclare function extends density_liq_pTX
   //  extends density_Duan2008_pTX(MM_vec=cat(1,MM_salt, {M_H2O}));
      //TODO should take MM_vec;
@@ -73,11 +66,9 @@ protected
 
   //   print("density_liquid_pTX: "+String(p*1e-5)+" bar,"+String(T)+" K->"+String(d)+"kg/m^3");
   end density_liq_pTX;
-
  /*function extends density_Duan2008_pTX(nX_salt_=nX_salt, ignoreLimitSalt_p_=ignoreLimitSalt_p_global) 
     "just to set the flags"
  end density_Duan2008_pTX;*/
-
 
  redeclare function extends specificEnthalpy_liq_pTX
  // Partial_Units.Molality molalities = massFractionsToMoleFractions(X, MM_vec);
@@ -91,7 +82,6 @@ protected
  //  print(String(p*1e-5)+" bar,"+String(T)+" K->"+String(h)+" J/kg (Brine_Duan_Multi_TwoPhase_ngas_3.specificEnthalpy_liq_pTX)");
  end specificEnthalpy_liq_pTX;
 
-
  redeclare function extends specificEnthalpy_gas_pTX
 
  algorithm
@@ -100,7 +90,6 @@ protected
          T,
          X);
  end specificEnthalpy_gas_pTX;
-
 
  redeclare function extends dynamicViscosity_liq
 protected
@@ -129,7 +118,6 @@ protected
        assert(eta>0,"Error in liquid viscosity calculation.");
  end dynamicViscosity_liq;
 
-
  redeclare function extends dynamicViscosity_gas
  algorithm
    eta  :=BrineGas3Gas.dynamicViscosity(BrineGas3Gas.ThermodynamicState(
@@ -138,7 +126,6 @@ protected
          state.X_g));
    assert(eta>0,"Error in gas viscosity calculation.");
  end dynamicViscosity_gas;
-
 
   redeclare function extends saturationPressures
   algorithm
@@ -158,7 +145,6 @@ protected
     end if;
   end saturationPressures;
 
-
   redeclare function extends thermalConductivity
   "Thermal conductivity of water"
   algorithm
@@ -170,20 +156,17 @@ protected
   assert(lambda>0,"lambda = " + String(lambda) + "W/(m.K)");
   end thermalConductivity;
 
-
   redeclare function extends surfaceTension
   algorithm
      sigma:=Modelica.Media.Water.WaterIF97_pT.surfaceTension(sat)
     "TODO http://www.if.ufrgs.br/~levin/Pdfs.dir/6756.pdf";
   end surfaceTension;
 
-
   redeclare function extends specificHeatCapacityCp_liq
   algorithm
       cp:=specificHeatCapacityCp_pTX_liq_Francke(p=state.p,T=state.T,X=state.X,
           MM_vec=MM_salt);
   end specificHeatCapacityCp_liq;
-
 
   redeclare function extends specificHeatCapacityCp_gas
   "calculation of gas specific heat capacity"
@@ -204,7 +187,6 @@ protected
                                 liquid and vapour state heat capacities.</p>
                                 </html>"));
   end specificHeatCapacityCp_gas;
-
 
   annotation (Documentation(info="<html>
 <p><b>BrineProp.Brine3salts3gas</b> is a medium package that, based on Brine.BrineProp.PartialBrineMultiSaltMultiGasTwoPhase, defines a brine property model with 3 salts (NaCl, KCl, CaCl<sub>2</sub>) and 3 gases (CO<sub>2</sub>, N<sub>2</sub>, CH<sub>4</sub>), which are the main constituents of the geofluid in Gross Schoenebeck, Germany.</p>

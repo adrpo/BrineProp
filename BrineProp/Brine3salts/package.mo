@@ -1,6 +1,7 @@
 within BrineProp;
 package Brine3salts "One-phase (liquid) multisalt brine solution"
-  extends SaltDataDuan;// "for the molar masses below"
+  extends SaltDataDuan;
+                       // "for the molar masses below"
   extends BrineProp.PartialBrineMultiSaltOnePhase(
     redeclare package Salt_data = BrineProp.SaltDataDuan,
     saltNames = {"sodium chloride","potassium chloride","calcium chloride"},
@@ -34,7 +35,7 @@ package Brine3salts "One-phase (liquid) multisalt brine solution"
  end specificEnthalpy_pTX;
 
  redeclare function extends dynamicViscosity_pTXd
-  protected
+protected
    SI.Temperature T_corr;
  algorithm
  //print("p="+String(p)+" Pa, T="+String(T)+" K (BrineProp.Brine_5salts_noGas.dynamicViscosity_pTX)");
@@ -77,7 +78,7 @@ package Brine3salts "One-phase (liquid) multisalt brine solution"
   end thermalConductivity;
 
  redeclare function extends dynamicViscosity_pTX
-  protected
+protected
    SI.Temperature T_corr;
  algorithm
  //print("p="+String(p)+" Pa, T="+String(T)+" K (BrineProp.Brine_5salts_noGas.dynamicViscosity_pTX)");

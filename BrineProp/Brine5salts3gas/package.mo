@@ -1,6 +1,5 @@
 within BrineProp;
-package Brine5salts3gas
-  "Two-phase aqueous solution of NaCl, KCl, CaCl2, N2, CO2, CH4"
+package Brine5salts3gas "Two-phase aqueous solution of NaCl, KCl, CaCl2, N2, CO2, CH4"
   extends Brine3salts3gas(
     redeclare package Salt_data = BrineProp.SaltDataDuan,
     final saltConstants = {
