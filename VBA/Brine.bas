@@ -158,6 +158,10 @@ Function saturationPressure_H2O(p As Double, T As Double, Xin, Optional ByRef p_
     End If
     ionMoleFractions = VecDiv(ionMoleFractions, Application.Sum(ionMoleFractions)) 'normalize
     p_H2O = IAPWS.Waterpsat_T(T)
+    If VarType(p_H2O) = vbString Then
+        saturationPressure_H2O = p_H2O & "(Brine.saturationPressure_H2O)"
+        Exit Function
+    End If
     saturationPressure_H2O = p_H2O * ionMoleFractions(nX)
   Else
     saturationPressure_H2O = 10 * p
@@ -211,13 +215,23 @@ Private Function saturationPressures(p As Double, T As Double, X_l_in, Xin)
     saturationPressures = p_sat
 End Function
 
-Function psat_T(p As Double, T As Double, X_)
-    Dim p_sat: p_sat = saturationPressures(p, T, X_, X_) 'vector of degassing pressures
-    If VarType(p_sat) = vbString Then
-        psat_T = p_sat
-        Exit Function
-    End If
-    psat_T = Application.Sum(saturationPressures(p, T, X_, X_))
+'Function psat_T(p As Double, T As Double, X_)
+'    Dim p_sat: p_sat = saturationPressures(p, T, X_, X_) 'vector of degassing pressures
+'    If VarType(p_sat) = vbString Then
+'        psat_T = p_sat
+'        Exit Function
+'    End If
+'    psat_T = Application.Sum(saturationPressures(p, T, X_, X_))
+'End Function
+
+Function degassingPressure(pOrVLEstate, Optional T As Double = -1, Optional Xi = -1, Optional phase As Integer = 0)
+'    Dim VLEstate As BrineProps_Type: VLEstate = getVLEstate_Type(pOrVLEstate, T, Xi, phase)
+'    If Len(VLEstate.error) > 0 Then
+'        degassingPressure = VLEstate.error
+'    Else
+'        degassingPressure = VLEstate.p_degas
+'    End If
+    degassingPressure = getValueFromVLE(pOrVLEstate, T, Xi, phase, "p_degas")
 End Function
 
 Private Function solubilities_pTX(p As Double, T As Double, X_l, X_, p_gas)
@@ -335,6 +349,11 @@ Function specificEnthalpy_gas(pOrVLEstate, Optional T As Double = -1, Optional X
     End If
 End Function
 
+Function gasLiquidRatio(pOrVLEstate, Optional T As Double = -1, Optional Xi = -1, Optional phase As Integer = 0)
+    Dim GVF: GVF = gasVolumeFraction(pOrVLEstate, T, Xi, phase)
+    gasLiquidRatio = GVF / (1 - GVF)
+End Function
+
 Function gasVolumeFraction(pOrVLEstate, Optional T As Double = -1, Optional Xi = -1, Optional phase As Integer = 0)
 '    Dim VLEstate As BrineProps_Type: VLEstate = getVLEstate_Type(pOrVLEstate, T, Xi, phase) 'calculate VLE or parse JSON string
     Dim VLEstate As BrinePropsClass: Set VLEstate = getVLEstate(pOrVLEstate, T, Xi, phase)
@@ -349,6 +368,26 @@ Function gasVolumeFraction(pOrVLEstate, Optional T As Double = -1, Optional Xi =
         End If
         gasVolumeFraction = IIf(VLEstate.x > 0, VLEstate.x * d / d_g, 0)
     End If
+End Function
+
+Function gasLiquidRatio_fullDegassing(p As Double, T As Double, Xi)
+    Dim X_: X_ = CheckMassVector(Xi, nX)
+    If VarType(X_) = vbString Then
+        gasLiquidRatio_fullDegassing = X_ & " (gasLiquidRatio_fullDegassing)"
+        Exit Function
+    End If
+    
+    Dim i As Integer
+    Dim gasVolume As Double
+    For i = nX_salt + 1 To nX_salt + nX_gas
+        gasVolume = gasVolume + X_(i) / MM_vec(i) * Constants.R * T / p
+    Next i
+    Dim y_H2O: y_H2O = saturationPressure_H2O(p, T, X_) / p
+'    gasVolume = gasVolume + gasVolume / (1 - y_H2O) * y_H2O ' Add water vapour volume
+    gasVolume = gasVolume / (1 - y_H2O)  ' Add water vapour volume
+    Dim liquidVolume: liquidVolume = 1 / density_liq(p, T, X_) * (1 - Application.Sum(SubArray(X_, nX_salt + 1, nX - 1)))
+    
+    gasLiquidRatio_fullDegassing = gasVolume / liquidVolume
 End Function
 
 Function density(pOrVLEstate, Optional T As Double = -1, Optional Xi = -1, Optional phase As Integer = 0, Optional ByRef d_g As Double)
@@ -381,15 +420,7 @@ Function density(pOrVLEstate, Optional T As Double = -1, Optional Xi = -1, Optio
     End If
 End Function
 
-Function degassingPressure(pOrVLEstate, Optional T As Double = -1, Optional Xi = -1, Optional phase As Integer = 0)
-'    Dim VLEstate As BrineProps_Type: VLEstate = getVLEstate_Type(pOrVLEstate, T, Xi, phase)
-'    If Len(VLEstate.error) > 0 Then
-'        degassingPressure = VLEstate.error
-'    Else
-'        degassingPressure = VLEstate.p_degas
-'    End If
-    degassingPressure = getValueFromVLE(pOrVLEstate, T, Xi, phase, "p_degas")
-End Function
+
 
 Function density_liq(pOrVLEstate, Optional T As Double = -1, Optional Xi = -1, Optional phase As Integer = 0)
 '    Dim VLEstate As BrineProps_Type: VLEstate = getVLEstate_Type(pOrVLEstate, T, Xi, phase)
@@ -580,7 +611,7 @@ Private Function VLE(p As Double, T As Double, Xi, Optional phase As Integer = 0
     Dim p_gas() As Double  'partial pressures of gases
     Dim X_l() As Double: X_l = X_ 'MassFractions start value
     Dim x As Double 'gas mass fraction
-    Dim p_H2O As Double 'partial pressure of water vapour pressure
+    Dim p_H2O 'partial pressure of water vapour pressure
     Dim p_H2O_0 As Double 'pure water vapour pressure
     Dim p_sat(1 To nX_gas + 1) As Double 'vector of degassing pressures
     Dim f() As Double 'nX_gas + 1componentwise pressure disbalance (to become zero)
@@ -607,6 +638,11 @@ Private Function VLE(p As Double, T As Double, Xi, Optional phase As Integer = 0
     
         ' DEGASSING PRESSURE
     p_H2O = saturationPressure_H2O(p, T, X_)
+    If VarType(p_H2O) = vbString Then
+        VLE.error = p_H2O & " (VLE)"
+        Exit Function
+    End If
+
     If (p_H2O > p) Then
 '        VLE.error = "#p is below water vapour pressure p_H2O(" & p / 10 ^ 5 & "bar," & T - 273.15 & "°C, X) = " & p_H2O / 100000# & " bar (VLE)"
 '        Exit Function

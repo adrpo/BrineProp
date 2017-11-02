@@ -100,7 +100,7 @@ Done:
 End Function
 
 Function SubArray(sourceArray, Indexfrom As Integer, IndexTo As Integer)
-    Dim b() As Double, i As Integer
+    Dim B() As Double, i As Integer
     Dim n As Integer
     
     n = Length(sourceArray)
@@ -108,20 +108,20 @@ Function SubArray(sourceArray, Indexfrom As Integer, IndexTo As Integer)
         SubArray = "#Index out of valid range for input array in SubArray"
         Exit Function
     End If
-    ReDim b(1 To IndexTo - Indexfrom + 1)
+    ReDim B(1 To IndexTo - Indexfrom + 1)
     For i = 0 To IndexTo - Indexfrom
-        b(1 + i) = sourceArray(Indexfrom + i)
+        B(1 + i) = sourceArray(Indexfrom + i)
     Next i
-    SubArray = b
+    SubArray = B
 End Function
 
 
 Private Sub TestMulVecElwise()
-    Dim a(3) As Double
-    a(1) = 1
-    a(2) = 2
-    a(3) = 3
-    Dim b() As Double: b = MulVecElwise(a, a)
+    Dim A(3) As Double
+    A(1) = 1
+    A(2) = 2
+    A(3) = 3
+    Dim B() As Double: B = MulVecElwise(A, A)
 End Sub
 
 Function Length(vec, Optional ByRef offset As Integer) As Integer
@@ -182,47 +182,47 @@ TwoD:
 End Function
 
 Function VecAbs(vec) 'As Double()
-    Dim c() As Double, n As Integer
+    Dim C() As Double, n As Integer
     n = Length(vec)
-    ReDim c(1 To n)
+    ReDim C(1 To n)
     
     Dim i As Integer
     For i = 1 To n
-        c(i) = Abs(vec(i))
+        C(i) = Abs(vec(i))
     Next i
-    VecAbs = c
+    VecAbs = C
 End Function
 
 Function VecSgn(vec) 'As Double()
-    Dim c() As Double, n As Integer
+    Dim C() As Double, n As Integer
     n = Length(vec)
-    ReDim c(1 To n)
+    ReDim C(1 To n)
     
     Dim i As Integer
     For i = 1 To n
-        c(i) = Math.Sgn(vec(i))
+        C(i) = Math.Sgn(vec(i))
     Next i
-    VecSgn = c
+    VecSgn = C
 End Function
 
-Function VecSum(a, b) 'As Double()
-    VecSum = VecOp(a, b, "add")
+Function VecSum(A, B) 'As Double()
+    VecSum = VecOp(A, B, "add")
 End Function
 
-Function VecProd(a, b) 'As Double()
-    VecProd = VecOp(a, b, "multiply")
+Function VecProd(A, B) 'As Double()
+    VecProd = VecOp(A, B, "multiply")
 End Function
 
-Function VecDiv(a, b) 'As Double()
-    VecDiv = VecOp(a, b, "divide")
+Function VecDiv(A, B) 'As Double()
+    VecDiv = VecOp(A, B, "divide")
 End Function
 
-Function VecDiff(a, b) 'As Double()
-    VecDiff = VecOp(a, b, "substract")
+Function VecDiff(A, B) 'As Double()
+    VecDiff = VecOp(A, B, "substract")
 End Function
 
-Function ScalProd(a, b) As Double 'scalar product of two vectors
-    ScalProd = VecOp(a, b, "scalarProduct")
+Function ScalProd(A, B) As Double 'scalar product of two vectors
+    ScalProd = VecOp(A, B, "scalarProduct")
 End Function
 
 Function VecOp(A_, B_, what) 'As Double()
@@ -230,16 +230,16 @@ Function VecOp(A_, B_, what) 'As Double()
     'n_a = Length(a)
     'n_b = Length(b)
     
-    Dim a, b
-    a = ToDouble(A_, n_a, True)
-    b = ToDouble(B_, n_b, True)
+    Dim A, B
+    A = ToDouble(A_, n_a, True)
+    B = ToDouble(B_, n_b, True)
     
-    If VarType(a) = vbString Then
-        VecOp = a
+    If VarType(A) = vbString Then
+        VecOp = A
         Exit Function
     End If
-    If VarType(b) = vbString Then
-        VecOp = b
+    If VarType(B) = vbString Then
+        VecOp = B
         Exit Function
     End If
 
@@ -260,36 +260,36 @@ Function VecOp(A_, B_, what) 'As Double()
     
     If what = "scalarProduct" Then
         For i = 1 To n
-            VecOp = VecOp + a(i) * b(i)
+            VecOp = VecOp + A(i) * B(i)
         Next i
     Else
-        Dim c() As Double
-        ReDim c(1 To n)
+        Dim C() As Double
+        ReDim C(1 To n)
         
         Select Case what
         Case "multiply"
             If n_a = 1 Then
                 For i = 1 To n
-                    c(i) = a * b(i)
+                    C(i) = A * B(i)
                 Next i
             ElseIf n_b = 1 Then
                 For i = 1 To n
-                    c(i) = a(i) * b
+                    C(i) = A(i) * B
                 Next i
             Else
                 For i = 1 To n
-                    c(i) = a(i) * b(i)
+                    C(i) = A(i) * B(i)
                 Next i
             End If
         Case "divide"
             If n_b = 1 Then
                 For i = 1 To n_a ' divide all elements by scalar
-                    c(i) = a(i) / b
+                    C(i) = A(i) / B
                 Next i
             Else
                 For i = 1 To n_a
-                    If b(i) > 0 Then
-                        c(i) = a(i) / b(i) ' divide elementwise
+                    If B(i) > 0 Then
+                        C(i) = A(i) / B(i) ' divide elementwise
                     Else
                         VecOp = "Division by zero in VecOp"
                         Exit Function
@@ -299,61 +299,61 @@ Function VecOp(A_, B_, what) 'As Double()
         Case "add"
             If n_a = 1 Then
                 For i = 1 To n
-                    c(i) = a + b(i)
+                    C(i) = A + B(i)
                 Next i
             ElseIf n_b = 1 Then
                 For i = 1 To n
-                    c(i) = a(i) + b
+                    C(i) = A(i) + B
                 Next i
             Else
                 For i = 1 To n
-                    c(i) = a(i) + b(i)
+                    C(i) = A(i) + B(i)
                 Next i
             End If
         Case "substract"
             If n_a = 1 Then
                 For i = 1 To n
-                    c(i) = a - b(i)
+                    C(i) = A - B(i)
                 Next i
             ElseIf n_b = 1 Then
                 For i = 1 To n
-                    c(i) = a(i) - b
+                    C(i) = A(i) - B
                 Next i
             Else
                 For i = 1 To n
-                    c(i) = a(i) - b(i)
+                    C(i) = A(i) - B(i)
                 Next i
             End If
         Case Else
                 VecOp = "#Don't know what to do (VecOp)"
         End Select
-        VecOp = c
+        VecOp = C
     End If
 End Function
 
 
-Function cat(a, b)
-    If VarType(a) = vbString Then
-        cat = a
+Function cat(A, B)
+    If VarType(A) = vbString Then
+        cat = A
         Exit Function
     End If
-    If VarType(b) = vbString Then
-        cat = b
+    If VarType(B) = vbString Then
+        cat = B
         Exit Function
     End If
 
     Dim n_a As Integer, n_b As Integer
-    n_a = Length(a)
-    n_b = Length(b)
+    n_a = Length(A)
+    n_b = Length(B)
     'b = ToDouble(b)
-    Dim c() As Double, i As Integer
-    c = ToDouble(a)
-    ReDim Preserve c(1 To n_a + n_b)
+    Dim C() As Double, i As Integer
+    C = ToDouble(A)
+    ReDim Preserve C(1 To n_a + n_b)
     
     For i = 1 To n_b
-        c(n_a + i) = b(i)
+        C(n_a + i) = B(i)
     Next i
-    cat = c
+    cat = C
 End Function
 
 Function fill(val, n) As Double()

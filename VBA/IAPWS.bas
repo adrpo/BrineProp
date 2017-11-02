@@ -132,6 +132,10 @@ End Function
 
 Function Density_pT(p_Pa, ByVal T) ' p in Pa, T in K
     'Density_pT = 1 / v1_pT(p_Pa / 10 ^ 6, T) 'Pa->MPa
+    If Not p_Pa > 0 Then 'if error
+        Density_pT = "#Negative Pressure! (Density_pT)"
+        Exit Function
+    End If
     Dim p As Double: p = p_Pa / 10 ^ 6 'Pa->MPa
     
     'Dim r: r = region_pT(p, T)
@@ -596,19 +600,27 @@ Private Function h5_pT(p, T) As Double
 End Function
 
 
-Function Waterpsat_T(T) As Double
-    Waterpsat_T = p4_T(T) * 10 ^ 6 'MPa->Pa
+Function Waterpsat_T(T)
+    Waterpsat_T = p4_T(T)
+    If Not VarType(Waterpsat_T) = vbString Then
+        Waterpsat_T = Waterpsat_T * 10 ^ 6 'MPa->Pa
+    End If
 End Function
-Private Function p4_T(T) As Double
+Private Function p4_T(T)
     ' Release on the IAPWS Industrial formulation 1997 for the Thermodynamic Properties of Water and Steam, September 1997
     ' Section 8.1 The Saturation-Pressure Equation
     ' Eq 30, Page 33
-    Dim teta As Double, a As Double, b As Double, c As Double
+    ' valid for 273.15 K < T < 647.096 K
+    If Not (273.15 < T And T < 647.096) Then
+        p4_T = "#Temperature " & T & "K out of range (IAPWS.p4_T)"
+        Exit Function
+    End If
+    Dim teta As Double, A As Double, B As Double, C As Double
     teta = T - 0.23855557567849 / (T - 650.17534844798)
-    a = teta ^ 2 + 1167.0521452767 * teta - 724213.16703206
-    b = -17.073846940092 * teta ^ 2 + 12020.82470247 * teta - 3232555.0322333
-    c = 14.91510861353 * teta ^ 2 - 4823.2657361591 * teta + 405113.40542057
-    p4_T = (2 * c / (-b + (b ^ 2 - 4 * a * c) ^ 0.5)) ^ 4 'MPa
+    A = teta ^ 2 + 1167.0521452767 * teta - 724213.16703206
+    B = -17.073846940092 * teta ^ 2 + 12020.82470247 * teta - 3232555.0322333
+    C = 14.91510861353 * teta ^ 2 - 4823.2657361591 * teta + 405113.40542057
+    p4_T = (2 * C / (-B + (B ^ 2 - 4 * A * C) ^ 0.5)) ^ 4 'MPa
 End Function
 
 Function WaterTsat_p(p_Pa) 'Saturation temperature

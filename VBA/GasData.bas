@@ -120,11 +120,14 @@ Function solubility_CO2_pTX_Duan2006(p As Double, T As Double, Xin, p_gas) 'CO2 
     
     zeta_CO2_NaCl_c = Array(0.000336389723, -0.000019829898, 0, 0, 0, 0, 0, 0.0021222083, -0.00524873303, 0, 0)
     
-    Dim p_H2O As Double
-    p_H2O = IAPWS.Waterpsat_T(T)
-    Dim phi  As Double
-    Dim mu_l0_CO2_RT  As Double
-    Dim lambda_CO2_Na  As Double
+    Dim p_H2O:    p_H2O = IAPWS.Waterpsat_T(T)
+    If VarType(p_H2O) = vbString Then 'if error
+        solubility_CO2_pTX_Duan2006 = p_H2O & "(solubility_CO2_pTX_Duan2006)"
+        Exit Function
+    End If
+    Dim phi
+    Dim mu_l0_CO2_RT As Double
+    Dim lambda_CO2_Na As Double
     Dim zeta_CO2_NaCl As Double
 
     Dim X_
@@ -144,26 +147,16 @@ Function solubility_CO2_pTX_Duan2006(p As Double, T As Double, Xin, p_gas) 'CO2 
     m_Ca = molalities(i_CaCl2)
     
     If Not p_gas > 0 Then
-       solubility_CO2_pTX_Duan2006 = 0
+       solubility_CO2_pTX_Duan2006 = "#p_gas negative! (solubility_CO2_pTX_Duan2006)"
+    ElseIf Not p > 0 Then
+       solubility_CO2_pTX_Duan2006 = "#p negative! (solubility_CO2_pTX_Duan2006)"
     Else
-       Dim msg As String
-       If T < 273 Or T > 533 Then
-           msg = "T=" & T - 273.15 & "°C, CO2 solubility only valid for 0<T<260°C (GasData.solubility_CO2_pTX_Duan2003)"
-       End If
-       If (p < 0 Or p > 2000 * 10 ^ 5) Then
-            msg = "p=" & p / 10 ^ 5 & " bar, CO2 fugacity only valid for 0<p<2000 bar (GasData.solubility_CO2_pTX_Duan2003)"
-       End If
-       If Len(msg) > 0 Then
-           If outOfRangeMode = 1 Then
-               Debug.Print msg
-           ElseIf outOfRangeMode = 2 Then
-               solubility_CO2_pTX_Duan2006 = msg
-               Exit Function
-           End If
-       End If
-    
         'equ. 9
         phi = fugacity_CO2_Duan2006(p_gas + p_H2O, T)
+        If VarType(phi) = vbString Then 'if error
+            solubility_CO2_pTX_Duan2006 = phi & "(solubility_CO2_pTX_Duan2006)"
+            Exit Function
+        End If
         mu_l0_CO2_RT = Par_CO2_Duan2003(p_gas + p_H2O, T, mu_l0_CO2_RT_c)
         lambda_CO2_Na = Par_CO2_Duan2003(p_gas + p_H2O, T, lambda_CO2_Na_c)
         zeta_CO2_NaCl = Par_CO2_Duan2003(p_gas + p_H2O, T, zeta_CO2_NaCl_c)
@@ -179,24 +172,27 @@ Function fugacity_CO2_Duan2006(p As Double, T As Double) 'Calculation of fugacit
   'doi:10.1016/j.marchem.2005.09.001
 
   Dim p_bar As Double, P_1 As Double
-  Dim c
+  Dim C
   p_bar = p / 10 ^ 5
-  
-  If outOfRangeMode = 1 Then
-    If T < 273 Or T > 573 Then
-      Debug.Print "T=" & T & "K, but CO2 solubility calculation is only valid for temperatures between 0 and 260°C (GasData.fugacity_CO2_Duan2006)"
+  Dim T_C_min As Double: T_C_min = 0
+  Dim T_C_max As Double: T_C_max = 300
+  Dim p_bar_max As Double: p_bar_max = 2000
+
+    Dim msg As String
+    If T - 273.15 < T_C_min Or T - 273.15 > T_C_max Then
+        msg = "T=" & T - 273.15 & "°C, CO2 fugacity only valid for " & T_C_min & "<T<" & T_C_max & "°C (GasData.fugacity_CO2_Duan2006)"
     End If
-   If (p < 0 Or p > 2000 * 10 ^ 5) Then
-       Debug.Print "p=" & p / 10 ^ 5 & " bar, but CO2 fugacity calculation only valid for pressures between 0 and 2000 bar (Partial_Gas_Data.fugacity_CO2_Duan2006)"
-   End If
-  ElseIf outOfRangeMode = 2 Then
-    If Not (T > 273 And T < 573) Then
-        fugacity_CO2_Duan2006 = "#T=" & T - 273.15 & "°C out of range(0...300°C) for CO2 fugacity calculation (fugacity_CO2_Duan2006)"
+    If (p < 0 Or p > p_bar_max * 10 ^ 5) Then
+         msg = "p=" & p / 10 ^ 5 & " bar, CO2 solubility only valid for 0<p<" & p_bar_max & " bar (GasData.fugacity_CO2_Duan2006)"
     End If
-    If Not p < 2000 * 10 ^ 5 Then
-        fugacity_CO2_Duan2006 = "#p=" & p / 10 ^ 5 & " bar out of range for CO2 fugacity calculation (fugacity_CO2_Duan2006)"
-      End If
-  End If
+    If Len(msg) > 0 Then
+        If outOfRangeMode = 1 Then
+            Debug.Print msg
+        ElseIf outOfRangeMode = 2 Then
+            fugacity_CO2_Duan2006 = msg
+            Exit Function
+        End If
+    End If
 
     If T < 305 Then
       P_1 = p_sat_CO2(T) / 10 ^ 5
@@ -208,44 +204,44 @@ Function fugacity_CO2_Duan2006(p As Double, T As Double) 'Calculation of fugacit
 
   If p_bar < P_1 Then
     '1 273<T<573 and p_bar<P_1
-      c = Array(1#, 0.0047586835, -0.0000033569963, 0, -1.3179396, -0.0000038389101, 0, 0.0022815104, 0, 0, 0, 0, 0, 0, 0)
+      C = Array(1#, 0.0047586835, -0.0000033569963, 0, -1.3179396, -0.0000038389101, 0, 0.0022815104, 0, 0, 0, 0, 0, 0, 0)
   ElseIf T > 435 Then
           '6 T>435 and p_bar>P_1
-          c = Array(-0.1569349, 0.00044621407, -0.00000091080591, 0, 0, 0.00000010647399, 2.4273357E-10, 0, 0.35874255, 0.00006331971, -249.89661, 0, 0, 888.768, -0.00000066348003)
+          C = Array(-0.1569349, 0.00044621407, -0.00000091080591, 0, 0, 0.00000010647399, 2.4273357E-10, 0, 0.35874255, 0.00006331971, -249.89661, 0, 0, 888.768, -0.00000066348003)
 
   ElseIf p_bar < 1000 Then
     'P_1<p_bar<1000 and 273<T<435
     If T < 340 Then
      '2 273<T<340 and P_1<p_bar<1000
-           c = Array(-0.71734882, 0.00015985379, -0.00000049286471, 0, 0, -0.00000027855285, 1.1877015E-09, 0, 0, 0, 0, -96.539512, 0.44774938, 101.81078, 0.0000053783879)
+           C = Array(-0.71734882, 0.00015985379, -0.00000049286471, 0, 0, -0.00000027855285, 1.1877015E-09, 0, 0, 0, 0, -96.539512, 0.44774938, 101.81078, 0.0000053783879)
     Else
       'T>340
           '4 340<T<435 and P_1<p_bar<1000
-          c = Array(5.0383896, -0.0044257744, 0, 1.9572733, 0, 0.0000024223436, 0, -0.00093796135, -1.502603, 0.003027224, -31.377342, -12.847063, 0, 0, -0.000015056648)
+          C = Array(5.0383896, -0.0044257744, 0, 1.9572733, 0, 0.0000024223436, 0, -0.00093796135, -1.502603, 0.003027224, -31.377342, -12.847063, 0, 0, -0.000015056648)
     End If
 
       Else
     'p_bar>1000 bar and 273<T<435
         If T < 340 Then
           '3 273<T<340 and p_bar>1000
-          c = Array(-0.065129019, -0.00021429977, -0.000001144493, 0#, 0#, -0.00000011558081, 0.000000001195237, 0#, 0#, 0#, 0#, -221.34306, 0#, 71.820393, 0.0000066089246)
+          C = Array(-0.065129019, -0.00021429977, -0.000001144493, 0#, 0#, -0.00000011558081, 0.000000001195237, 0#, 0#, 0#, 0#, -221.34306, 0#, 71.820393, 0.0000066089246)
         Else 'T>340
           '5 340<T<435 and p_bar>1000
-          c = Array(-16.063152, -0.002705799, 0, 0.14119239, 0, 0.00000081132965, 0, -0.00011453082, 2.3895671, 0.00050527457, -17.76346, 985.92232, 0, 0, -0.00000054965256)
+          C = Array(-16.063152, -0.002705799, 0, 0.14119239, 0, 0.00000081132965, 0, -0.00011453082, 2.3895671, 0.00050527457, -17.76346, 985.92232, 0, 0, -0.00000054965256)
         End If
         'Region 6 omitted
   End If
-    c = ToDouble(c)
-  fugacity_CO2_Duan2006 = c(1) + (c(2) + c(3) * T + c(4) / T + c(5) / (T - 150)) * p_bar + (c(6) + c(7) * T + c(8) / T) * p_bar ^ 2 + (c(9) + c(10) * T + c(11) / T) * Log(p_bar) + (c(12) + c(13) * T) / p_bar + c(14) / T + c(15) * T ^ 2
+    C = ToDouble(C)
+  fugacity_CO2_Duan2006 = C(1) + (C(2) + C(3) * T + C(4) / T + C(5) / (T - 150)) * p_bar + (C(6) + C(7) * T + C(8) / T) * p_bar ^ 2 + (C(9) + C(10) * T + C(11) / T) * Log(p_bar) + (C(12) + C(13) * T) / p_bar + C(14) / T + C(15) * T ^ 2
 End Function
 
-  Function Par_CO2_Duan2003(p As Double, T As Double, c) 'Duan,Sun(2003)
+  Function Par_CO2_Duan2003(p As Double, T As Double, C) 'Duan,Sun(2003)
     Dim p_bar As Double
     p_bar = p / 10 ^ 5
    
     'eq. 7
-    c = ToDouble(c)
-    Par_CO2_Duan2003 = c(1) + c(2) * T + c(3) / T + c(4) * T ^ 2 + c(5) / (630 - T) + c(6) * p_bar + c(7) * p_bar * Log(T) + c(8) * p_bar / T + c(9) * p_bar / (630 - T) + c(10) * p_bar ^ 2 / (630 - T) ^ 2 + c(11) * T * Log(p_bar)
+    C = ToDouble(C)
+    Par_CO2_Duan2003 = C(1) + C(2) * T + C(3) / T + C(4) * T ^ 2 + C(5) / (630 - T) + C(6) * p_bar + C(7) * p_bar * Log(T) + C(8) * p_bar / T + C(9) * p_bar / (630 - T) + C(10) * p_bar ^ 2 / (630 - T) ^ 2 + C(11) * T * Log(p_bar)
   End Function
 
   Function p_sat_CO2(T As Double) 'calculates saturation pressure, polynom derived from EES calculations
@@ -283,11 +279,20 @@ End Function
     m_Mg = 0 ' molalities(i_MgCl2)
     m_SO4 = 0 ' molalities(i_MgCl2)
 
-    Dim p_H2O As Double, X_NaCl As Double
+    Dim p_H2O, X_NaCl As Double
     p_H2O = IAPWS.Waterpsat_T(T)
+    If VarType(p_H2O) = vbString Then 'if error
+        solubility_N2_pTX_Mao2006 = p_H2O & "(solubility_N2_pTX_Mao2006)"
+        Exit Function
+    End If
     X_NaCl = molalities(i_NaCl) * M_H2O 'mole fraction of NaCl in liquid phase
+    Dim rho_l_H2O: rho_l_H2O = IAPWS.Density_pT(p, T)
+    If VarType(rho_l_H2O) = vbString Then 'if error
+        solubility_N2_pTX_Mao2006 = rho_l_H2O & "(solubility_N2_pTX_Mao2006)"
+        Exit Function
+    End If
     Dim v_l_H2O As Double 'MolarVolume
-    v_l_H2O = M_H2O / IAPWS.Density_pT(p, T)
+    v_l_H2O = M_H2O / rho_l_H2O
     Dim phi_H2O As Double
     phi_H2O = fugacity_H2O_Mao2006N2(p, T)
     Const R = 83.14472 'bar.cm3/(mol.K) Molar gas constant"
@@ -364,19 +369,19 @@ Function fugacity_N2_Duan2006(p As Double, T As Double)  'Zero search with EOS f
     
     Dim V_neu As Double, V As Double  'SpecificVolume
     V_neu = 0.024 'start value SpecificVolume
-    Dim a
-    a = Array(0.0375504388, -10873.0273, 1109648.61, 0.000541589372, 112.094559, -5921.91393, 0.00000437200027, 0.495790731, -164.902948, -7.07442825E-08, 0.00965727297, 0.487945175, 16225.7402, 0.00899)
+    Dim A
+    A = Array(0.0375504388, -10873.0273, 1109648.61, 0.000541589372, 112.094559, -5921.91393, 0.00000437200027, 0.495790731, -164.902948, -7.07442825E-08, 0.00965727297, 0.487945175, 16225.7402, 0.00899)
     Dim sigma As Double
     sigma = 3.63
     Dim epsilon As Double 'Temperature
     epsilon = 101
-    Dim T_m As Double, b As Double, c As Double, d As Double, E As Double, f As Double
+    Dim T_m As Double, B As Double, C As Double, d As Double, E As Double, f As Double
     T_m = 154 * T / epsilon
-    b = a(1) + a(2) / T_m ^ 2 + a(3) / T_m ^ 3
-    c = a(4) + a(5) / T_m ^ 2 + a(6) / T_m ^ 3
-    d = a(7) + a(8) / T_m ^ 2 + a(9) / T_m ^ 3
-    E = a(10) + a(11) / T_m ^ 2 + a(12) / T_m ^ 3
-    f = a(13) / T_m ^ 3
+    B = A(1) + A(2) / T_m ^ 2 + A(3) / T_m ^ 3
+    C = A(4) + A(5) / T_m ^ 2 + A(6) / T_m ^ 3
+    d = A(7) + A(8) / T_m ^ 2 + A(9) / T_m ^ 3
+    E = A(10) + A(11) / T_m ^ 2 + A(12) / T_m ^ 3
+    f = A(13) / T_m ^ 3
     
     Dim P_m As Double, G As Double, ln_phi As Double, V_m As Double, Z As Double
     P_m = 3.0626 * sigma ^ 3 * p_bar / epsilon
@@ -388,7 +393,7 @@ Function fugacity_N2_Duan2006(p As Double, T As Double)  'Zero search with EOS f
     While Abs(V - V_neu) > 10 ^ -8
         V = IIf(z_ < 5, V_neu, (1 - D_) * V_neu + D_ * V)
         V_m = V * 10 ^ 6 / (1000# * (sigma / 3.691) ^ 3)
-        Z = 1 + b / V_m + c / V_m ^ 2 + d / V_m ^ 4 + E / V_m ^ 5 + f / V_m ^ 2 * (1 + a(14) / V_m ^ 2) * Exp(-a(14) / V_m ^ 2)
+        Z = 1 + B / V_m + C / V_m ^ 2 + d / V_m ^ 4 + E / V_m ^ 5 + f / V_m ^ 2 * (1 + A(14) / V_m ^ 2) * Exp(-A(14) / V_m ^ 2)
         V_neu = Z / p * Constants.R * T
         '    print("V("&(z)&")="&(V_neu))
         z_ = z_ + 1
@@ -400,28 +405,28 @@ Function fugacity_N2_Duan2006(p As Double, T As Double)  'Zero search with EOS f
     Wend
     
     V_m = 1000# * V / (sigma / 3.691) ^ 3 'm³/mol -> dm³/mol"
-    Z = 1 + (a(1) + a(2) / T_m ^ 2 + a(3) / T_m ^ 3) / V_m _
-        + (a(4) + a(5) / T_m ^ 2 + a(6) / T_m ^ 3) / V_m ^ 2 _
-        + (a(7) + a(8) / T_m ^ 2 + a(9) / T_m ^ 3) / V_m ^ 4 _
-        + (a(10) + a(11) / T_m ^ 2 + a(12) / T_m ^ 3) / V_m ^ 5 _
-        + a(13) / T_m ^ 3 / V_m ^ 2 * (1 + a(14) / V_m ^ 2) * Exp(-a(14) / V_m ^ 2)
-    G = a(13) / T_m ^ 3 / (2 * a(14)) * (2 - (2 + a(14) / V_m ^ 2) * Exp(-a(14) / V_m ^ 2))
-    fugacity_N2_Duan2006 = Exp(Z - 1 + b / V_m + c / (2 * V_m ^ 2) + d / (4 * V_m ^ 4) + E / (5 * V_m ^ 5) + G) / Z 'fugacity coefficient
+    Z = 1 + (A(1) + A(2) / T_m ^ 2 + A(3) / T_m ^ 3) / V_m _
+        + (A(4) + A(5) / T_m ^ 2 + A(6) / T_m ^ 3) / V_m ^ 2 _
+        + (A(7) + A(8) / T_m ^ 2 + A(9) / T_m ^ 3) / V_m ^ 4 _
+        + (A(10) + A(11) / T_m ^ 2 + A(12) / T_m ^ 3) / V_m ^ 5 _
+        + A(13) / T_m ^ 3 / V_m ^ 2 * (1 + A(14) / V_m ^ 2) * Exp(-A(14) / V_m ^ 2)
+    G = A(13) / T_m ^ 3 / (2 * A(14)) * (2 - (2 + A(14) / V_m ^ 2) * Exp(-A(14) / V_m ^ 2))
+    fugacity_N2_Duan2006 = Exp(Z - 1 + B / V_m + C / (2 * V_m ^ 2) + d / (4 * V_m ^ 4) + E / (5 * V_m ^ 5) + G) / Z 'fugacity coefficient
 End Function
   
-Function Par_N2_Mao2006(p As Double, T As Double, c) 'Mao,Duan(2006)
+Function Par_N2_Mao2006(p As Double, T As Double, C) 'Mao,Duan(2006)
     Dim p_bar As Double
     p_bar = p / 10 ^ 5
     'eq. 7
-    Par_N2_Mao2006 = c(1) + c(2) * T + c(3) / T + c(4) * T ^ 2 + c(5) / T ^ 2 + c(6) * p_bar + c(7) * p_bar * T + c(8) * p_bar / T + c(9) * p_bar ^ 2 / T
+    Par_N2_Mao2006 = C(1) + C(2) * T + C(3) / T + C(4) * T ^ 2 + C(5) / T ^ 2 + C(6) * p_bar + C(7) * p_bar * T + C(8) * p_bar / T + C(9) * p_bar ^ 2 / T
 End Function
 
  Function fugacity_H2O_Mao2006N2(p As Double, T As Double) 'Calculation of fugacity coefficient
 ' according to (Mao&Duan 2006 'A thermodynamic model for calculating nitrogen solubility, gasphase composition and density of the N2?H2O?NaCl system')"
-    Dim p_bar As Double, a, phi As Double
+    Dim p_bar As Double, A, phi As Double
     p_bar = p / 10 ^ 5
-    a = Array(0.00186357885, 0.0117332094, 0.000000782682497, -0.0000115662779, -3.13619739, -0.00129464029)
-    phi = Exp(a(1) + a(2) * p_bar + a(3) * p_bar ^ 2 + a(4) * p_bar * T + a(5) * p_bar / T + a(6) * p_bar ^ 2 / T) 'equ. 5
+    A = Array(0.00186357885, 0.0117332094, 0.000000782682497, -0.0000115662779, -3.13619739, -0.00129464029)
+    phi = Exp(A(1) + A(2) * p_bar + A(3) * p_bar ^ 2 + A(4) * p_bar * T + A(5) * p_bar / T + A(6) * p_bar ^ 2 / T) 'equ. 5
  End Function
 
 
@@ -436,9 +441,18 @@ Function solubility_CH4_pTX_Duan2006(p As Double, T As Double, Xin, p_gas) 'Duan
     xi_CH4_NaCl_c = Array(-0.0029903571, 0, 0, 0, 0, 0, 0, 0, 0, 0)
     
     'Dim M_H2O As Double: M_H2O = H2O.MM
+    Dim rho_H2O: rho_H2O = IAPWS.Density_pT(p, T)
+    If VarType(rho_H2O) = vbString Then 'if error
+        solubility_CH4_pTX_Duan2006 = rho_H2O & "(solubility_CH4_pTX_Duan2006)"
+        Exit Function
+    End If
+    Dim v_l_H2O As Double: v_l_H2O = M_H2O / rho_H2O 'MolarVolume
     Dim p_H2O As Double: p_H2O = p_sat_H2O_Duan2003(T)
-    Dim v_l_H2O As Double: v_l_H2O = M_H2O / IAPWS.Density_pT(p, T) 'MolarVolume
-    Dim phi_H2O As Double: phi_H2O = fugacity_H2O_Duan2006CH4(p, T)
+    Dim phi_H2O: phi_H2O = fugacity_H2O_Duan2006CH4(p, T)
+    If VarType(phi_H2O) = vbString Then 'if error
+        solubility_CH4_pTX_Duan2006 = phi_H2O & "(solubility_CH4_pTX_Duan2006)"
+        Exit Function
+    End If
     Dim phi_CH4 As Double, mu_l0_CH4_RT As Double, lambda_CH4_Na As Double, xi_CH4_NaCl As Double
     
     If Not p_gas > 0 Then
@@ -497,22 +511,22 @@ End Function
 Function fugacity_CH4_Duan1992(p As Double, T As Double)    'Zero search with EOS from Duan1992
     Dim V_neu As Double, V As Double  'SpecificVolume
     V_neu = 0.024 'start value SpecificVolume
-    Dim a
-    a = Array(0.0872553928, -0.752599476, 0.375419887, 0.0107291342, 0.0054962636, -0.0184772802, 0.000318993183, 0.000211079375, 0.0000201682801, -0.0000165606189, 0.000119614546, -0.000108087289, 0.0448262295, 0.75397, 0.077167)
+    Dim A
+    A = Array(0.0872553928, -0.752599476, 0.375419887, 0.0107291342, 0.0054962636, -0.0184772802, 0.000318993183, 0.000211079375, 0.0000201682801, -0.0000165606189, 0.000119614546, -0.000108087289, 0.0448262295, 0.75397, 0.077167)
     Dim alpha As Double, beta As Double, gamma As Double, T_C As Double
-    alpha = a(13)
-    beta = a(14)
-    gamma = a(15)
+    alpha = A(13)
+    beta = A(14)
+    gamma = A(15)
     T_C = 190.6
     Dim P_c As Double, P_r As Double, T_r As Double
     P_c = 46.41 * 10 ^ 5
     P_r = p / P_c
     T_r = T / T_C
-    Dim b As Double, c As Double, d As Double, E As Double, f As Double
-    b = a(1) + a(2) / T_r ^ 2 + a(3) / T_r ^ 3
-    c = a(4) + a(5) / T_r ^ 2 + a(6) / T_r ^ 3
-    d = a(7) + a(8) / T_r ^ 2 + a(9) / T_r ^ 3
-    E = a(10) + a(11) / T_r ^ 2 + a(12) / T_r ^ 3
+    Dim B As Double, C As Double, d As Double, E As Double, f As Double
+    B = A(1) + A(2) / T_r ^ 2 + A(3) / T_r ^ 3
+    C = A(4) + A(5) / T_r ^ 2 + A(6) / T_r ^ 3
+    d = A(7) + A(8) / T_r ^ 2 + A(9) / T_r ^ 3
+    E = A(10) + A(11) / T_r ^ 2 + A(12) / T_r ^ 3
     f = alpha / T_r ^ 3
     Dim ln_phi As Double, D_ As Double, G As Double, Z As Double, V_r As Double
     Dim z_ As Integer 'counter to avoid getting caught in the iteration loop
@@ -522,7 +536,7 @@ Function fugacity_CH4_Duan1992(p As Double, T As Double)    'Zero search with EO
         V = IIf(z_ < 5, V_neu, (1 - D_) * V_neu + D_ * V) 'dampened
         V_r = V / (Constants.R * T_C / P_c)
         G = f / (2 * gamma) * (beta + 1 - (beta + 1 + gamma / V_r ^ 2) * Exp(-gamma / V_r ^ 2))
-        Z = 1 + b / V_r + c / V_r ^ 2 + d / V_r ^ 4 + E / V_r ^ 5 + f / V_r ^ 2 * (beta + gamma / V_r ^ 2) * Exp(-gamma / V_r ^ 2)
+        Z = 1 + B / V_r + C / V_r ^ 2 + d / V_r ^ 4 + E / V_r ^ 5 + f / V_r ^ 2 * (beta + gamma / V_r ^ 2) * Exp(-gamma / V_r ^ 2)
         V_neu = Z / p * Constants.R * T
         z_ = z_ + 1
         If z_ >= 1000 Then
@@ -531,34 +545,43 @@ Function fugacity_CH4_Duan1992(p As Double, T As Double)    'Zero search with EO
         End If
     Wend
     
-    fugacity_CH4_Duan1992 = Exp(Z - 1 + b / V_r + c / (2 * V_r ^ 2) + d / (4 * V_r ^ 4) + E / (5 * V_r ^ 5) + G) / Z 'fugacity coefficient
+    fugacity_CH4_Duan1992 = Exp(Z - 1 + B / V_r + C / (2 * V_r ^ 2) + d / (4 * V_r ^ 4) + E / (5 * V_r ^ 5) + G) / Z 'fugacity coefficient
 End Function
   
-Function Par_CH4_Duan2006(p As Double, T As Double, c) 'Duan,Sun(2003)
+Function Par_CH4_Duan2006(p As Double, T As Double, C) 'Duan,Sun(2003)
     Dim p_bar
     p_bar = p / 10 ^ 5
     'eq. 7
-    Par_CH4_Duan2006 = c(1) + c(2) * T + c(3) / T + c(4) * T ^ 2 + c(5) / T ^ 2 + c(6) * p_bar + c(7) * p_bar * T + c(8) * p_bar / T + c(9) * p_bar / T ^ 2 + c(10) * p_bar ^ 2 * T
+    Par_CH4_Duan2006 = C(1) + C(2) * T + C(3) / T + C(4) * T ^ 2 + C(5) / T ^ 2 + C(6) * p_bar + C(7) * p_bar * T + C(8) * p_bar / T + C(9) * p_bar / T ^ 2 + C(10) * p_bar ^ 2 * T
 End Function
 
-Function p_sat_H2O_Duan2003(T) 'calculates saturation pressure of water, with the equation given in Duan2003
+Private Function p_sat_H2O_Duan2003(T) 'calculates saturation pressure of water, with the equation given in Duan2003
 'An improved model calculating CO2 solubility in pure water and aqueous NaCl solutions from 273 to 533 K and from 0 to 2000 bar
-    Dim c, P_c As Double, T_C As Double, T_ As Double
-    c = Array(-38.640844, 5.894842, 59.876516, 26.654627, 10.637097)
+    Dim C, P_c As Double, T_C As Double, T_ As Double
+    C = Array(-38.640844, 5.894842, 59.876516, 26.654627, 10.637097)
     P_c = 220.85 * 10 ^ 5
     T_C = 647.29
     T_ = (T - T_C) / T_C
     
-    p_sat_H2O_Duan2003 = (P_c * T / T_C) * (1 + c(1) * (-T_) ^ 1.9 + c(2) * T_ + c(3) * T_ ^ 2 + c(4) * T_ ^ 3 + c(5) * T_ ^ 4)
+    p_sat_H2O_Duan2003 = (P_c * T / T_C) * (1 + C(1) * (-T_) ^ 1.9 + C(2) * T_ + C(3) * T_ ^ 2 + C(4) * T_ ^ 3 + C(5) * T_ ^ 4)
 End Function
 
 Function fugacity_H2O_Duan2006CH4(p As Double, T As Double) 'Calculation of fugacity coefficient according to Duan ZH, Mao SD. (2006)
 'A thermodynamic model for calculating methane solubility, density and gas phase composition of methane-bearing aqueous fluids from 273 to 523 K and from 1 to 2000 bar. Geochimica et Cosmochimica Acta, 70 (13): 3369-3386.
-    Dim p_bar As Double, a, phi As Double
+    If Not 273 <= T And T <= 523 Then
+        fugacity_H2O_Duan2006CH4 = "# T=" & T - 273.15 & "°C out of range(fugacity_H2O_Duan2006CH4)"
+        Exit Function
+    End If
+    If Not (100000# <= p And p <= 200000000#) Then
+        fugacity_H2O_Duan2006CH4 = "# p out of range(fugacity_H2O_Duan2006CH4)"
+        Exit Function
+    End If
+        
+    Dim p_bar As Double, A, phi As Double
     p_bar = p / 10 ^ 5
-    a = Array(-0.0142006707, 0.010836991, -0.0000015921316, -0.0000110804676, -3.14287155, 0.00106338095)
+    A = Array(-0.0142006707, 0.010836991, -0.0000015921316, -0.0000110804676, -3.14287155, 0.00106338095)
     'equ. 6
-    phi = Exp(a(1) + a(2) * p_bar + a(3) * p_bar ^ 2 + a(4) * p_bar * T + a(5) * p_bar / T + a(6) * p_bar ^ 2 / T)
+    phi = Exp(A(1) + A(2) * p_bar + A(3) * p_bar ^ 2 + A(4) * p_bar * T + A(5) * p_bar / T + A(6) * p_bar ^ 2 / T)
 End Function
 
 Function MoistAirDynamicViscosity(T)
