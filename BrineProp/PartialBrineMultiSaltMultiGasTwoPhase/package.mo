@@ -50,7 +50,7 @@ partial package PartialBrineMultiSaltMultiGasTwoPhase "Template medium for aqueo
 
 
    redeclare model extends BaseProperties(d(start=1000))
-  "Base properties of medium"
+     "Base properties of medium"
      import BrineProp;
    //  MassFraction[nX] X_l(start=cat(1,fill(0,nXi),{1}))  "= X cat(1,X_salt/(X[end]*m_l),X[nX_salt+1:end])";
      SI.Density d_l "density of liquid phase";
@@ -60,7 +60,8 @@ partial package PartialBrineMultiSaltMultiGasTwoPhase "Template medium for aqueo
      Real x "gas phase mass fraction";
      SI.Pressure p_H2O;
      SI.Pressure[nX_gas + 1] p_gas "partial gas pressures in gas phase";
-     SI.Pressure p_degas[nX_gas + 1] "degassing pressure in liquid phase";
+     SI.Pressure p_degas[nX_gas + 1] "degassing pressure for 1-phase-liquid";
+     SI.Pressure p_sat[nX_gas + 1] "degassing pressure in liquid phase";
      //  MassFraction[nX_gas+1] X_g "mass fractions in gas phase";
      MassFraction[nX] X_l "mass fractions in liquid phase";
 
@@ -99,7 +100,7 @@ partial package PartialBrineMultiSaltMultiGasTwoPhase "Template medium for aqueo
      end if;
 
    //  (state,GVF,h_l,h_g,p_gas,p_H2O,p_degas,z,n_g_norm) = setState_pTX(p,T,X,phase,n_g_norm_start);
-     (state,GVF,h_l,h_g,p_gas,p_H2O,p_degas) = setState_pTX(p,T,X,phase,n_g_norm_start);
+     (state,GVF,h_l,h_g,p_gas,p_H2O,p_degas,p_sat) = setState_pTX(p,T,X,phase,n_g_norm_start);
      X_l=state.X_l;
      x=state.x;
      s=state.s;
@@ -461,6 +462,7 @@ protected
       output SI.Pressure[nX_gas + 1] p_gas "partial pressures of gases";
       output SI.Pressure p_H2O "water vapour pressure TODO is in p_gas drin";
       output SI.Pressure[nX_gas + 1] p_degas;
+      output SI.Pressure[nX_gas + 1] p_sat_;
     //  output Integer z "number of iterations";
 protected
       Integer z "number of iterations";
@@ -509,7 +511,7 @@ protected
 
       if String(T)== "-1.#IND" then
       assert(false, "T is NaN, probably division by zero."+(if AssertLevel==1 then "Setting T=300 K." else ""),aLevel);
-        T2:=350;
+        T2:=300;
       else
         assert(T>273.15,"T="+String(T-273.15)+" C too low (<0 C)."+(if AssertLevel==1 then " setting to 0 C" else ""),aLevel);
         T2:= max(273.16,T);
@@ -525,8 +527,7 @@ protected
 
         k :=solu ./ p_gas[1:nX_gas];
         for i in 1:nX_gas loop
-            p_degas[i] :=X_l[nX_salt + i]/(if k[i] > 0 then k[i] else 1^10)
-      "Degassing pressure";
+            p_degas[i] :=X_l[nX_salt + i]/(if k[i] > 0 then k[i] else 1^10) "Degassing pressure";
         end for;
         p_degas[nX_gas + 1] :=p_H2O;
 
@@ -661,7 +662,7 @@ protected
               Delta_n_g_norm[alpha] := if X[nX_salt+alpha]>0 then -f[alpha]/dfdn_g_norm[alpha] else 0;
     //          if alpha==ju then
     //            n_g_norm[alpha] := max(0,min(1,n_g_norm[alpha] + b[alpha]*Delta_n_g_norm[alpha]))
-                n_g_norm[alpha] := max(1e-9,min(1,n_g_norm[alpha] + Delta_n_g_norm[alpha]))
+              n_g_norm[alpha] := max(1e-9,min(1,n_g_norm[alpha] + Delta_n_g_norm[alpha]))
           "new concentration limited by all dissolved/none dissolved, 1e-9 to avoid k=NaN";
     //          end if;
             end for;
@@ -727,7 +728,7 @@ protected
     X_l={max(0,X_l[i]) for i in 1:nX}, didn't help!
     X_g={max(0,X_g[i]) for i in 1:nX_gas+1}, didn't help"
 */
-
+    p_sat_:=p_sat;
       annotation (Diagram(graphics={Text(
               extent={{-96,16},{98,-16}},
               lineColor={0,0,255},
