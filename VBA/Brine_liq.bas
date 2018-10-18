@@ -40,7 +40,7 @@ Private Sub DefineLimits()
     ignoreLimitSalt_visc(3) = False
 End Sub
 
-Function specificHeatCapacityCp(p As Double, T As Double, Xin)  'calculation of liquid specific heat capacity from apparent molar heat capacities
+Function specificHeatCapacityCp(p As Double, T As Double, Xin, Optional ignore_Tlimit = False)  'calculation of liquid specific heat capacity from apparent molar heat capacities
     If DebugMode Then
         Debug.Print "Running specificHeatCapacityCp(" & p / 10 ^ 5 & " bar," & T - 273.15 & " °C, X={" & Xin(1) & Xin(2) & Xin(3); "})"
     End If
@@ -77,7 +77,7 @@ Function specificHeatCapacityCp(p As Double, T As Double, Xin)  'calculation of 
     Dim Cp_appmol: ReDim Cp_appmol(2 To nX_salt) 'Apparent molar heat capacity of salts
     'Cp_appmol(1) = 0
     If B(2) > 0 Then
-        Cp_appmol(2) = appMolarHeatCapacity_KCl_White(T, B(2))
+        Cp_appmol(2) = appMolarHeatCapacity_KCl_White(T, B(2), ignore_Tlimit)
         If VarType(Cp_appmol(2)) = vbString Then
             specificHeatCapacityCp = Cp_appmol(2)
             Exit Function
@@ -85,7 +85,7 @@ Function specificHeatCapacityCp(p As Double, T As Double, Xin)  'calculation of 
 
     End If
     If B(3) > 0 Then
-        Cp_appmol(3) = appMolarHeatCapacity_CaCl2_White(T, B(3))
+        Cp_appmol(3) = appMolarHeatCapacity_CaCl2_White(T, B(3), ignore_Tlimit)
         If VarType(Cp_appmol(3)) = vbString Then
             specificHeatCapacityCp = Cp_appmol(3)
             Exit Function
@@ -136,7 +136,7 @@ Private Function appMolarX_KCl_White(T As Double, ByVal mola As Double, what As 
 End Function
 
 Private Function appMolarHeatCapacity_CaCl2_White(T As Double, ByVal mola As Double, Optional ignore_Tlimit = False) '2D-fit Reproduction of measurements of heat capacity of KCl solution
-    appMolarHeatCapacity_CaCl2_White = appMolarX_CaCl2_White(T, mola, "cp")
+    appMolarHeatCapacity_CaCl2_White = appMolarX_CaCl2_White(T, mola, "cp", ignore_Tlimit)
 End Function
 Private Function appMolarEnthalpy_CaCl2_White(T As Double, ByVal mola As Double, Optional ignore_Tlimit = False) '2D-fit Reproduction of measurements of heat capacity of KCl solution
     appMolarEnthalpy_CaCl2_White = appMolarX_CaCl2_White(T, mola, "h", ignore_Tlimit)

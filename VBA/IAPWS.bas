@@ -611,7 +611,7 @@ Private Function p4_T(T)
     ' Section 8.1 The Saturation-Pressure Equation
     ' Eq 30, Page 33
     ' valid for 273.15 K < T < 647.096 K
-    If Not (273.15 < T And T < 647.096) Then
+    If Not (273.15 <= T And T < 647.096) Then
         p4_T = "#Temperature " & T & "K out of range (IAPWS.p4_T)"
         Exit Function
     End If

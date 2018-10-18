@@ -252,7 +252,7 @@ End Function
     End If
   End Function
 
- Function solubility_N2_pTX_Mao2006(p As Double, T As Double, Xin, p_gas) 'solubility calculation of N2 in seawater Mao&Duan(2006)
+ Function solubility_N2_pTX_Mao2006_molality(p As Double, T As Double, Xin, p_gas, Optional ByRef X_H2O As Double)   'solubility calculation of N2 in seawater Mao&Duan(2006)
     ' Shide Mao and Zhenhao Duan (2006) A thermodynamic model for calculating nitrogen solubility, gas phase composition and density of the H2O-N2-NaCl system. Fluid Phase Equilibria, 248 (2): 103-114
     ' 273-400 K, 1-600 bar and 0-6 mol/kg
     ' http://dx.doi.org/10.1016/j.fluid.2006.07.020
@@ -261,14 +261,15 @@ End Function
     'Dim M_H2O As Double:M_H2O = H2O.MM
     Dim X_: X_ = CheckMassVector(Xin, Brine.nX)
     If VarType(X_) = vbString Then
-       solubility_N2_pTX_Mao2006 = X_
+       solubility_N2_pTX_Mao2006_molality = X_
        Exit Function
     End If
+    X_H2O = X_(Brine.nX) ' to be used in solubility_N2_pTX_Mao2006
     
     Dim molalities
     molalities = ToDouble(massFractionsToMolalities(X_, Brine.MM_vec))
     If VarType(molalities) = vbString Then
-        solubility_N2_pTX_Mao2006 = molalities
+        solubility_N2_pTX_Mao2006_molality = molalities
         Exit Function
     End If
     Dim m_Cl As Double, m_Na As Double, m_K As Double, m_Ca As Double, m_Mg As Double, m_SO4 As Double
@@ -282,13 +283,13 @@ End Function
     Dim p_H2O, X_NaCl As Double
     p_H2O = IAPWS.Waterpsat_T(T)
     If VarType(p_H2O) = vbString Then 'if error
-        solubility_N2_pTX_Mao2006 = p_H2O & "(solubility_N2_pTX_Mao2006)"
+        solubility_N2_pTX_Mao2006_molality = p_H2O & "(solubility_N2_pTX_Mao2006)"
         Exit Function
     End If
     X_NaCl = molalities(i_NaCl) * M_H2O 'mole fraction of NaCl in liquid phase
     Dim rho_l_H2O: rho_l_H2O = IAPWS.Density_pT(p, T)
     If VarType(rho_l_H2O) = vbString Then 'if error
-        solubility_N2_pTX_Mao2006 = rho_l_H2O & "(solubility_N2_pTX_Mao2006)"
+        solubility_N2_pTX_Mao2006_molality = rho_l_H2O & "(solubility_N2_pTX_Mao2006)"
         Exit Function
     End If
     Dim v_l_H2O As Double 'MolarVolume
@@ -302,7 +303,7 @@ End Function
     Dim xi_N2_NaCl As Double
    
     If Not p_gas > 0 Then
-      solubility_N2_pTX_Mao2006 = 0
+      solubility_N2_pTX_Mao2006_molality = 0
     Else
         Dim msg As String
      If outOfRangeMode > 0 Then
@@ -319,7 +320,7 @@ End Function
             If outOfRangeMode = 1 Then
                 Debug.Print msg
             ElseIf outOfRangeMode = 2 Then
-                solubility_N2_pTX_Mao2006 = msg
+                solubility_N2_pTX_Mao2006_molality = msg
                 Exit Function
             End If
         End If
@@ -332,35 +333,43 @@ End Function
       
       phi_N2 = fugacity_N2_Duan2006(p_gas + p_H2O, T)
       If VarType(phi_N2) = vbString Then
-        solubility_N2_pTX_Mao2006 = phi_N2
+        solubility_N2_pTX_Mao2006_molality = phi_N2
         Exit Function
       End If
       
       mu_l0_N2_RT = Par_N2_Mao2006(p_gas + p_H2O, T, mu_l0_N2_RT_c)
       If VarType(mu_l0_N2_RT) = vbString Then
-        solubility_N2_pTX_Mao2006 = mu_l0_N2_RT
+        solubility_N2_pTX_Mao2006_molality = mu_l0_N2_RT
         Exit Function
       End If
       
       lambda_N2_Na = Par_N2_Mao2006(p_gas + p_H2O, T, lambda_N2_Na_c)
       If VarType(lambda_N2_Na) = vbString Then
-        solubility_N2_pTX_Mao2006 = lambda_N2_Na
+        solubility_N2_pTX_Mao2006_molality = lambda_N2_Na
         Exit Function
       End If
       
       xi_N2_NaCl = Par_N2_Mao2006(p_gas + p_H2O, T, xi_N2_NaCl_c)
       If VarType(xi_N2_NaCl) = vbString Then
-        solubility_N2_pTX_Mao2006 = xi_N2_NaCl
+        solubility_N2_pTX_Mao2006_molality = xi_N2_NaCl
         Exit Function
       End If
 
     'equ. 9
-      Dim solu As Double ' mol/kg_H2O
-      solu = p_gas / 10 ^ 5 * phi_N2 * Exp(-mu_l0_N2_RT - 2 * lambda_N2_Na * (m_Na + m_K + 2 * m_Ca + 2 * m_Mg) - xi_N2_NaCl * (m_Cl + 2 * m_SO4) * (m_Na + m_K + 2 * m_Ca + 2 * m_Mg) - 4 * 0.0371 * m_SO4)
-      solubility_N2_pTX_Mao2006 = solu * M_N2 * X_(Brine.nX) 'molality->mass fraction
+      solubility_N2_pTX_Mao2006_molality = p_gas / 10 ^ 5 * phi_N2 * Exp(-mu_l0_N2_RT - 2 * lambda_N2_Na * (m_Na + m_K + 2 * m_Ca + 2 * m_Mg) - xi_N2_NaCl * (m_Cl + 2 * m_SO4) * (m_Na + m_K + 2 * m_Ca + 2 * m_Mg) - 4 * 0.0371 * m_SO4)
     End If
 End Function
-
+Function solubility_N2_pTX_Mao2006(p As Double, T As Double, Xin, p_gas) 'solubility calculation of N2 in seawater Mao&Duan(2006)
+    Dim solu ' mol/kg_H2O
+    Dim X_H2O As Double
+    solu = solubility_N2_pTX_Mao2006_molality(p, T, Xin, p_gas, X_H2O)
+    If VarType(solu) = vbString Then
+      solubility_N2_pTX_Mao2006 = solu
+      Exit Function
+    End If
+    solubility_N2_pTX_Mao2006 = solu * M_N2 * X_H2O 'molality->mass fraction
+End Function
+ 
 Function fugacity_N2_Duan2006(p As Double, T As Double)  'Zero search with EOS from Duan2006
 'doi:10.1016/j.?uid.2006.07.020
 'Shide Mao, Zhenhao Duan:A thermodynamic model for calculating nitrogen solubility, gas phase composition and density of the N2?H2O?NaCl system
@@ -555,13 +564,17 @@ Function Par_CH4_Duan2006(p As Double, T As Double, C) 'Duan,Sun(2003)
     Par_CH4_Duan2006 = C(1) + C(2) * T + C(3) / T + C(4) * T ^ 2 + C(5) / T ^ 2 + C(6) * p_bar + C(7) * p_bar * T + C(8) * p_bar / T + C(9) * p_bar / T ^ 2 + C(10) * p_bar ^ 2 * T
 End Function
 
-Private Function p_sat_H2O_Duan2003(T) 'calculates saturation pressure of water, with the equation given in Duan2003
+Function p_sat_H2O_Duan2003(T) 'calculates saturation pressure of water, with the equation given in Duan2003
 'An improved model calculating CO2 solubility in pure water and aqueous NaCl solutions from 273 to 533 K and from 0 to 2000 bar
     Dim C, P_c As Double, T_C As Double, T_ As Double
+    T_C = 647.29
+    If T > T_C Then
+        p_sat_H2O_Duan2003 = "# T=" & T - 273.15 & "°C above critical temperature (p_sat_H2O_Duan2003)"
+        Exit Function
+    End If
+    T_ = (T - T_C) / T_C
     C = Array(-38.640844, 5.894842, 59.876516, 26.654627, 10.637097)
     P_c = 220.85 * 10 ^ 5
-    T_C = 647.29
-    T_ = (T - T_C) / T_C
     
     p_sat_H2O_Duan2003 = (P_c * T / T_C) * (1 + C(1) * (-T_) ^ 1.9 + C(2) * T_ + C(3) * T_ ^ 2 + C(4) * T_ ^ 3 + C(5) * T_ ^ 4)
 End Function
