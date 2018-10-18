@@ -1,0 +1,16 @@
+﻿modelName = "BrineProp.Examples.SolubilityValidation"
+translateModel(modelName);
+p_vec = {1,10,50,100,150,200,250,300,350,400,450,500,550,600};
+T_vec = {273.15,303.15,333.15,363.15,393.15,423.15,453.15,483.15,513.15,543.15,573.15};
+data = fill(0,size(p_vec,1),size(T_vec,1));
+for i in 1:size(p_vec,1) loop
+  p = p_vec[i]; //set pressure in model
+  for j in  loop
+    T = T_vec[j]; //set temperature in model    
+    simulateModel(modelName, method="dassl", resultFile="BrineProps2PhaseMinimal");
+    data(i,j) = signalOperatorValue(modelName+"[end].solu", SignalOperator.Max,stopTime=stopTime);
+  end for;
+end for;
+
+DataFiles.writeCSVmatrix("SolubilityValidation.csv", cat(1,"T",String(p_vec)), cat(2,T_vec,data), ";");
+system(csvFileName); //Open in excel
