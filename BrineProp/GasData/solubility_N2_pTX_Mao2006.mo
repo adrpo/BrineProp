@@ -1,7 +1,7 @@
 within BrineProp.GasData;
 function solubility_N2_pTX_Mao2006 "solubility calculation of N2 in seawater Mao&Duan(2006)
   Shide Mao and Zhenhao Duan (2006) A thermodynamic model for calculating nitrogen solubility, gas phase composition and density of the H2O-N2-NaCl system. Fluid Phase Equilibria, 248 (2): 103-114
-  273-400 K, 1-600 bar and 0-6 mol/kg
+  273-400 K (590 K for pure water), 1-600 bar and 0-6 mol/kg
   http://dx.doi.org/10.1016/j.fluid.2006.07.020
   http://www.geochem-model.org/wp-content/uploads/2009/09/46-FPE_248_103.pdf"
 //redeclare function extends solubility_N2_pTX
@@ -88,7 +88,7 @@ algorithm
   else
 
     if AssertLevel>0 then
-     assert(ignoreTlimit or ignoreLimitN2_T or (273<=T and T<=400), "Temperature out of validity range: T=" + String(T - 273.15) + " C.\nTo ignore set ignoreLimitN2_T=true",aLevel);
+     assert(ignoreTlimit or ignoreLimitN2_T or (273<=T and T<=400) or (not max(X[1:end-1])>0 and 273<=T and T<=590), "Temperature out of validity range: T=" + String(T - 273.15) + " C.\nTo ignore set ignoreLimitN2_T=true",aLevel);
      assert(ignoreLimitN2_p or (1e5<=p and p<=600e5),"Pressure out of validity range: p=" + String(p/1e5) + " bar.\nTo ignore set ignoreLimitN2_p=true",aLevel);
      assert(ignoreLimitN2_b or molalities[iNaCl]<=6,"Molality out of validity range: mola[NaCl]=" + String(molalities[iNaCl]) + " mol/kg.\nTo ignore set ignoreLimitN2_b=true",aLevel);
      assert(m_Sr==0 or ignoreLimitSalt_soluN2[iSrCl2], "SrCl2 content is not considered here.",aLevel);
