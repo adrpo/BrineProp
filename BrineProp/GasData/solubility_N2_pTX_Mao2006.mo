@@ -70,8 +70,6 @@ protected
   SI.MolarVolume v_l_H2O=M_H2O/Modelica.Media.Water.WaterIF97_pT.density_pT(p,T);
   Real phi_H2O = fugacity_H2O_Duan2006N2(p,T);
   
-  final constant Real R(final unit="bar.cm3/(mol.K)") = 83.14472
-    "Molar gas constant";
   Real y_H20 = (1-2*X_NaCl) * p_H2O/(phi_H2O*p) * exp(v_l_H2O*(p-p_H2O)/(Modelica.Constants.R*T)) 
     "equ. 4 (gamma_H2O=1";
   Real y_N2 = 1-y_H20 "mole fraction of CO2 in vapor phase";*/
@@ -82,8 +80,8 @@ algorithm
   if iNaCl<>1 or debugmode then
       print("Running solubility_N2_pTX_Duan2006("+String(p/1e5)+" bar,"+String(T-273.15)+" C, ignoreTlimit="+String(ignoreTlimit)+", X="+Modelica.Math.Matrices.toString(transpose([X]))+")");
   end if;
-// print("mola_N2("+String(p_gas)+","+String(T-273.16)+") (solubility_N2_pTX_Duan2006)");
-  if not p_gas>0 then
+
+    if not p_gas>0 then
     X_gas:=0;
   else
 

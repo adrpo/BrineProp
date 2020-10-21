@@ -1,5 +1,5 @@
 within BrineProp.GasData;
-function solubility_res
+function solubility_res "returns residual, used in inversion of solubility"
 extends Modelica.Math.Nonlinear.Interfaces.partialScalarFunction;
   input SI.Pressure p;
   input SI.Temp_K T;
