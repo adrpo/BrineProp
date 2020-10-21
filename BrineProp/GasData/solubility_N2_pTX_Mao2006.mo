@@ -86,10 +86,10 @@ algorithm
   else
 
     if AssertLevel>0 then
-     assert(ignoreTlimit or ignoreLimitN2_T or (273<=T and T<=400) or (not max(X[1:end-1])>0 and 273<=T and T<=590), "Temperature out of validity range: T=" + String(T - 273.15) + " C.\nTo ignore set ignoreLimitN2_T=true",aLevel);
-     assert(ignoreLimitN2_p or (1e5<=p and p<=600e5),"Pressure out of validity range: p=" + String(p/1e5) + " bar.\nTo ignore set ignoreLimitN2_p=true",aLevel);
-     assert(ignoreLimitN2_b or molalities[iNaCl]<=6,"Molality out of validity range: mola[NaCl]=" + String(molalities[iNaCl]) + " mol/kg.\nTo ignore set ignoreLimitN2_b=true",aLevel);
-     assert(m_Sr==0 or ignoreLimitSalt_soluN2[iSrCl2], "SrCl2 content is not considered here.",aLevel);
+     assert(ignoreTlimit or ignoreLimitN2_T or (273<=T and T<=400) or (not max(X[1:end-1])>0 and 273<=T and T<=590), "Temperature out of validity range: T=" + String(T - 273.15) + " C.\nTo ignore set ignoreLimitN2_T=true ("+getInstanceName()+")",aLevel);
+     assert(ignoreLimitN2_p or (1e5<=p and p<=600e5),"Pressure out of validity range: p=" + String(p/1e5) + " bar.\nTo ignore set ignoreLimitN2_p=true ("+getInstanceName()+")",aLevel);
+     assert(ignoreLimitN2_b or molalities[iNaCl]<=6,"Molality out of validity range: mola[NaCl]=" + String(molalities[iNaCl]) + " mol/kg.\nTo ignore set ignoreLimitN2_b=true ("+getInstanceName()+")",aLevel);
+     assert(m_Sr==0 or ignoreLimitSalt_soluN2[iSrCl2], "SrCl2 content is not considered here. ("+getInstanceName()+")",aLevel);
     end if;
 
     phi_N2 :=fugacity_N2_Mao2006(p_gas + p_H2O, T);
