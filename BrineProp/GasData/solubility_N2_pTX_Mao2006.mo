@@ -70,8 +70,6 @@ protected
   SI.MolarVolume v_l_H2O=M_H2O/Modelica.Media.Water.WaterIF97_pT.density_pT(p,T);
   Real phi_H2O = fugacity_H2O_Duan2006N2(p,T);
   
-  final constant Real R(final unit="bar.cm3/(mol.K)") = 83.14472
-    "Molar gas constant";
   Real y_H20 = (1-2*X_NaCl) * p_H2O/(phi_H2O*p) * exp(v_l_H2O*(p-p_H2O)/(Modelica.Constants.R*T)) 
     "equ. 4 (gamma_H2O=1";
   Real y_N2 = 1-y_H20 "mole fraction of CO2 in vapor phase";*/
@@ -82,16 +80,16 @@ algorithm
   if iNaCl<>1 or debugmode then
       print("Running solubility_N2_pTX_Duan2006("+String(p/1e5)+" bar,"+String(T-273.15)+" C, ignoreTlimit="+String(ignoreTlimit)+", X="+Modelica.Math.Matrices.toString(transpose([X]))+")");
   end if;
-// print("mola_N2("+String(p_gas)+","+String(T-273.16)+") (solubility_N2_pTX_Duan2006)");
-  if not p_gas>0 then
+
+    if not p_gas>0 then
     X_gas:=0;
   else
 
     if AssertLevel>0 then
-     assert(ignoreTlimit or ignoreLimitN2_T or (273<=T and T<=400) or (not max(X[1:end-1])>0 and 273<=T and T<=590), "Temperature out of validity range: T=" + String(T - 273.15) + " C.\nTo ignore set ignoreLimitN2_T=true",aLevel);
-     assert(ignoreLimitN2_p or (1e5<=p and p<=600e5),"Pressure out of validity range: p=" + String(p/1e5) + " bar.\nTo ignore set ignoreLimitN2_p=true",aLevel);
-     assert(ignoreLimitN2_b or molalities[iNaCl]<=6,"Molality out of validity range: mola[NaCl]=" + String(molalities[iNaCl]) + " mol/kg.\nTo ignore set ignoreLimitN2_b=true",aLevel);
-     assert(m_Sr==0 or ignoreLimitSalt_soluN2[iSrCl2], "SrCl2 content is not considered here.",aLevel);
+     assert(ignoreTlimit or ignoreLimitN2_T or (273<=T and T<=400) or (not max(X[1:end-1])>0 and 273<=T and T<=590), "Temperature out of validity range: T=" + String(T - 273.15) + " C.\nTo ignore set ignoreLimitN2_T=true ("+getInstanceName()+")",aLevel);
+     assert(ignoreLimitN2_p or (1e5<=p and p<=600e5),"Pressure out of validity range: p=" + String(p/1e5) + " bar.\nTo ignore set ignoreLimitN2_p=true ("+getInstanceName()+")",aLevel);
+     assert(ignoreLimitN2_b or molalities[iNaCl]<=6,"Molality out of validity range: mola[NaCl]=" + String(molalities[iNaCl]) + " mol/kg.\nTo ignore set ignoreLimitN2_b=true ("+getInstanceName()+")",aLevel);
+     assert(m_Sr==0 or ignoreLimitSalt_soluN2[iSrCl2], "SrCl2 content is not considered here. ("+getInstanceName()+")",aLevel);
     end if;
 
     phi_N2 :=fugacity_N2_Mao2006(p_gas + p_H2O, T);
