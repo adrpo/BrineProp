@@ -143,14 +143,19 @@ Function ToDouble(vec, Optional ByRef n As Integer, Optional reduce = False) 'Ty
         vec = CStr(vec)
     End If
         
+    If IsEmpty(vec) Then
+        ToDouble = vec
+        Exit Function
+    End If
+        
     Dim offset As Integer
     n = Length(vec, offset)
     Dim vt As Integer
     vt = VarType(vec)
     If vt < 12 And Not vt = 9 Then  ' if scalar
-        ToDouble = vec
-    ElseIf n = 1 And reduce Then
-        ToDouble = vec(1) ' reduce 1-element-array to scalar
+        ToDouble = CDbl(vec)
+    ElseIf n = 1 And reduce Then ' if 1-element-array
+        ToDouble = CDbl(vec(1))  ' reduce 1-element-array to scalar
     Else
         Dim dbl() As Double
         If n = 0 Then
