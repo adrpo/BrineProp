@@ -175,7 +175,7 @@ Private Function solubilities_pTX(p As Double, T As Double, X_l, X_, p_gas)
             solu(1) = solubilities_pTX
         End If
     Else
-        solu(1) = -1
+        solu(1) = 0
     End If
     
     If X_(nX_salt + 2) > 0 Then
@@ -186,7 +186,7 @@ Private Function solubilities_pTX(p As Double, T As Double, X_l, X_, p_gas)
             solu(2) = solubilities_pTX
         End If
     Else
-        solu(2) = -1
+        solu(2) = 0
     End If
     
     If X_(nX_salt + 3) > 0 Then
@@ -197,7 +197,7 @@ Private Function solubilities_pTX(p As Double, T As Double, X_l, X_, p_gas)
             solu(3) = solubilities_pTX
         End If
    Else
-        solu(3) = -1
+        solu(3) = 0
     End If
     solubilities_pTX = solu
 End Function

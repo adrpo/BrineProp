@@ -111,7 +111,23 @@ Function solubility_CO2_pTX_Duan2006(p As Double, T As Double, Xin, p_gas) 'CO2 
 '' Zhenhao Duan et al. (2006) An improved model for the calculation of CO2 solubility in aqueous
 '' solutions containing Na+,K+,Ca2+,Mg2+,Cl-, and SO4_2-. Marine Chemistry 98131-139.
 '' fugacity from doi10.1016/j.marchem.2005.09.001
-
+    
+    If Not p_gas > 0 Then
+       solubility_CO2_pTX_Duan2006 = 0
+       Exit Function
+    ElseIf p_gas < 0 Then
+       solubility_CO2_pTX_Duan2006 = "#p_gas negative! (solubility_CO2_pTX_Duan2006)"
+       Exit Function
+    ElseIf p_gas > p Then
+       solubility_CO2_pTX_Duan2006 = "#p_gas > p ! (solubility_CO2_pTX_Duan2006)"
+       Exit Function
+    End If
+    
+    If p < 0 Then
+       solubility_CO2_pTX_Duan2006 = "#p negative! (solubility_CO2_pTX_Duan2006)"
+       Exit Function
+    End If
+    
     Dim solu As Double 'CO2 solubility in mol_CO2/kg H2O
     Dim mu_l0_CO2_RT_c, lambda_CO2_Na_c, zeta_CO2_NaCl_c
     mu_l0_CO2_RT_c = Array(28.9447706, -0.0354581768, -4770.67077, 0.0000102782768, 33.8126098, 0.0090403714, -0.00114934031, -0.307405726, -0.0907301486, 0.000932713393, 0)
@@ -360,6 +376,22 @@ End Function
     End If
 End Function
 Function solubility_N2_pTX_Mao2006(p As Double, T As Double, Xin, p_gas) 'solubility calculation of N2 in seawater Mao&Duan(2006)
+    If Not p_gas > 0 Then
+       solubility_N2_pTX_Mao2006 = 0
+       Exit Function
+    ElseIf p_gas < 0 Then
+       solubility_N2_pTX_Mao2006 = "#p_gas negative! (solubility_N2_pTX_Mao2006)"
+       Exit Function
+    ElseIf p_gas > p Then
+       solubility_N2_pTX_Mao2006 = "#p_gas > p ! (solubility_N2_pTX_Mao2006)"
+       Exit Function
+    End If
+    
+    If p < 0 Then
+       solubility_N2_pTX_Mao2006 = "#p negative! (solubility_N2_pTX_Mao2006)"
+       Exit Function
+    End If
+    
     Dim solu ' mol/kg_H2O
     Dim X_H2O As Double
     solu = solubility_N2_pTX_Mao2006_molality(p, T, Xin, p_gas, X_H2O)
@@ -444,6 +476,24 @@ Function solubility_CH4_pTX_Duan2006(p As Double, T As Double, Xin, p_gas) 'Duan
 ' http://dx.doi.org/10.1016/j.gca.2006.03.018TODO Umrechnung andere Salz in NaCl"
 '  output SI.MassFraction c_gas "gas concentration in kg_gas/kg_H2O"
 
+    
+    If Not p_gas > 0 Then
+       solubility_CH4_pTX_Duan2006 = 0
+       Exit Function
+    ElseIf p_gas < 0 Then
+       solubility_CH4_pTX_Duan2006 = "#p_gas negative! (solubility_CH4_pTX_Duan2006)"
+       Exit Function
+    ElseIf p_gas > p Then
+       solubility_CH4_pTX_Duan2006 = "#p_gas > p ! (solubility_CH4_pTX_Duan2006)"
+       Exit Function
+    End If
+    
+    If p < 0 Then
+       solubility_CH4_pTX_Duan2006 = "#p negative! (solubility_CH4_pTX_Duan2006)"
+       Exit Function
+    End If
+
+    
     Dim mu_l0_CH4_RT_c, lambda_CH4_Na_c, xi_CH4_NaCl_c
     mu_l0_CH4_RT_c = Array(8.3143711, -0.00072772168, 2148.9858, -0.000014019672, -667434.49, 0.007698589, -0.0000050253331, -3.0092013, 484.68502, 0)
     lambda_CH4_Na_c = Array(-0.81222036, 0.0010635172, 188.94036, 0, 0, 0.000044105635, 0, 0, 0, -4.6797718E-11)
