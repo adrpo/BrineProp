@@ -162,23 +162,12 @@ Function solubility_CO2_pTX_Duan2006(p As Double, T As Double, Xin, p_gas) 'CO2 
     m_K = molalities(i_KCl)
     m_Ca = molalities(i_CaCl2)
     
-    If Not p_gas > 0 Then
-       solubility_CO2_pTX_Duan2006 = "#p_gas negative! (solubility_CO2_pTX_Duan2006)"
-    ElseIf Not p > 0 Then
-       solubility_CO2_pTX_Duan2006 = "#p negative! (solubility_CO2_pTX_Duan2006)"
-    Else
-        'equ. 9
-        phi = fugacity_CO2_Duan2006(p_gas + p_H2O, T)
-        If VarType(phi) = vbString Then 'if error
-            solubility_CO2_pTX_Duan2006 = phi & "(solubility_CO2_pTX_Duan2006)"
-            Exit Function
-        End If
-        mu_l0_CO2_RT = Par_CO2_Duan2003(p_gas + p_H2O, T, mu_l0_CO2_RT_c)
-        lambda_CO2_Na = Par_CO2_Duan2003(p_gas + p_H2O, T, lambda_CO2_Na_c)
-        zeta_CO2_NaCl = Par_CO2_Duan2003(p_gas + p_H2O, T, zeta_CO2_NaCl_c)
-       
-        solu = phi * p_gas / 10 ^ 5 * Exp(-mu_l0_CO2_RT - 2 * lambda_CO2_Na * (m_Na + m_K + 2 * m_Ca + 2 * m_Mg) - zeta_CO2_NaCl * m_Cl * (m_Na + m_K + m_Mg + m_Ca) + 0.07 * m_SO4 * 0)
-        solubility_CO2_pTX_Duan2006 = solu * M_CO2 * X_(Brine.nX) 'molality->mass fraction
+ 
+    'equ. 9
+    phi = fugacity_CO2_Duan2006(p_gas + p_H2O, T)
+    If VarType(phi) = vbString Then 'if error
+        solubility_CO2_pTX_Duan2006 = phi & "(solubility_CO2_pTX_Duan2006)"
+        Exit Function
     End If
 End Function
 
@@ -514,9 +503,9 @@ Function solubility_CH4_pTX_Duan2006(p As Double, T As Double, Xin, p_gas) 'Duan
     End If
     Dim phi_CH4 As Double, mu_l0_CH4_RT As Double, lambda_CH4_Na As Double, xi_CH4_NaCl As Double
     
-    If Not p_gas > 0 Then
-        solubility_CH4_pTX_Duan2006 = 0
-    Else
+'    If Not p_gas > 0 Then
+'        solubility_CH4_pTX_Duan2006 = 0
+'    Else
         Dim msg As String
         If outOfRangeMode > 0 Then
             If 273 > T Or T > 273 + 250 Then
