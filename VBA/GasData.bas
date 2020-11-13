@@ -128,6 +128,7 @@ Function solubility_CO2_pTX_Duan2006(p As Double, T As Double, Xin, p_gas) 'CO2 
        Exit Function
     End If
     
+ 
     Dim solu As Double 'CO2 solubility in mol_CO2/kg H2O
     Dim mu_l0_CO2_RT_c, lambda_CO2_Na_c, zeta_CO2_NaCl_c
     mu_l0_CO2_RT_c = Array(28.9447706, -0.0354581768, -4770.67077, 0.0000102782768, 33.8126098, 0.0090403714, -0.00114934031, -0.307405726, -0.0907301486, 0.000932713393, 0)
@@ -146,16 +147,16 @@ Function solubility_CO2_pTX_Duan2006(p As Double, T As Double, Xin, p_gas) 'CO2 
     Dim lambda_CO2_Na As Double
     Dim zeta_CO2_NaCl As Double
 
-    Dim X_
-    X_ = CheckMassVector(Xin, Brine.nX)
-    If VarType(X_) = vbString Then
-       solubility_CO2_pTX_Duan2006 = X_
+    Dim X
+    X = CheckMassVector(Xin, Brine.nX)
+    If VarType(X) = vbString Then
+       solubility_CO2_pTX_Duan2006 = X
        Exit Function
     End If
  
  'constant
     Dim molalities '() As Double ReDim molalities(nX)
-    molalities = massFractionsToMolalities(X_, Brine.MM_vec)
+    molalities = massFractionsToMolalities(X, Brine.MM_vec)
     Dim m_Cl As Double, m_Na As Double, m_K As Double, m_Ca As Double, m_Mg As Double, m_SO4 As Double
     m_Cl = molalities(i_NaCl) + molalities(i_KCl) + 2 * molalities(i_CaCl2)
     m_Na = molalities(i_NaCl)
@@ -169,6 +170,13 @@ Function solubility_CO2_pTX_Duan2006(p As Double, T As Double, Xin, p_gas) 'CO2 
         solubility_CO2_pTX_Duan2006 = phi & "(solubility_CO2_pTX_Duan2006)"
         Exit Function
     End If
+    mu_l0_CO2_RT = Par_CO2_Duan2003(p_gas + p_H2O, T, mu_l0_CO2_RT_c)
+    lambda_CO2_Na = Par_CO2_Duan2003(p_gas + p_H2O, T, lambda_CO2_Na_c)
+    zeta_CO2_NaCl = Par_CO2_Duan2003(p_gas + p_H2O, T, zeta_CO2_NaCl_c)
+   
+    solu = phi * p_gas / 10 ^ 5 * Exp(-mu_l0_CO2_RT - 2 * lambda_CO2_Na * (m_Na + m_K + 2 * m_Ca + 2 * m_Mg) - zeta_CO2_NaCl * m_Cl * (m_Na + m_K + m_Mg + m_Ca) + 0.07 * m_SO4 * 0)
+    solubility_CO2_pTX_Duan2006 = solu * M_CO2 * X(Brine.nX) 'molality->mass fraction
+    
 End Function
 
 
@@ -264,15 +272,15 @@ End Function
     ' http://www.geochem-model.org/wp-content/uploads/2009/09/46-FPE_248_103.pdf
     
     'Dim M_H2O As Double:M_H2O = H2O.MM
-    Dim X_: X_ = CheckMassVector(Xin, Brine.nX)
-    If VarType(X_) = vbString Then
-       solubility_N2_pTX_Mao2006_molality = X_
+    Dim X: X = CheckMassVector(Xin, Brine.nX)
+    If VarType(X) = vbString Then
+       solubility_N2_pTX_Mao2006_molality = X
        Exit Function
     End If
-    X_H2O = X_(Brine.nX) ' to be used in solubility_N2_pTX_Mao2006
+    X_H2O = X(Brine.nX) ' to be used in solubility_N2_pTX_Mao2006
     
     Dim molalities
-    molalities = ToDouble(massFractionsToMolalities(X_, Brine.MM_vec))
+    molalities = ToDouble(massFractionsToMolalities(X, Brine.MM_vec))
     If VarType(molalities) = vbString Then
         solubility_N2_pTX_Mao2006_molality = molalities
         Exit Function
@@ -525,15 +533,15 @@ Function solubility_CH4_pTX_Duan2006(p As Double, T As Double, Xin, p_gas) 'Duan
             End If
         End If
         
-        Dim X_
-        X_ = CheckMassVector(Xin, Brine.nX)
-        If VarType(X_) = vbString Then
-            solubility_CH4_pTX_Duan2006 = X_
+        Dim X
+        X = CheckMassVector(Xin, Brine.nX)
+        If VarType(X) = vbString Then
+            solubility_CH4_pTX_Duan2006 = X
             Exit Function
         End If
 
         Dim molalities '(nX)
-        molalities = massFractionsToMolalities(X_, Brine.MM_vec)
+        molalities = massFractionsToMolalities(X, Brine.MM_vec)
         Dim m_Cl As Double, m_Na As Double, m_K As Double, m_Ca As Double, m_Mg As Double, m_SO4 As Double                 'Molality
         m_Cl = molalities(i_NaCl) + molalities(i_KCl) + 2 * molalities(i_CaCl2)  '+ 2 * molalities(i_MgCl2)
         m_Na = molalities(i_NaCl)
@@ -551,8 +559,8 @@ Function solubility_CH4_pTX_Duan2006(p As Double, T As Double, Xin, p_gas) 'Duan
         Dim solu As Double
         solu = p_gas / 10 ^ 5 * phi_CH4 * Exp(-mu_l0_CH4_RT - 2 * lambda_CH4_Na * (m_Na + m_K + 2 * m_Ca + 2 * m_Mg) - xi_CH4_NaCl * (m_Na + m_K + 2 * m_Ca + 2 * m_Mg) * (m_Cl + 2 * m_SO4) - 4 * 0.0332 * m_SO4)
         
-        solubility_CH4_pTX_Duan2006 = solu * M_CH4 * X_(Brine.nX) 'molality->mass fraction
-    End If
+        solubility_CH4_pTX_Duan2006 = solu * M_CH4 * X(Brine.nX) 'molality->mass fraction
+'    End If
 End Function
 
   
