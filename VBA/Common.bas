@@ -58,7 +58,8 @@ Function String2Vector(Xi_string, Optional ByRef n As Integer) 'As Double() Conv
     End If
     
     'Change decimal separator
-    If Mid(CCur(1.1), 2, 1) = "," Then ' If Excel is set to dot as decimal separator, but system is not
+    ' If Mid(CCur(1.1), 2, 1) = "," Then ' If Excel is set to dot as decimal separator, but system is not
+    If Application.DecimalSeparator = "," Then
         Xi_str = Replace(Xi_str, ".", ",")
     Else
         Xi_str = Replace(Xi_str, ",", ".")
