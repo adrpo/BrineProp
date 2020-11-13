@@ -26,6 +26,9 @@ Public Const i_KCl = 2 'reference number
 Public Const i_CaCl2 = 3 'reference number
 'Public Const i_MgCl2 = 4 'reference number
 'Public Const i_SrCl2 = 5 'reference number
+Public Const i_CO2 = 4 'reference number
+Public Const i_N2 = 5 'reference number
+Public Const i_CH4 = 6 'reference number
 
 Function saturationPressure_H2O(p As Double, T As Double, Xin, Optional ByRef p_H2O) 'brine water vapour pressure
     Dim ionMoleFractions '(nX) As Double
@@ -167,7 +170,7 @@ Private Function solubilities_pTX(p As Double, T As Double, X_l, X_, p_gas)
     End If
     Dim solu() As Double
     ReDim solu(1 To nX_gas)
-    If X_(nX_salt + 1) > 0 Then
+    If X(i_CO2) > 0 Then
         solubilities_pTX = solubility_CO2_pTX_Duan2006(p, T, X_l, p_gas(1)) 'aus Partial_Gas_Data, mol/kg_H2O -> kg_CO2/kg_H2O
         If VarType(solubilities_pTX) = vbString Then
             Exit Function
@@ -178,7 +181,7 @@ Private Function solubilities_pTX(p As Double, T As Double, X_l, X_, p_gas)
         solu(1) = 0
     End If
     
-    If X_(nX_salt + 2) > 0 Then
+    If X(i_N2) > 0 Then
         solubilities_pTX = solubility_N2_pTX_Mao2006(p, T, X_l, p_gas(2)) 'aus Partial_Gas_Data, mol/kg_H2O -> kg_N2/kg_H2O
         If VarType(solubilities_pTX) = vbString Then
             Exit Function
@@ -189,7 +192,6 @@ Private Function solubilities_pTX(p As Double, T As Double, X_l, X_, p_gas)
         solu(2) = 0
     End If
     
-    If X_(nX_salt + 3) > 0 Then
          solubilities_pTX = solubility_CH4_pTX_Duan2006(p, T, X_l, p_gas(3)) 'aus Partial_Gas_Data, mol/kg_H2O -> kg_CH4/kg_H2O
          If VarType(solubilities_pTX) = vbString Then
             Exit Function
