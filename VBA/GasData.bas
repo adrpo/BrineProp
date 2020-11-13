@@ -6,7 +6,7 @@ Attribute VB_Name = "GasData"
 
 
 ' by Henning Francke francke@gfz-potsdam.de
-' 2014 GFZ Potsdam
+' 2020 GFZ Potsdam
 
 Option Explicit
 Option Base 1
