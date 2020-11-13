@@ -96,7 +96,7 @@ Function GetValueFromJSON(jsonText As String, PropertyName As String) 'Parse JSO
 End Function
 
 Function SubArray(sourceArray, Indexfrom As Integer, IndexTo As Integer)
-    Dim B() As Double, i As Integer
+    Dim B(), i As Integer
     Dim n As Integer
     
     n = Length(sourceArray)
@@ -153,11 +153,21 @@ Function ToDouble(vec, Optional ByRef n As Integer, Optional reduce = False) 'Ty
     n = Length(vec, offset)
     Dim vt As Integer
     vt = VarType(vec)
-    If vt < 12 And Not vt = 9 Then  ' if scalar
-        ToDouble = CDbl(vec)
+    If IsEmpty(vec) Then
+        ToDouble = 0
+    ElseIf vt < 12 And Not vt = 9 Then  ' if scalar
+        If Application.DecimalSeparator = "," Then
+            ToDouble = CDbl(Replace(vec, ".", ","))
+        Else
+            ToDouble = CDbl(vec)
+        End If
     ElseIf n = 1 And reduce Then ' if 1-element-array
-        ToDouble = CDbl(vec(1))  ' reduce 1-element-array to scalar
-    Else
+        If Application.DecimalSeparator = "," Then
+            ToDouble = CDbl(Replace(vec(1), ".", ","))
+        Else
+            ToDouble = CDbl(vec(1))  ' reduce 1-element-array to scalar
+        End If
+    Else ' must be an array then
         Dim dbl() As Double
         If n = 0 Then
             Exit Function
@@ -169,7 +179,13 @@ Function ToDouble(vec, Optional ByRef n As Integer, Optional reduce = False) 'Ty
 'Is passed array 1D or 2D (when given anot as String or Range, but as {1,2,3})
 On Error GoTo TwoD: 'coz there is no function to query the number of dimensions in VBA (https://stackoverflow.com/questions/6901991/how-to-return-the-number-of-dimensions-of-a-variant-variable-passed-to-it-in-v)
         For i = 1 To n
-            dbl(i) = vec(i + offset) ' Try 1D Array
+            If IsEmpty(vec(i + offset)) Then
+                dbl(i) = 0
+            ElseIf Application.DecimalSeparator = "," Then
+                dbl(i) = CDbl(Replace(vec(i + offset), ".", ","))
+            Else
+                dbl(i) = vec(i + offset) ' Try 1D Array
+            End If
         Next i
         ToDouble = dbl
     End If
@@ -439,15 +455,17 @@ Function CheckMassVector(X, nX_must) As Variant
             CheckMassVector = Xout
             Exit Function
         End If
-        s2v = True 'stupid flag to avoid having to recheck or copy Xout=X
+        's2v = True 'stupid flag to avoid having to recheck or copy Xout=X
     Else
-        nX = Length(X)
+        'nX = Length(X)
+        Xout = ToDouble(X, nX) 'in case X is an array of strings
         ' Xout = X Doesn't work
-        s2v = False
+        's2v = False
     End If
     
     If nX = nX_must - 1 Then 'without water
-        Xout = FullMassVector(IIf(s2v, Xout, X), nX) 'make sure first index is 1
+        'Xout = FullMassVector(IIf(s2v, Xout, X), nX) 'make sure first index is 1
+        Xout = FullMassVector(Xout, nX) 'make sure first index is 1
         'If VarType(Xout) = vbString Then
         '    CheckMassVector = Xout
         'Else
@@ -458,11 +476,13 @@ Function CheckMassVector(X, nX_must) As Variant
         End If
 '    ElseIf nX = nX_salt + 1 Then 'Full mass vector with water
     ElseIf nX = nX_must Then 'Full mass vector with water
-        'If Abs(Application.Sum(IIf(s2v, Xout, X)) - 1) > 10 ^ -6 Then
-        If Abs(SumItUp(IIf(s2v, Xout, X)) - 1) > 10 ^ -6 Then
+        'If Abs(Application.Sum(IIf(s2v, Xout, X)) - 1) > 10 ^ -6 Then 'works only for ranges
+'        If Abs(SumItUp(IIf(s2v, Xout, X)) - 1) > 10 ^ -6 Then
+        If Abs(SumItUp(Xout) - 1) > 10 ^ -6 Then
             CheckMassVector = "#Mass vector does not add up to 1"
         Else
-            CheckMassVector = ToDouble(IIf(s2v, Xout, X)) 'to prevent adding a dimension
+            'CheckMassVector = ToDouble(IIf(s2v, Xout, X)) 'to prevent adding a dimension
+            CheckMassVector = Xout 'to prevent adding a dimension
         End If
     Else
         CheckMassVector = "#Mass vector has wrong number of elements (" & nX & " instead of " & nX_must - 1 & " or " & nX_must & " )"
