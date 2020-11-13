@@ -4,7 +4,7 @@ Attribute VB_Name = "Common"
 ' and more
 
 ' by Henning Francke francke@gfz-potsdam.de
-' 2014 GFZ Potsdam
+' 2020 GFZ Potsdam
 
 Option Explicit
 Option Base 1
@@ -143,7 +143,7 @@ Function ToDouble(vec, Optional ByRef n As Integer, Optional reduce = False) 'Ty
         On Error GoTo TypeError
         vec = CStr(vec)
     End If
-        
+    
     If IsEmpty(vec) Then
         ToDouble = vec
         Exit Function
@@ -176,7 +176,7 @@ Function ToDouble(vec, Optional ByRef n As Integer, Optional reduce = False) 'Ty
         Dim i As Integer
  '       Dim offset As Integer: offset = LBound(vec) - 1
 
-'Is passed array 1D or 2D (when given anot as String or Range, but as {1,2,3})
+'Is passed array 1D or 2D (when given not as String or Range, but as {1,2,3})
 On Error GoTo TwoD: 'coz there is no function to query the number of dimensions in VBA (https://stackoverflow.com/questions/6901991/how-to-return-the-number-of-dimensions-of-a-variant-variable-passed-to-it-in-v)
         For i = 1 To n
             If IsEmpty(vec(i + offset)) Then
@@ -500,3 +500,4 @@ Function SumItUp(ByVal col) As Double
         SumItUp = SumItUp + CDbl(el)
     Next el
 End Function
+
