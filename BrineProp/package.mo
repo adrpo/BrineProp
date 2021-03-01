@@ -6,6 +6,7 @@ package BrineProp "Media models for p-h-T-rho-eta properties of aqueous solution
 
   constant SI.MolarMass M_H2O = Modelica.Media.Water.waterConstants[1].molarMass
   "0.018015 [kg/mol]";
+  constant Integer nM_H2O = 1 "number of ions per molecule";
   /* Set the path to the data directory */
   constant String DataDir=Modelica.Utilities.Files.loadResource("modelica://BrineProp/Resources/Data");
   /* Set the path of the output directory */
