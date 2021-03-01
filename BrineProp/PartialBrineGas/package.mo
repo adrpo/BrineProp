@@ -13,7 +13,6 @@ partial package PartialBrineGas "Medium template for gas mixture of nX_gas gases
  //Dummy for OM
  end ThermodynamicState;
 
-
  redeclare replaceable model extends BaseProperties "Base properties of medium"
     SI.MoleFraction y_vec[:]=Utilities.massToMoleFractions(X,MM_vec);
  equation
@@ -44,7 +43,6 @@ constant String gasNames[:]={""};
     "Specific heat capacity at constant pressure";
   end specificHeatCapacityCp_pTX;
 
-
   redeclare replaceable function density_pTX "Density of a mixture of gases"
     input SI.Pressure p;
     input SI.Temp_K T;
@@ -54,7 +52,6 @@ constant String gasNames[:]={""};
   //algorithm
 
   end density_pTX;
-
 
   replaceable function dynamicViscosity_pTX
   "calculation of gas dynamic Viscosity"
@@ -66,7 +63,6 @@ constant String gasNames[:]={""};
 
   end dynamicViscosity_pTX;
 
-
   replaceable function thermalConductivity_pTX
   "calculation of gas thermalConductivity"
   //    import NG = Modelica.Media.IdealGases.Common.SingleGasNasa;
@@ -76,7 +72,6 @@ constant String gasNames[:]={""};
     output SI.ThermalConductivity lambda;
 
   end thermalConductivity_pTX;
-
 
   annotation (Documentation(info="<html>
 <p>Ideal mixture of gases.</p>

@@ -21,5 +21,4 @@ package SaltData
     String name;
     annotation (Documentation(info="<html></html>"));
   end SaltConstants;
-
 end SaltData;

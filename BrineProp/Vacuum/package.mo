@@ -9,7 +9,6 @@ package Vacuum "Medium with zero properties"
  redeclare model extends BaseProperties
  //Dummy for OM
  end BaseProperties;
-
 /* redeclare record extends ThermodynamicState
  //Dummy for OM
  end ThermodynamicState;
@@ -26,7 +25,6 @@ package Vacuum "Medium with zero properties"
       X= state.X);
   end density;
 
-
   redeclare function extends density_pTX
   "Density of an ideal mixture of ideal gases"
   algorithm
@@ -36,7 +34,6 @@ package Vacuum "Medium with zero properties"
 
     d :=0;
   end density_pTX;
-
 
   redeclare function extends dynamicViscosity
   "water-saturated  thermal conductivity of water"
@@ -49,7 +46,6 @@ package Vacuum "Medium with zero properties"
   //  else state.X[end - nX + 1:end]);
   //  assert(lambda>0,"lambda="+String(lambda));
   end dynamicViscosity;
-
 
   redeclare function extends dynamicViscosity_pTX
   "calculation of gas dynamic Viscosity"
@@ -66,7 +62,6 @@ package Vacuum "Medium with zero properties"
       X={0,0}));
   end dynamicViscosity_pTX;
 
-
   redeclare function extends thermalConductivity
   algorithm
     lambda := thermalConductivity_pTX(
@@ -76,13 +71,11 @@ package Vacuum "Medium with zero properties"
 
   end thermalConductivity;
 
-
   redeclare function extends thermalConductivity_pTX
   "calculation of gas thermal conductivity"
   algorithm
     lambda:=0;
   end thermalConductivity_pTX;
-
 
   redeclare function specificEnthalpy_pTX
   "calculation of specific enthalpy of gas mixture"
@@ -97,7 +90,6 @@ package Vacuum "Medium with zero properties"
     h := 0;
   end specificEnthalpy_pTX;
 
-
   redeclare function extends specificEnthalpy
   "water-saturated specific enthalpy of gas phase"
   algorithm
@@ -108,7 +100,6 @@ package Vacuum "Medium with zero properties"
   //  else state.X[end - nX + 1:end]);
 
   end specificEnthalpy;
-
 
   annotation (Documentation(info="<html>
 <p><b>BrineGas_3Gas</b> is a medium package that, based on Brine.PartialBrineGas, defines a brine with 3 gases (CO<sub>2</sub>, N<sub>2</sub>, CH<sub>4</sub>), which are the main gases in the geofluid in Gross Schoenebeck, Germany.</p>

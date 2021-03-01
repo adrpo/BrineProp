@@ -4,12 +4,6 @@ function solubility_N2_pTX_Harting
   //made for NaCl, considering other salts via conversion factors
   extends partial_solubility_pTX;
 
-/*  input SI.Pressure p;
-  input SI.Temp_K T;
-  input SI.MassFraction X[:] "mass fractions m_x/m_H2O";
-  input SI.MolarMass MM[:] "molar masses of components";
-  output SI.MassFraction c_gas "gas concentration in kg_gas/kg_H2O";
-*/
 protected
   Types.Molality molalities[size(X, 1)]= Utilities.massFractionsToMolalities(X,MM_vec);
   SI.Temp_C T_C = SI.Conversions.to_degC(T);

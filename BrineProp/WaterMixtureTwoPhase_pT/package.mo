@@ -107,7 +107,6 @@ constant Integer nX_gas = 0;
  //  end if;
  end BaseProperties;
 
-
   redeclare function specificEnthalpy_pTX
     input Modelica.SIunits.Pressure p;
     input Modelica.SIunits.Temp_K T;
@@ -118,7 +117,6 @@ constant Integer nX_gas = 0;
   //  Modelica.Utilities.Streams.print("specificEnthalpy_pTX("+String(p)+","+String(T)+")");
     annotation(LateInline=true,inverse(T = temperature_phX(p=p,h=h,X=X,phase=phase)));
   end specificEnthalpy_pTX;
-
 
   redeclare function temperature_phX
     input Modelica.SIunits.Pressure p;
@@ -131,7 +129,6 @@ constant Integer nX_gas = 0;
 
      annotation(LateInline=true,inverse(h = specificEnthalpy_pTX(p=p,T=T,phase=phase,X=X)));
   end temperature_phX;
-
 
 redeclare record extends ThermodynamicState
   "a selection of variables that uniquely defines the thermodynamic state"
@@ -151,12 +148,10 @@ redeclare record extends ThermodynamicState
 </html>"));
 end ThermodynamicState;
 
-
   redeclare function extends dewEnthalpy "dew curve specific enthalpy of water"
   algorithm
     hv :=  Modelica.Media.Water.IF97_Utilities.BaseIF97.Regions.hv_p(sat.psat);
   end dewEnthalpy;
-
 
   redeclare function extends bubbleEnthalpy
   "boiling curve specific enthalpy of water"
@@ -164,25 +159,21 @@ end ThermodynamicState;
     hl := Modelica.Media.Water.IF97_Utilities.BaseIF97.Regions.hl_p(sat.psat);
   end bubbleEnthalpy;
 
-
   redeclare function extends saturationTemperature
   algorithm
      //T := Modelica.Media.Water.IF97_Utilities.BaseIF97.Basic.tsat(p);
      T := Modelica.Media.Water.WaterIF97_pT.saturationTemperature(p);
   end saturationTemperature;
 
-
   redeclare function extends dynamicViscosity
   algorithm
     eta := Modelica.Media.Water.WaterIF97_pT.dynamicViscosity(state);
   end dynamicViscosity;
 
-
 redeclare function extends specificEntropy "specific entropy of water"
 algorithm
     s := Modelica.Media.Water.IF97_Utilities.s_ph(state.p, state.h, state.phase);
 end specificEntropy;
-
 
 redeclare function specificEnthalpy_ps
   "Computes specific enthalpy as a function of pressure and temperature"
@@ -194,7 +185,6 @@ redeclare function specificEnthalpy_ps
 algorithm
   h := Modelica.Media.Water.IF97_Utilities.h_ps(p, s, phase);
 end specificEnthalpy_ps;
-
 
 redeclare function extends setState_psX
   "Return thermodynamic state of water as function of p and s"
@@ -213,7 +203,6 @@ algorithm
     d_g=-1);
 //    GVF=-1,
 end setState_psX;
-
 
 redeclare function extends setState_pTX
   "Return thermodynamic state of water as function of p and T"
@@ -242,7 +231,6 @@ algorithm
 //    GVF=-1,
 end setState_pTX;
 
-
 redeclare function specificEntropy_pTX
   "Computes specific entropy as a function of pressure and temperature"
     extends Modelica.Icons.Function;
@@ -255,7 +243,6 @@ algorithm
   s := Modelica.Media.Water.IF97_Utilities.s_pT(p, T, phase);
 end specificEntropy_pTX;
 
-
   redeclare function extends thermalConductivity
   "Thermal conductivity of water"
   algorithm
@@ -265,7 +252,6 @@ end specificEntropy_pTX;
         state.p,
         state.phase);
   end thermalConductivity;
-
 
   redeclare function extends specificHeatCapacityCp
   "specific heat capacity at constant pressure of water"
@@ -290,12 +276,10 @@ end specificEntropy_pTX;
                                 </html>"));
   end specificHeatCapacityCp;
 
-
   redeclare function extends saturationPressure
   algorithm
      p := Modelica.Media.Water.WaterIF97_pT.saturationPressure(T);
   end saturationPressure;
-
 
   redeclare function extends specificHeatCapacityCv
   "specific heat capacity at constant pressure of water"
@@ -320,13 +304,11 @@ end specificEntropy_pTX;
                                 </html>"));
   end specificHeatCapacityCv;
 
-
  redeclare function extends dynamicViscosity_liq
  algorithm
  //  eta := Modelica.Media.Water.WaterIF97_pT.dynamicViscosity(state);
    eta := Modelica.Media.Water.IF97_Utilities.dynamicViscosity(state.d, saturationTemperature(state.p), state.p+1, 1);
  end dynamicViscosity_liq;
-
 
  redeclare function extends dynamicViscosity_gas
  algorithm
@@ -334,13 +316,11 @@ end specificEntropy_pTX;
    eta := Modelica.Media.Water.IF97_Utilities.dynamicViscosity(state.d, saturationTemperature(state.p), state.p-1, 1);
  end dynamicViscosity_gas;
 
-
   redeclare function extends surfaceTension
   "Surface tension in two phase region of water"
   algorithm
   sigma := Modelica.Media.Water.IF97_Utilities.surfaceTension(sat.Tsat);
   end surfaceTension;
-
 
 redeclare replaceable partial function extends setState_phX
   "Calculates medium properties from p,h,X"
@@ -376,7 +356,6 @@ algorithm
 
 end setState_phX;
 
-
   redeclare function density_pTX
     input Modelica.SIunits.Pressure p;
     input Modelica.SIunits.Temp_K T;
@@ -387,7 +366,6 @@ end setState_phX;
   //  Modelica.Utilities.Streams.print("density_pTX("+String(p)+","+String(T)+")");
   //  annotation(LateInline=true,inverse(T = temperature_phX(p=p,h=h,X=X,phase=phase)));
   end density_pTX;
-
 
   redeclare function density_phX
     input Modelica.SIunits.Pressure p;
@@ -400,7 +378,6 @@ end setState_phX;
   //  annotation(LateInline=true,inverse(T = temperature_phX(p=p,h=h,X=X,phase=phase)));
   end density_phX;
 
-
   redeclare function vapourQuality "Return vapour quality"
     input ThermodynamicState state "Thermodynamic state record";
     output MassFraction x= state.x "Vapour quality";
@@ -409,24 +386,19 @@ end setState_phX;
     annotation(Documentation(info="<html></html>"));
   end vapourQuality;
 
-
 redeclare function extends temperature_ph "to avoid check error"
 end temperature_ph;
-
 
 redeclare function extends specificEnthalpy_pT "to avoid check error"
 end specificEnthalpy_pT;
 
-
 redeclare function extends density_pT "to avoid check error"
 end density_pT;
-
 
   redeclare function extends density "density from state"
   algorithm
     d := state.d;
   end density;
-
 
  annotation (Documentation(info="<html>
   <h1>Water_MixtureTwoPhase_pT</h1>

@@ -65,7 +65,6 @@ redeclare record extends ThermodynamicState
 </html>"));
 end ThermodynamicState;
 
-
   redeclare function extends dynamicViscosity "viscosity calculation"
   algorithm
     eta:=dynamicViscosity_pTXd(
@@ -75,7 +74,6 @@ end ThermodynamicState;
       state.d) "d for Zhang equation";
   end dynamicViscosity;
 
-
   replaceable function dynamicViscosity_pTXd "viscosity calculation"
     input SI.Pressure p;
     input SI.Temp_K T;
@@ -84,7 +82,6 @@ end ThermodynamicState;
     output SI.DynamicViscosity eta;
   //  constant Real M_NaCl=0.058443 "molar mass in [kg/mol]";
   end dynamicViscosity_pTXd;
-
 
  redeclare model extends BaseProperties "Base properties of medium"
     //   import BrineProp;
@@ -109,7 +106,6 @@ end ThermodynamicState;
 </html>"));
  end BaseProperties;
 
-
   redeclare replaceable partial function density_pTX
   "Return density from p, T, and X or Xi"
     extends Modelica.Icons.Function;
@@ -121,7 +117,6 @@ end ThermodynamicState;
     annotation(Documentation(info="<html></html>"));
   end density_pTX;
 
-
   redeclare replaceable function specificEnthalpy_pTX
      input SI.Pressure p;
     input SI.Temp_K T;
@@ -132,7 +127,6 @@ end ThermodynamicState;
   h := 4*T;
 */
   end specificEnthalpy_pTX;
-
 
   redeclare function temperature_phX
   "iterative inversion of specificEnthalpy_pTX by regula falsi"
@@ -221,7 +215,6 @@ protected
 
   end temperature_phX;
 
-
 redeclare replaceable partial function extends setState_phX
   "Calculates medium properties from p,h,X"
 //      input String fluidnames;
@@ -232,7 +225,6 @@ algorithm
   state := setState_pTX(p,temperature_phX(p,h,X),X) ",fluidnames)";
 end setState_phX;
 
-
   replaceable partial function surfaceTension_T
   "Return surface tension sigma in the two phase region"
   //standard function in MSL.Media takes sat-properties
@@ -242,7 +234,6 @@ end setState_phX;
     annotation(Documentation(info="<html></html>"));
   end surfaceTension_T;
 
-
   replaceable function dynamicViscosity_pTX "viscosity calculation"
     input SI.Pressure p;
     input SI.Temp_K T;
@@ -251,7 +242,6 @@ end setState_phX;
   //  constant Real M_NaCl=0.058443 "molar mass in [kg/mol]";
   end dynamicViscosity_pTX;
 
-
 redeclare replaceable function extends isobaricExpansionCoefficient
 protected
   constant SI.Temperature Delta_T= 1;
@@ -259,7 +249,6 @@ algorithm
 //  beta :=state.d*(1/state.d - 1/(density_pTX(state.p,state.T - Delta_T,state.X)))/Delta_T;
   beta :=(1 - state.d/(density_pTX(state.p,state.T - Delta_T,state.X)))/Delta_T;
 end isobaricExpansionCoefficient;
-
 
   annotation (Documentation(info="<html>
 <h5>Usage</h5>

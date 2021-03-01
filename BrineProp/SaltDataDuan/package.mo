@@ -30,7 +30,6 @@ package SaltDataDuan "Coefficients used in Duan density calculation"
     Real mola_max_eta "maximum molality for which viscosity function is valid";
     annotation (Documentation(info="<html></html>"));
   end SaltConstants;
-
 constant SaltConstants saltConstants_NaCl=
   SaltConstants(
      name = "NaCl",
