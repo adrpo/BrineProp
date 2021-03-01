@@ -1,5 +1,5 @@
 within BrineProp.Examples;
-model BrineGas
+model Brine3Gas
 package Medium = BrineProp.BrineGas3Gas (ignoreNoCompositionInBrineGas=true);
 //package Medium = Modelica.Media.Air.SimpleAir;
 //package Medium = PartialBrineGas;
@@ -63,4 +63,4 @@ algorithm
 //  print("sum(X_l)="+String(sum(props.state.X_l)-1)+"");
 //    print("sum(X_sat)="+String(sum(X_sat)));
 
-end BrineGas;
+end Brine3Gas;

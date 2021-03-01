@@ -1,7 +1,9 @@
 SingleSaltBrine
 BrineProps1PhaseMinimal
 BrineProps1PhaseFull
-BrineGas
+Brine3Gas_Minimal
+Brine3Gas
+Brine4Gas_Minimal
 PureWaterMinimal
 PureWaterFlashing
 BrineProps2PhaseMinimal
