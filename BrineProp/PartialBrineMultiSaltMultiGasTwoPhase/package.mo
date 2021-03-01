@@ -146,7 +146,7 @@ partial package PartialBrineMultiSaltMultiGasTwoPhase "Template medium for aqueo
       output SI.SpecificEnthalpy Delta_h_solution;
     end solutionEnthalpy;
 
-    replaceable partial function solubilities_pTX
+    partial function solubilities_pTX
     "solubility calculation of gas in m_gas/m_H2O"
       input SI.Pressure p;
       input SI.Temp_K T;

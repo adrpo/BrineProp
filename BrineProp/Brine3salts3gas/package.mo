@@ -21,9 +21,9 @@ package Brine3salts3gas "Two-phase aqueous solution of NaCl, KCl, CaCl2, N2, CO2
     iCO2=4,
     iN2=5,
     iCH4=6,
-    final gasNames = {"carbondioxide","nitrogen","methane"},
-    final MM_gas = {M_CO2,M_N2,M_CH4},
-    final nM_gas = {nM_CO2,nM_N2,nM_CH4}); //iGas not final, because reassigned in Brine5salts3gas
+    gasNames = {"carbondioxide","nitrogen","methane"},
+    MM_gas = {M_CO2,M_N2,M_CH4},
+    nM_gas = {nM_CO2,nM_N2,nM_CH4}); //iGas not final, because reassigned in Brine5salts3gas
 
   redeclare function extends setState_pTX "to avoid check error"
   end setState_pTX;
@@ -31,7 +31,7 @@ package Brine3salts3gas "Two-phase aqueous solution of NaCl, KCl, CaCl2, N2, CO2
   redeclare function extends setState_phX "to avoid check error"
   end setState_phX;
 
-  redeclare function extends solubilities_pTX
+  redeclare replaceable function extends solubilities_pTX
   "solubility calculation of CO2 in seawater Duan, Sun(2003), returns gas concentration in kg/kg H2O"
   algorithm
   //  print("p_gas={"+String(p_gas[1])+", "+String(p_gas[2])+", "+String(p_gas[3])+"} (solubilities_pTX)");
