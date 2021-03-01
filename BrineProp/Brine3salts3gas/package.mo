@@ -38,14 +38,13 @@ package Brine3salts3gas "Two-phase aqueous solution of NaCl, KCl, CaCl2, N2, CO2
     if debugmode then
         print("Running solubilities_pTX("+String(p/1e5)+" bar,"+String(T-273.15)+" C, ignoreTlimit="+String(ignoreTlimit)+", X="+Modelica.Math.Matrices.toString(transpose([X]))+")");
     end if;
-      solu[1] := if X[nX_salt+1]>0 then solubility_CO2_pTX_Duan2006(p,T,X_l,MM_vec,p_gas[1],ignoreTlimit) else -1
+      solu[iCO2-nX_salt] := if X[iCO2]>0 then solubility_CO2_pTX_Duan2006(p,T,X_l,MM_vec,p_gas[iCO2-nX_salt],ignoreTlimit) else -1
     "aus GasData, mol/kg_H2O -> kg_CO2/kg_H2O";
-      solu[2] :=if X[nX_salt + 2] > 0 then solubility_N2_pTX_Mao2006(p,T,X_l,MM_vec,p_gas[2],ignoreTlimit) else -1
+      solu[iN2-nX_salt] :=if X[iN2] > 0 then solubility_N2_pTX_Mao2006(p,T,X_l,MM_vec,p_gas[iN2-nX_salt],ignoreTlimit) else -1
     "aus GasData, mol/kg_H2O -> kg_N2/kg_H2O";
   //    solu[2] := if X[nX_salt+2]>0 then solubility_N2_pTX_Harting(p,T,X_l,MM_vec,p_gas[2]) else -1
-      solu[3] := if X[nX_salt+3]>0 then solubility_CH4_pTX_Duan2006(p,T,X_l,MM_vec,p_gas[3],ignoreTlimit) else -1
+      solu[iCH4-nX_salt] := if X[iCH4]>0 then solubility_CH4_pTX_Duan2006(p,T,X_l,MM_vec,p_gas[iCH4-nX_salt],ignoreTlimit) else -1
     "aus GasData, mol/kg_H2O -> kg_CH4/kg_H2O";
-  //    solu[3] := if X[nX_salt+3]>0 then solubility_CH4_pTX_Harting(p,T,X_l,MM_vec,p_gas[3]) else -1
 
   //  print("k={"+String(solu[1]/p_gas[1])+", "+String(solu[2]/p_gas[2])+", "+String(solu[3]/p_gas[3])+"}(solubilities_pTX)");
   //  print("solu={"+String(solu[1])+", "+String(solu[2])+", "+String(solu[3])+"}(solubilities_pTX)");
@@ -131,14 +130,15 @@ protected
   algorithm
 
   //  if gasname =="carbondioxide" then
-      p_sat[1] := if X[nX_salt+1]>0 then degassingPressure_CO2_Duan2006(p,T,X,MM_vec) else 0
+      p_sat[iCO2-nX_salt] := if X[iCO2]>0 then degassingPressure_CO2_Duan2006(p,T,X,MM_vec) else 0
     "aus GasData TODO: use numeral";
   //  elseif gasname =="nitrogen" then
-      p_sat[2] :=if X[nX_salt + 2] > 0 then GasData.degassingPressure_N2_Mao2006(p,T,X,MM_vec) else 0
+      p_sat[iN2-nX_salt] :=if X[iN2] > 0 then GasData.degassingPressure_N2_Mao2006(p,T,X,MM_vec) else 0
     "aus GasData";
   //  elseif gasname =="methane" then
-      p_sat[3] := if X[nX_salt+3]>0 then degassingPressure_CH4_Duan2006(p,T,X,MM_vec) else 0
+      p_sat[iCH4-nX_salt] := if X[iCH4]>0 then degassingPressure_CH4_Duan2006(p,T,X,MM_vec) else 0
     "aus GasData";
+
   //  end if;
     if debugmode then
       print("saturationPressures("+String(p)+","+String(T)+")={"+Modelica.Math.Matrices.toString({p_sat})+"}");
