@@ -1,4 +1,4 @@
-within BrineProp.Examples;
+within BrineProp.Examples.Gas;
 model Brine3Gas
 package Medium = BrineProp.BrineGas3Gas (ignoreNoCompositionInBrineGas=true);
 //package Medium = Modelica.Media.Air.SimpleAir;

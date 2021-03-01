@@ -1,4 +1,4 @@
-within BrineProp.Examples;
+within BrineProp.Examples.TwoPhase;
 model BrineProps2phaseFull "Two-phase example demonstrating all features"
   //needs "Advanced.PedanticModelica:=false" to run
 
@@ -75,10 +75,8 @@ model BrineProps2phaseFull "Two-phase example demonstrating all features"
 /*  */
   SI.MassConcentration TDS= sum(props.X_l[1:Medium.nX_salt])*props.d_l;
 
-
   Real[:] y_l=if not max(props.X_l[6:8])>0 then fill(0,Medium.nX_gas) else props.X_l[6:8]./Medium.MM_gas / sum(props.X_l[6:8]./Medium.MM_gas)
     "mol fraction of dissolved gases";
-
 
 /*
   Real[:] m=y[2:3]./fill(1-y[4],2) "mass fraction of gas in gas phase";

@@ -1,4 +1,4 @@
-within BrineProp.Examples;
+within BrineProp.Examples.Liquid;
 model BrineProps1PhasePureNaCl "Pure salt example - only h and cp"
   //needs "Advanced.PedanticModelica:=false" to run
   // Driesner EOS support also pure NaCl density, but as it is used here only for h and cp only those values can be calculatesd

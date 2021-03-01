@@ -1,4 +1,4 @@
-within BrineProp.Examples;
+within BrineProp.Examples.TwoPhase;
 model InitializationTest "Test influence of start vector of VLE algorithm"
   /* In order to run this test you have to 
   change n_g_norm_start from parameter to variable

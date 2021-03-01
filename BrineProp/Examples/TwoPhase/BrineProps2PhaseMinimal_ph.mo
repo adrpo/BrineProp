@@ -1,4 +1,4 @@
-within BrineProp.Examples;
+within BrineProp.Examples.TwoPhase;
 model BrineProps2PhaseMinimal_ph
   "Minimal inversion (h(p,T) -> T(p,h)) example for 2-phase brine property model"
   //needs "Advanced.PedanticModelica:=false" to run

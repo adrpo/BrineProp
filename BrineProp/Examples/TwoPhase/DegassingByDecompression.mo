@@ -1,4 +1,4 @@
-within BrineProp.Examples;
+within BrineProp.Examples.TwoPhase;
 model DegassingByDecompression
   "Degassing example for 2-phase brine property model"
   //needs "Advanced.PedanticModelica:=false" to run

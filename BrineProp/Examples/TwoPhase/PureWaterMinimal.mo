@@ -1,4 +1,4 @@
-within BrineProp.Examples;
+within BrineProp.Examples.TwoPhase;
 model PureWaterMinimal "Minimal example for pure water"
 //specify medium
   package Medium = BrineProp.WaterMixtureTwoPhase_pT "IAPWS water in wrapper";

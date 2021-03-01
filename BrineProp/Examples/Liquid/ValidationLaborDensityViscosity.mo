@@ -1,4 +1,4 @@
-within BrineProp.Examples;
+within BrineProp.Examples.Liquid;
 model ValidationLaborDensityViscosity "with lab measurements"
   //see 6.1.1 and 6.2 in PhD-Thesis (http://nbn-resolving.de/urn:nbn:de:kobv:83-opus4-47126)
 package Medium = Brine3salts(AssertLevel= 1) "TO AVOID ERROR MESSAGES";

@@ -1,4 +1,4 @@
-within BrineProp.Examples;
+within BrineProp.Examples.TwoPhase;
 model DeepWellSampleTakingGasIncrease
   "What happens when gas content is increased?"
 //SPECIFY MEDIUM and COMPOSITION

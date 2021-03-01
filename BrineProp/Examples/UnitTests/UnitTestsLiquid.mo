@@ -1,5 +1,5 @@
-within BrineProp;
-model UnitTests "To be filled..."
+within BrineProp.Examples.UnitTests;
+model UnitTestsLiquid "To be filled..."
 
   package Medium_3s = BrineProp.Brine3salts (ignoreLimitSalt_p={false,true,true});
   Medium_3s.BaseProperties props_3s;
@@ -20,4 +20,4 @@ equation
 //   print(String(props_3s.d-1127.85417379));
 
   annotation ();
-end UnitTests;
+end UnitTestsLiquid;

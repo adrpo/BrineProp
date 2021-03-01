@@ -1,4 +1,4 @@
-within BrineProp.Examples;
+within BrineProp.Examples.TwoPhase;
 model PureWaterFlashing "gradual evaporation by pressure reduction"
 //package Medium = Modelica.Media.Water.WaterIF97_ph;
 //package Medium = REFPROPMedium(final substanceNames={"water"},  final explicitVars = "pT");

@@ -1,6 +1,5 @@
-within BrineProp.Examples;
-model SalinityFromDensity
-  "Invert density function to determine NaCl content"
+within BrineProp.Examples.Liquid;
+model SalinityFromDensity "Invert density function to determine NaCl content"
   //needs "Advanced.PedanticModelica:=false" to run
 
   package Medium = Brine3salts "specify medium";

@@ -1,4 +1,4 @@
-within BrineProp.Examples;
+within BrineProp.Examples.Gas;
 model Brine3Gas_Minimal
 package Medium = BrineProp.BrineGas3Gas (ignoreNoCompositionInBrineGas=true);
   Medium.BaseProperties props;

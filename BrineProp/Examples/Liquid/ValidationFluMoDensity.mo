@@ -1,4 +1,4 @@
-within BrineProp.Examples;
+within BrineProp.Examples.Liquid;
 model ValidationFluMoDensity "Validation with density measured by Flumo"
   //multitude of values from online measurement have been condensed by finding "BestFitPlane" in MATLAB and extracting the interpolation points
   //see 6.1.2 in PhD-Thesis (http://nbn-resolving.de/urn:nbn:de:kobv:83-opus4-47126)

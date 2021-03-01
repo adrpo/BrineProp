@@ -1,4 +1,4 @@
-within BrineProp.Examples;
+within BrineProp.Examples.Liquid;
 model SingleSaltBrine
   //SPECIFY MEDIUM
 //  package Medium = BrineProp.BrineDriesner "Driesner EOS for NaCl solution";

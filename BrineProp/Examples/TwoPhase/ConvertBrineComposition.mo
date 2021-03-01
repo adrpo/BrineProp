@@ -1,4 +1,4 @@
-within BrineProp.Examples;
+within BrineProp.Examples.TwoPhase;
 model ConvertBrineComposition
   "convert volume related composition into mass fraction g/l -> kg/kg"
 //  Finds brine composition as mass fraction from infos in g/l by iterative density calculation

@@ -1,4 +1,4 @@
-within BrineProp.Examples;
+within BrineProp.Examples.Liquid;
 model BrineProps1PhaseFull
   "Example for 1-phase brine property model demonstrating all features"
   //needs "Advanced.PedanticModelica:=false" to run

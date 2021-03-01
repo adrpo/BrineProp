@@ -1,5 +1,5 @@
-within BrineProp.Examples;
-model UnitTests
+within BrineProp.Examples.UnitTests;
+model UnitTestsTwoPhase
   //Compares calculation result with hardcoded values.
   //no assert should be triggered
   //To be filled...
@@ -27,4 +27,4 @@ equation
   assert(abs(props.h-188780.97)<1e6,"GVF differs!");
   annotation (experiment(StopTime=1, __Dymola_NumberOfIntervals=1),
       __Dymola_experimentSetupOutput);
-end UnitTests;
+end UnitTestsTwoPhase;

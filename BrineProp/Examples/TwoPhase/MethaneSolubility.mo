@@ -1,4 +1,4 @@
-within BrineProp.Examples;
+within BrineProp.Examples.TwoPhase;
 model MethaneSolubility
   "Comparing solubility direct with VLE result for one gas"
   //needs "Advanced.PedanticModelica:=false" to run

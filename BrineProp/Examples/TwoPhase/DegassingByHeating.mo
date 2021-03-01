@@ -1,6 +1,5 @@
-within BrineProp.Examples;
-model DegassingByHeating
-  "Degassing example for 2-phase brine property model"
+within BrineProp.Examples.TwoPhase;
+model DegassingByHeating "Degassing example for 2-phase brine property model"
   //needs "Advanced.PedanticModelica:=false" to run
 
 //SPECIFY MEDIUM and COMPOSITION

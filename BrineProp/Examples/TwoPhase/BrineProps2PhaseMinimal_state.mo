@@ -1,4 +1,4 @@
-within BrineProp.Examples;
+within BrineProp.Examples.TwoPhase;
 model BrineProps2PhaseMinimal_state
   "Using the state record instead of Baseproperties"
   //needs "Advanced.PedanticModelica:=false" to run
