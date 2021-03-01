@@ -1,13 +1,13 @@
 ﻿within BrineProp.GasData;
-function solubility_H2_pTX_Chabab
+function solubility_H2_pTX_Chabab2020
   // ' Chabab, S., Théveneau, P., Coquelet, C., Corvisier, J. & Paricaud, P. Measurements and predictive models of high-pressure H2 solubility in brine (H2O+NaCl) for underground hydrogen storage application. Int. J. Hydrogen Energy 45, 32206–32220 (2020).
   // For H2 solubility in pure water (Eq. (13)): 273.15 < T (K) < 373.15; 1 < P (bar) < 203
   // For H2 solubility in NaCl-brine (Eq. (12)): 323.15 < T (K) < 373.15; 10 < P (bar) < 230; 0 < molality (mol/kgw) < 5
 
   extends partial_solubility_pTX;
-
-/*  Types.Molality molalities[size(X, 1)]= Utilities.massFractionsToMolalities(X,MM_vec);
-  SI.Temp_C T_C = SI.Conversions.to_degC(T);
+protected
+  Types.Molality molalities[size(X, 1)]= Utilities.massFractionsToMolalities(X,MM_vec);
+/*  SI.Temp_C T_C = SI.Conversions.to_degC(T);
   Real L_0=0.252 "N2 solubility in H2O at 25 atm, 75degC";
   Real L_rel_p "pressure influence";
   Real L_rel_c "salinity influence";
@@ -25,13 +25,9 @@ algorithm
      assert(ignoreLimitH2_b or molalities[iNaCl]<5,"Molality out of validity range: mola[NaCl]=" + String(molalities[iNaCl]) + " mol/kg.\nTo ignore set ignoreLimitH2_b=true",aLevel);
   end if;
 
-  solu :=solubility_H2_pTX_Chabab2020_molality(
-      p,
-      T,
-      X,
-      p_gas);                                                   // mol/kg_H2O
+  solu :=solubility_H2_pTX_Chabab2020_molality(p,T,X, MM_vec,p_gas);                                                   // mol/kg_H2O
   X_gas := solu * M_H2 * X[end]; //molality->mass fraction
 
 //      print("mola_N2("+String(p_gas)+"Pa,"+String(T-273.16)+"degC,"+String(molalities[1])+")="+String(solu)+" (solubility_N2_pTX_Harting)");
 //    print("mola_N2("+String(p_gas)+","+String(T-273.16)+")="+String(c_gas)+"->k="+String(c_gas/max(1,p_gas))+" (solubility_N2_pTX_Duan2006)");
-end solubility_H2_pTX_Chabab;
+end solubility_H2_pTX_Chabab2020;
