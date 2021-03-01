@@ -4,6 +4,8 @@ M_N2
 nM_N2
 M_CH4
 nM_CH4
+M_H2
+nM_H2
 polyval
 partial_fugacity_pTX
 p_sat_CO2
@@ -31,3 +33,8 @@ partial_solutionEnthalpy
 solutionEnthalpy_CO2_Duan2003
 solutionEnthalpy_N2
 solutionEnthalpy_CH4
+solubility_H2_pTX_Chabab
+solubility_H2_pTX_Chabab2020_molality
+solubility_H2_pTb_Chabab2020_molality
+solubility_H2_pTb_Chabab2020_y
+solubility_H2_pT_Chabab2020_y
