@@ -3,7 +3,7 @@ package BrineGas3Gas "Gas mixture of CO2+N2+CH4+H2O"
   extends PartialBrineGas(
     final substanceNames={"carbondioxide","nitrogen","methane","water"},
     final MM_vec = {M_CO2,M_N2,M_CH4,M_H2O},
-    final nM_vec = {nM_CO2,nM_N2,nM_CH4,nM_CH4});
+    final nM_vec = {nM_CO2,nM_N2,nM_CH4,nM_H2O});
 
 
   extends PartialFlags;
@@ -12,7 +12,6 @@ package BrineGas3Gas "Gas mixture of CO2+N2+CH4+H2O"
  redeclare model extends BaseProperties
  //Dummy for OM
  end BaseProperties;
-
 /* redeclare record extends ThermodynamicState
  //Dummy for OM
  end ThermodynamicState;
@@ -51,7 +50,6 @@ protected
 
   end waterSaturatedComposition_pTX;
 
-
   redeclare function extends density "water-saturated density from state"
 
   algorithm
@@ -65,7 +63,6 @@ protected
   //      waterSaturatedComposition_pTX(state.p,state.T,state.X[end - nX+1:end])
   //  assert(lambda>0,"lambda="+String(lambda));
   end density;
-
 
   redeclare function extends density_pTX
   "Density of an ideal mixture of ideal gases"
@@ -100,7 +97,6 @@ protected
 
 
 
-
   redeclare function extends dynamicViscosity
   "water-saturated  thermal conductivity of water"
   //very little influence of salinity
@@ -114,7 +110,6 @@ protected
   //  else state.X[end - nX + 1:end]);
   //  assert(lambda>0,"lambda="+String(lambda));
   end dynamicViscosity;
-
 
   redeclare function extends dynamicViscosity_pTX
   "calculation of gas dynamic Viscosity"
@@ -130,7 +125,6 @@ protected
       T=T,
       X={0,0}));
   end dynamicViscosity_pTX;
-
 
   redeclare function extends thermalConductivity
   "water-saturated  thermal conductivity of water"
@@ -150,7 +144,6 @@ protected
 
   end thermalConductivity;
 
-
   redeclare function extends thermalConductivity_pTX
   "calculation of gas thermal conductivity"
   /*  import NG = Modelica.Media.IdealGases.Common.SingleGasNasa;
@@ -162,7 +155,6 @@ protected
     lambda:=Modelica.Media.Air.MoistAir.thermalConductivity(
       Modelica.Media.Air.MoistAir.ThermodynamicState(p=0,T=T,X={0,0}));
   end thermalConductivity_pTX;
-
 
   redeclare function specificEnthalpy_pTX
   "calculation of specific enthalpy of gas mixture"
@@ -208,7 +200,6 @@ protected
   */
   end specificEnthalpy_pTX;
 
-
   redeclare function extends specificEnthalpy
   "water-saturated specific enthalpy of gas phase"
   algorithm
@@ -221,7 +212,6 @@ protected
   //  else state.X[end - nX + 1:end]);
 
   end specificEnthalpy;
-
 
   annotation (Documentation(info="<html>
 <p><b>BrineGas_3Gas</b> is a medium package that, based on Brine.PartialBrineGas, defines a brine with 3 gases (CO<sub>2</sub>, N<sub>2</sub>, CH<sub>4</sub>), which are the main gases in the geofluid in Gross Schoenebeck, Germany.</p>
