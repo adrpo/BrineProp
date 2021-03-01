@@ -24,8 +24,10 @@ algorithm
 end for;*/
 
   n_total :=sum(molalities);
-  for i in 1:n loop
+/*  for i in 1:n loop
     molefractions[i] := molalities[i]/n_total;
-  end for;
+  end for;*/
+  molefractions := molalities/n_total;
+
   annotation(smoothOrder=5);
 end massToMoleFractions;
