@@ -85,9 +85,9 @@ protected
 
  algorithm
      h :=BrineGas3Gas.specificEnthalpy_pTX(
-     p,
-     T,
-     X);
+       p,
+       T,
+       X);
  end specificEnthalpy_gas_pTX;
 
  redeclare function extends dynamicViscosity_liq
@@ -120,9 +120,9 @@ protected
  redeclare function extends dynamicViscosity_gas
  algorithm
    eta  :=BrineGas3Gas.dynamicViscosity(BrineGas3Gas.ThermodynamicState(
-     state.p,
-     state.T,
-     state.X_g));
+       state.p,
+       state.T,
+       state.X_g));
    assert(eta>0,"Error in gas viscosity calculation.");
  end dynamicViscosity_gas;
 
@@ -175,9 +175,9 @@ protected
     if state.x>0 then
 
       cp :=BrineGas3Gas.specificHeatCapacityCp_pTX(
-        p=state.p,
-        T=state.T,
-        X=X_g[end - nX_gas:end]);
+          p=state.p,
+          T=state.T,
+          X=X_g[end - nX_gas:end]);
     else
       cp:=-1;
     end if;

@@ -1,7 +1,6 @@
 within BrineProp.Examples.TwoPhase;
 model BrineProps2PhaseMinimal
   "Minimal degassing example for 2-phase brine property model"
-  import BrineProp;
   //needs "Advanced.PedanticModelica:=false" to run
 
 //SPECIFY MEDIUM and COMPOSITION
