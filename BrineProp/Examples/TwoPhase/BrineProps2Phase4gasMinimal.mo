@@ -14,7 +14,7 @@ model BrineProps2Phase4gasMinimal
 equation
   //SPECIFY THERMODYNAMIC STATE
   //degassing by heating starting at STP
-  props.p = 1.01325e5;
+  props.p = 10.01325e5;
   props.T = 60+273.15;
 
   //specify brine composition

@@ -2,7 +2,8 @@ within BrineProp;
 partial package PartialBrineMultiSaltOnePhase "Template medium for  one-phase aqueous solution of m Salts and n Gases based on PartialMediaMixtureMedium"
 // extends PartialFlags;
 
- constant String saltNames[:]={""} "TODO: replace by saltOrder";
+ constant String saltNames[:]=fill("",0);
+                                          //{""} "TODO: replace by saltOrder";
   constant Integer nX_salt = size(saltNames, 1) "Number of salt components"   annotation(Evaluate=true);
 
 

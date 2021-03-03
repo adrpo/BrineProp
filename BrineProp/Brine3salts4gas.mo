@@ -9,10 +9,24 @@ package Brine3salts4gas
 
 
   redeclare function solubilities_pTX
-    "solubility calculation of CO2 in seawater Duan, Sun(2003), returns gas concentration in kg/kg H2O"
-    extends PartialBrineMultiSaltMultiGasTwoPhase.solubilities_pTX;
+    "solubility calculation"
+    //  extends PartialBrineMultiSaltMultiGasTwoPhase.solubilities_pTX;
+    // TODO: avoid repeating the declarations below (extending Brine3salts3gas doesn't work [multiple algorithms]
+    input SI.Pressure p;
+    input SI.Temp_K T;
+    input SI.MassFraction X_l[nX] "mass fractions m_x/m_Sol";
+    input SI.MassFraction X[nX] "mass fractions m_x/m_Sol";
+    input SI.Pressure[nX_gas] p_gas;
+    input Boolean ignoreTlimit=false "activated by temperature_phX";
+  //  input SI.MolarMass MM[:] "=fill(0,nX)molar masses of components";
+  //  output Molality[nX_gas] solu;
+    output MassFraction solu[nX_gas] "gas concentration in kg_gas/kg_fluid";
+
   algorithm
-  //  print("p_gas={"+String(p_gas[1])+", "+String(p_gas[2])+", "+String(p_gas[3])+"} (solubilities_pTX)");
+    if debugmode then
+        //print("\nRunning setState_pTX("+String(p/1e5)+" bar,"+String(min(1000,T)-273.15)+" degC, ignoreTlimit="+String(ignoreTlimit)+", X="+Modelica.Math.Matrices.toString(transpose([X]))+")");
+        print("\nRunning setState_pTX(p_gas={"+String(p_gas[1])+", "+String(p_gas[2])+", "+String(p_gas[3])+"}) (solubilities_pTX)");
+    end if;
     if debugmode then
         print("Running solubilities_pTX("+String(p/1e5)+" bar,"+String(T-273.15)+" C, ignoreTlimit="+String(ignoreTlimit)+", X="+Modelica.Math.Matrices.toString(transpose([X]))+")");
     end if;
@@ -20,10 +34,9 @@ package Brine3salts4gas
     "aus GasData, mol/kg_H2O -> kg_CO2/kg_H2O";
       solu[iN2-nX_salt] :=if X[iN2] > 0 then solubility_N2_pTX_Mao2006(p,T,X_l,MM_vec,p_gas[iN2-nX_salt],ignoreTlimit) else -1
     "aus GasData, mol/kg_H2O -> kg_N2/kg_H2O";
-  //    solu[2] := if X[nX_salt+2]>0 then solubility_N2_pTX_Harting(p,T,X_l,MM_vec,p_gas[2]) else -1
       solu[iCH4-nX_salt] := if X[iCH4]>0 then solubility_CH4_pTX_Duan2006(p,T,X_l,MM_vec,p_gas[iCH4-nX_salt],ignoreTlimit) else -1
     "aus GasData, mol/kg_H2O -> kg_CH4/kg_H2O";
-  //    solu[3] := if X[nX_salt+3]>0 then solubility_CH4_pTX_Harting(p,T,X_l,MM_vec,p_gas[3]) else -1
+
       solu[iH2-nX_salt] := if X[iH2]>0 then solubility_H2_pTX_Chabab2020(p,T,X_l,MM_vec,p_gas[iH2-nX_salt],ignoreTlimit) else -1
     "aus GasData, mol/kg_H2O -> kg_CH4/kg_H2O";
 

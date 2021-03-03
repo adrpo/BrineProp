@@ -8,7 +8,8 @@ partial package PartialBrineMultiSaltMultiGasTwoPhase "Template medium for aqueo
   "activates inversion for state definition by dT, slows calculation down";
 
 //   extends BrineProp.PartialFlags_(final nX_salt=size(saltNames, 1));
-  constant String saltNames[:]={""} "TODO replace by saltorder enumeration";
+   constant String saltNames[:]=fill("",0);
+                                            //{""} "TODO replace by saltorder enumeration";
    constant Integer nX_salt = size(saltNames, 1) "Number of salt components"   annotation(Evaluate=true);
 
 
@@ -32,7 +33,8 @@ partial package PartialBrineMultiSaltMultiGasTwoPhase "Template medium for aqueo
    constant SI.MolarMass[:] MM_vec = cat(1,MM_salt, MM_gas, {M_H2O});
    constant Integer[:] nM_vec = cat(1,nM_salt, nM_gas, {1});
 
-   constant String gasNames[:]={""};
+   constant String gasNames[:]=fill("",0);
+                                           //{""};
 
    extends BrineProp.GasData(final nX_salt_=nX_salt);
 

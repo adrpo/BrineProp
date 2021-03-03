@@ -32,7 +32,7 @@ package Brine3salts3gas "Two-phase aqueous solution of NaCl, KCl, CaCl2, N2, CO2
   end setState_phX;
 
   redeclare replaceable function extends solubilities_pTX
-  "solubility calculation of CO2 in seawater Duan, Sun(2003), returns gas concentration in kg/kg H2O"
+  "solubility calculation, returns gas concentration in kg/kg H2O"
   algorithm
   //  print("p_gas={"+String(p_gas[1])+", "+String(p_gas[2])+", "+String(p_gas[3])+"} (solubilities_pTX)");
     if debugmode then
