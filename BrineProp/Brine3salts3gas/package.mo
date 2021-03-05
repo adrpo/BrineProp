@@ -24,6 +24,7 @@ package Brine3salts3gas "Two-phase aqueous solution of NaCl, KCl, CaCl2, N2, CO2
     gasNames = {"carbondioxide","nitrogen","methane"},
     MM_gas = {M_CO2,M_N2,M_CH4},
     nM_gas = {nM_CO2,nM_N2,nM_CH4}); //iGas not final, because reassigned in Brine5salts3gas
+    //order of gases must be consistentwith Brine3Gas TODO: pass order or copy enthalpy/density/cp here
 
   redeclare function extends setState_pTX "to avoid check error"
   end setState_pTX;
@@ -52,22 +53,23 @@ package Brine3salts3gas "Two-phase aqueous solution of NaCl, KCl, CaCl2, N2, CO2
   end solubilities_pTX;
 
   redeclare function extends density_liq_pTX
-  //  extends density_Duan2008_pTX(MM_vec=cat(1,MM_salt, {M_H2O}));
-     //TODO should take MM_vec;
-
-  //  PowerPlant.Media.Brine.Salt_Data_Duan.density_Duan2008_pTX;
 protected
     constant Integer[:] liqIndex=cat(1,1:nX_salt,{nX});
     Real X_[:] =  cat(1, X[1:nX_salt], {1-sum(X[1:nX_salt])}); //recalculate water mass fraction when gases are omitted (which they are in the density function)
   algorithm
     d := density_Duan2008_pTX(p,T,X_,MM[liqIndex],
     saltConstants);
-
   //   print("density_liquid_pTX: "+String(p*1e-5)+" bar,"+String(T)+" K->"+String(d)+"kg/m^3");
   end density_liq_pTX;
  /*function extends density_Duan2008_pTX(nX_salt_=nX_salt, ignoreLimitSalt_p_=ignoreLimitSalt_p_global) 
     "just to set the flags"
  end density_Duan2008_pTX;*/
+
+  redeclare replaceable function extends density_gas_pTX
+  algorithm
+    d := BrineGas3Gas.density_pTX(p,T,X,MM);
+  //   print("density_liquid_pTX: "+String(p*1e-5)+" bar,"+String(T)+" K->"+String(d)+"kg/m^3");
+  end density_gas_pTX;
 
  redeclare function extends specificEnthalpy_liq_pTX
  // Partial_Units.Molality molalities = massFractionsToMoleFractions(X, MM_vec);
@@ -81,13 +83,10 @@ protected
  //  print(String(p*1e-5)+" bar,"+String(T)+" K->"+String(h)+" J/kg (Brine_Duan_Multi_TwoPhase_ngas_3.specificEnthalpy_liq_pTX)");
  end specificEnthalpy_liq_pTX;
 
- redeclare function extends specificEnthalpy_gas_pTX
+ redeclare replaceable function extends specificEnthalpy_gas_pTX
 
  algorithm
-     h :=BrineGas3Gas.specificEnthalpy_pTX(
-       p,
-       T,
-       X);
+     h :=BrineGas3Gas.specificEnthalpy_pTX(p,T,X); //,MM
  end specificEnthalpy_gas_pTX;
 
  redeclare function extends dynamicViscosity_liq

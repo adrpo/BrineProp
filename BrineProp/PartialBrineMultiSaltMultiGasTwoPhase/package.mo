@@ -126,6 +126,52 @@ partial package PartialBrineMultiSaltMultiGasTwoPhase "Template medium for aqueo
 </html>"));
   end ThermodynamicState;
 
+  redeclare function extends density "return density of ideal gas"
+  algorithm
+    d := state.d;
+  end density;
+
+    redeclare function density_pTX "wrapper to extract d from state"
+      //necessary for declaration of inverse function p(T,d)
+      input SI.Pressure p;
+      input SI.Temp_K T;
+      input MassFraction X[:] "mass fraction m_NaCl/m_Sol";
+      input FixedPhase phase=0
+    "2 for two-phase, 1 for one-phase, 0 if not known";
+      input Real[nX_gas+1] n_g_norm_start=fill(0.5,nX_gas+1)
+    "start value, all gas in gas phase, all water liquid";
+      output SI.Density d;
+
+    algorithm
+      if debugmode then
+          print("Running density_pTX("+String(p/1e5)+","+String(T-273.15)+"degC, X="+Modelica.Math.Matrices.toString(transpose([X]))+")");
+      end if;
+     d:=density(setState_pTX(p,T,X,phase,n_g_norm_start));
+
+     annotation(LateInline=true,inverse(p=pressure_dTX(d,T,X,phase,n_g_norm_start)));
+    end density_pTX;
+
+   replaceable function density_liq_pTX "Density of the liquid phase"
+     input SI.Pressure p "TODO: Rename to density_liq_pTX";
+     input SI.Temp_K T;
+     input MassFraction X[nX] "mass fraction m_NaCl/m_Sol";
+     input SI.MolarMass MM[:] "=MM_vec =fill(0,nX) molar masses of components";
+     output SI.Density d;
+   end density_liq_pTX;
+
+   replaceable function density_gas_pTX "Density of the gas phase"
+     input SI.Pressure p;
+     input SI.Temp_K T;
+     input MassFraction X[:] "nX_gas mass fraction";
+     input SI.MolarMass MM[:] "=MM_vec =fill(0,nX) molar masses of components";
+     output SI.Density d;
+   end density_gas_pTX;
+
+    redeclare function extends saturationTemperature "saturation temperature"
+    algorithm
+      T := 373.15;
+    end saturationTemperature;
+
     redeclare function extends dewEnthalpy
     "dew curve specific enthalpy of water"
     algorithm
@@ -137,11 +183,6 @@ partial package PartialBrineMultiSaltMultiGasTwoPhase "Template medium for aqueo
     algorithm
       hl := 2000;
     end bubbleEnthalpy;
-
-    redeclare function extends saturationTemperature "saturation temperature"
-    algorithm
-      T := 373.15;
-    end saturationTemperature;
 
     replaceable partial function solutionEnthalpy
       input SI.Temp_K T;
@@ -172,14 +213,6 @@ protected
     Types.Pressure_bar p_bar=SI.Conversions.to_bar(p);
     end fugacity_pTX;
 
-   replaceable function density_liq_pTX "Density of the liquid phase"
-     input SI.Pressure p "TODO: Rename to density_liq_pTX";
-     input SI.Temp_K T;
-     input MassFraction X[nX] "mass fraction m_NaCl/m_Sol";
-     input SI.MolarMass MM[:] "=MM_vec =fill(0,nX) molar masses of components";
-     output SI.Density d;
-   end density_liq_pTX;
-
   redeclare function vapourQuality
   "Returns vapour quality, needs to be defined to overload function defined in PartialMixtureTwoPhaseMedium"
     input ThermodynamicState state "Thermodynamic state record";
@@ -187,56 +220,6 @@ protected
   algorithm
   x := state.x;
   end vapourQuality;
-
-    redeclare function specificEnthalpy_pTX "wrapper to extract h from state"
-      //necessary for declaration of inverse function T(p,h)
-      input SI.Pressure p;
-      input SI.Temp_K T;
-      input MassFraction X[:] "mass fraction m_NaCl/m_Sol";
-      input FixedPhase phase=0
-    "2 for two-phase, 1 for one-phase, 0 if not known";
-      input Real[nX_gas+1] n_g_norm_start=fill(0.5,nX_gas+1)
-    "start value, all gas in gas phase, all water liquid";
-      input Boolean ignoreTlimit=false;
-      output SI.SpecificEnthalpy h;
-
-    algorithm
-      if debugmode then
-          print("Running specificEnthalpy_pTX("+String(p/1e5)+" bar,"+String(T-273.15)+" C, ignoreTlimit="+String(ignoreTlimit)+", X="+Modelica.Math.Matrices.toString(transpose([X]))+")");
-      end if;
-     h:=specificEnthalpy(setState_pTX(
-        p,
-        T,
-        X,
-        phase,
-        n_g_norm_start,
-        ignoreTlimit));
-
-    //print(String(p)+","+String(T)+" K->"+String(h)+" J/kg & (PartialBrine_Multi_TwoPhase_ngas.specificEnthalpy_pTX)");
-     //,p=pressure_ThX(T,h,X);
-
-     annotation(LateInline=true,inverse(T=temperature_phX(p,h,X,phase,n_g_norm_start,ignoreTlimit)));
-    end specificEnthalpy_pTX;
-
-    redeclare function density_pTX "wrapper to extract d from state"
-      //necessary for declaration of inverse function p(T,d)
-      input SI.Pressure p;
-      input SI.Temp_K T;
-      input MassFraction X[:] "mass fraction m_NaCl/m_Sol";
-      input FixedPhase phase=0
-    "2 for two-phase, 1 for one-phase, 0 if not known";
-      input Real[nX_gas+1] n_g_norm_start=fill(0.5,nX_gas+1)
-    "start value, all gas in gas phase, all water liquid";
-      output SI.Density d;
-
-    algorithm
-      if debugmode then
-          print("Running density_pTX("+String(p/1e5)+","+String(T-273.15)+"degC, X="+Modelica.Math.Matrices.toString(transpose([X]))+")");
-      end if;
-     d:=density(setState_pTX(p,T,X,phase,n_g_norm_start));
-
-     annotation(LateInline=true,inverse(p=pressure_dTX(d,T,X,phase,n_g_norm_start)));
-    end density_pTX;
 
     redeclare function temperature_phX
     "iterative inversion of specificEnthalpy_pTX by regula falsi"
@@ -400,6 +383,36 @@ protected
 
     end pressure_dTX;
 
+    redeclare function specificEnthalpy_pTX "wrapper to extract h from state"
+      //necessary for declaration of inverse function T(p,h)
+      input SI.Pressure p;
+      input SI.Temp_K T;
+      input MassFraction X[:] "mass fraction m_NaCl/m_Sol";
+      input FixedPhase phase=0
+    "2 for two-phase, 1 for one-phase, 0 if not known";
+      input Real[nX_gas+1] n_g_norm_start=fill(0.5,nX_gas+1)
+    "start value, all gas in gas phase, all water liquid";
+      input Boolean ignoreTlimit=false;
+      output SI.SpecificEnthalpy h;
+
+    algorithm
+      if debugmode then
+          print("Running specificEnthalpy_pTX("+String(p/1e5)+" bar,"+String(T-273.15)+" C, ignoreTlimit="+String(ignoreTlimit)+", X="+Modelica.Math.Matrices.toString(transpose([X]))+")");
+      end if;
+     h:=specificEnthalpy(setState_pTX(
+        p,
+        T,
+        X,
+        phase,
+        n_g_norm_start,
+        ignoreTlimit));
+
+    //print(String(p)+","+String(T)+" K->"+String(h)+" J/kg & (PartialBrine_Multi_TwoPhase_ngas.specificEnthalpy_pTX)");
+     //,p=pressure_ThX(T,h,X);
+
+     annotation(LateInline=true,inverse(T=temperature_phX(p,h,X,phase,n_g_norm_start,ignoreTlimit)));
+    end specificEnthalpy_pTX;
+
    replaceable function specificEnthalpy_liq_pTX
     "Specific enthalpy of liquid phase"
      input SI.Pressure p;
@@ -414,8 +427,8 @@ protected
     "Specific enthalpy of gas in gas phase"
      input SI.Pressure p;
      input SI.Temp_K T;
-   //  input SI.MolarMass MM[:]=fill(0,nX)     "molar masses of components";
      input MassFraction X[:] "mass fraction m_NaCl/m_Sol";
+   //  input SI.MolarMass MM[:]=fill(0,nX)     "molar masses of components";
      output SI.SpecificEnthalpy h;
    end specificEnthalpy_gas_pTX;
 
@@ -428,7 +441,6 @@ protected
       input SI.MolarMass MM[:] "molar masses of components";
       output SI.Pressure[nX_gas] p_sat;
     end saturationPressures;
-
 
     redeclare replaceable partial function extends setState_pTX
       "finds the VLE iteratively by varying the normalized quantity of gas in the gasphase, calculates the densities"
@@ -672,11 +684,8 @@ protected
     d_g :=if x > 0 then p/(T2*R_gas) else -1;*/
       //  d_g:= if x>0 then p/(Modelica.Constants.R*T2)*(n_g*cat(1,MM_gas,{M_H2O}))/sum(n_g) else -1;
         if x > 0 then
-          d_g :=BrineGas3Gas.density_pTX(
-            p,
-            T,
-            X_g);
-          h_g := specificEnthalpy_gas_pTX(p,T,X_g);
+          d_g := density_gas_pTX(p,T,X_g,MM_gas); //BrineGas3Gas.density_pTX(
+          h_g := specificEnthalpy_gas_pTX(p,T,X_g); //,MM_gas
         else
           d_g := -1;
           h_g := -1;
@@ -845,11 +854,6 @@ protected
   algorithm
     h := state.h;
   end specificEnthalpy;
-
-  redeclare function extends density "return density of ideal gas"
-  algorithm
-    d := state.d;
-  end density;
 
     annotation (Documentation(info="<html>
 <ul>

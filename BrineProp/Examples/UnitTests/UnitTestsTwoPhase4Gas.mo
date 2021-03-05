@@ -24,7 +24,7 @@ equation
   props.Xi = Xi;
 
   assert(abs(props.GVF-0.0497710432105261)<1e6,"GVF differs!");
-  assert(abs(props.h-288702.455)<1e6,"GVF differs!");
+  assert(abs(props.h-288702.455)<1e6,"h differs!");
   annotation (experiment(StopTime=1, __Dymola_NumberOfIntervals=1),
       __Dymola_experimentSetupOutput);
 end UnitTestsTwoPhase4Gas;
