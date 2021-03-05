@@ -8,9 +8,7 @@ package BrineGas3Gas "Gas mixture of CO2+N2+CH4+H2O"
     MM_vec = {M_CO2,M_N2,M_CH4,M_H2O},
     nM_vec = {nM_CO2,nM_N2,nM_CH4,nM_H2O});
 
-
   extends PartialFlags;
-
 
  redeclare model extends BaseProperties
  //Dummy for OM
@@ -20,7 +18,6 @@ package BrineGas3Gas "Gas mixture of CO2+N2+CH4+H2O"
  end ThermodynamicState;
 */
   constant Boolean waterSaturated=false "activates water saturation";
-
 
   replaceable function waterSaturatedComposition_pTX
   "calculates the water saturated mass vector for a given Temperature"
@@ -67,37 +64,6 @@ protected
   //  assert(lambda>0,"lambda="+String(lambda));
   end density;
 
-  redeclare function extends density_pTX
-  "Density of an ideal mixture of ideal gases"
-  //    SpecificHeatCapacity R_gas; //= sum(Modelica.Constants.R*X ./ MM_vec);
-  //    MassFraction[:] X_=cat(1,fill(nX-1,0),{1});
-  //    MassFraction[size(X,1)] X_=cat(1,fill(size(X,1),0),{1});
-  algorithm
-  /*  if not R_gas >0 then
-    print("R_gas="+String(R_gas)+", (MM="+Modelica.Math.Matrices.toString({MM_vec})+", X="+Modelica.Math.Matrices.toString({X})+")");
-  end if;*/
-  //  print("size(X_,1)="+String(size(X_,1))+",size(X,1)="+String(size(X,1)));
-    if debugmode then
-      print("Running density_pTX("+String(p/1e5)+" bar,"+String(T-273.15)+" degC, X="+Modelica.Math.Matrices.toString(transpose([X]))+")");
-    end if;
-  // assert(min(X)>0,"Cannot calculate with empty composition.");
-    if not min(X)>0 and not ignoreNoCompositionInBrineGas then
-      print("No gas composition, assuming water vapour.(BrineProp.BrineGas_3Gas.density_pTX)");
-    end if;
-    R_gas :=Modelica.Constants.R*sum(cat(1,X[1:end-1],{(if min(X)>0 then X[end] else 1)})./ MM_vec);
-
-  /*  if waterSaturated then
-    R_gas :=sum(Modelica.Constants.R*waterSaturatedComposition_pTX(
-        p,
-        T,
-        X[end - nX + 1:end]) ./ MM_vec);
-    d :=p/(T*R_gas);
-  else*/
-        d :=p/(T*R_gas);
-  //  end if;
-  //  print("d="+String(d)+" kg/m^3");
-  end density_pTX;
-
   replaceable function extends specificHeatCapacityCp_pTX
     "calculation of specific heat capacities of gas mixture"
     import Modelica.Media.IdealGases.Common.SingleGasNasa;
@@ -113,7 +79,7 @@ protected
       SI.SpecificHeatCapacity cp_H2O=Water.IF97_Utilities.cp_pT(min(p,Water.IF97_Utilities.BaseIF97.Basic.psat(T)-1),T=T)
       "below psat -> gaseous";
 
-      SI.SpecificHeatCapacity cp_vec[:]={cp_CO2,cp_N2,cp_CH4,cp_H2O};
+      SI.SpecificHeatCapacity cp_vec[:]={cp_CO2,cp_N2,cp_CH4,cp_H2O}; //the two-phase models rely on this order!
 
   algorithm
     if debugmode then
@@ -216,7 +182,7 @@ protected
     SI.SpecificEnthalpy h_N2=SingleGases.N2.specificEnthalpy(state);
     SI.SpecificEnthalpy h_CH4=SingleGases.CH4.specificEnthalpy(state);
 
-    SI.SpecificEnthalpy[:] h_vec={h_CO2,h_N2,h_CH4,h_H2O};
+    SI.SpecificEnthalpy[:] h_vec={h_CO2,h_N2,h_CH4,h_H2O}; //the two-phase models rely on this order!
     SI.MassFraction X_[size(X,1)] "OM workaround for cat";
   algorithm
     X_[1:end-1]:=X[1:end-1] "OM workaround for cat";

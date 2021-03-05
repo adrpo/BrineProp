@@ -23,7 +23,7 @@ partial package PartialBrineGas "Medium template for gas mixture of nX_gas gases
  //  (h,x,d,d_g,d_l) = specificEnthalpy_pTX(p,T,X) unfortunately, this is not invertable;
      h = specificEnthalpy_pTX(p,T,X);
  //    d=density_pTX(p,T,X);
-     (d,R) = density_pTX(p,T,X);
+     (d,R) = density_pTX(p,T,X, MM_vec);
 
      state=ThermodynamicState(p=p,T=T,X=X);
  end BaseProperties;
@@ -47,9 +47,20 @@ constant String gasNames[:]={""};
     input SI.Pressure p;
     input SI.Temp_K T;
     input MassFraction X[nX] "Mass fractions";
+    input SI.MolarMass MM[:]=fill(0,nX) "molar masses of components";
+
     output SI.Density d;
     output SpecificHeatCapacity R_gas;
-  //algorithm
+  algorithm
+      if debugmode then
+      print("Running density_pTX("+String(p/1e5)+" bar,"+String(T-273.15)+" degC, X="+Modelica.Math.Matrices.toString(transpose([X]))+")");
+    end if;
+    if not min(X)>0 and not ignoreNoCompositionInBrineGas then
+      print("No gas composition, assuming water vapour.(BrineProp.BrineGas_3Gas.density_pTX)");
+    end if;
+    R_gas :=Modelica.Constants.R*sum(cat(1,X[1:end-1],{(if min(X)>0 then X[end] else 1)})./ MM);
+
+    d :=p/(T*R_gas);
 
   end density_pTX;
 

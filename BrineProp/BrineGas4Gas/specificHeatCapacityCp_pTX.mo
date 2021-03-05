@@ -22,7 +22,7 @@ algorithm
   cp_vec[iN2]:=cp_N2;
   cp_vec[iCH4]:=cp_CH4;
   cp_vec[iH2]:=cp_H2;
-  cp_vec[iCO2]:=cp_H2O;
+  cp_vec[iCO2]:=cp_H2O; //the two-phase models rely on this order!
 
   if debugmode then
     print("Running specificHeatCapacityCp_pTX("+String(p/1e5)+" bar,"+String(T-273.15)+" degC, X="+Modelica.Math.Matrices.toString(transpose([X]))+")");

@@ -6,7 +6,7 @@ package Brine3salts4gas
     final gasNames = {"carbondioxide","nitrogen","methane","hydrogen"},
     final MM_gas = {M_CO2,M_N2,M_CH4,M_H2},
     final nM_gas = {nM_CO2,nM_N2,nM_CH4,nM_H2}); //iGas not final, because reassigned in Brine5salts3gas
-
+    //order of gases must be consistent with Brine3Gas TODO: pass order or copy enthalpy/density/cp here
 
   redeclare function solubilities_pTX
     "solubility calculation"
@@ -91,4 +91,21 @@ package Brine3salts4gas
                                 liquid and vapour state heat capacities.</p>
                                 </html>"));
   end specificHeatCapacityCp_gas;
+  redeclare function density_gas_pTX
+    extends PartialBrineMultiSaltMultiGasTwoPhase.density_gas_pTX;
+  /*  input SI.Pressure p;
+  input SI.Temp_K T;
+  input MassFraction X[:] "nX_gas mass fraction";
+  input SI.MolarMass MM[:] "=MM_vec =fill(0,nX) molar masses of components";
+  output SI.Density d;*/
+  algorithm
+    d := BrineGas4Gas.density_pTX(p,T,X,MM);
+  //   print("density_liquid_pTX: "+String(p*1e-5)+" bar,"+String(T)+" K->"+String(d)+"kg/m^3");
+  end density_gas_pTX;
+
+ redeclare function specificEnthalpy_gas_pTX
+   extends PartialBrineMultiSaltMultiGasTwoPhase.specificEnthalpy_gas_pTX;
+ algorithm
+     h :=BrineGas4Gas.specificEnthalpy_pTX(p,T,X); //,MM
+ end specificEnthalpy_gas_pTX;
 end Brine3salts4gas;

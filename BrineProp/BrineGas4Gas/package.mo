@@ -26,7 +26,7 @@ protected
     SI.SpecificEnthalpy h_CH4=SingleGases.CH4.specificEnthalpy(state);
     SI.SpecificEnthalpy h_H2=SingleGases.H2.specificEnthalpy(state);
 
-  //  SI.SpecificEnthalpy[:] h_vec={h_CO2,h_N2,h_CH4,h_H2,h_H2O};
+  //  SI.SpecificEnthalpy[:] h_vec={h_CO2,h_N2,h_CH4,h_H2,h_H2O}; //the two-phase models rely on this order!
     SI.SpecificEnthalpy[nX] h_vec;
     SI.MassFraction X_[size(X,1)] "OM workaround for cat";
   algorithm

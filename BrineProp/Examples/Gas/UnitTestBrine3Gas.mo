@@ -1,5 +1,5 @@
 within BrineProp.Examples.Gas;
-model Brine3Gas
+model UnitTestBrine3Gas
 package Medium = BrineProp.BrineGas3Gas (ignoreNoCompositionInBrineGas=true);
 //package Medium = Modelica.Media.Air.SimpleAir;
 //package Medium = PartialBrineGas;
@@ -58,9 +58,14 @@ equation
 // props.Xi={0.8};
  props.Xi={0.0892134,0.0051995,0.137699,0,0,0.000639217,7.0356e-6,1.5464e-5};
  */
+
+//  assert(abs(props.GVF-0.0497710432105261)<1e6,"GVF differs!");
+  assert(abs(props.h-2777119.5)<1e6,"h differs!");
+  assert(abs(props.d-0.007391231)<1e6,"d differs!");
+
 algorithm
 //  print("rho="+String(d)+" kg/m^3, TDS = " + String(TDS) + " g/l -> "+ String(f*265/TDS));
 //  print("sum(X_l)="+String(sum(props.state.X_l)-1)+"");
 //    print("sum(X_sat)="+String(sum(X_sat)));
 
-end Brine3Gas;
+end UnitTestBrine3Gas;
