@@ -18,12 +18,13 @@ protected
 //    Real m_SO4 = molalities[i_MgCl2];
 
     Real b_NaCl = m_Na + m_K + 2 * m_Ca; // + 2 * m_Mg;
-    // Debug.Print "b_NaCl: "; b_NaCl
 
     SI.Pressure p_H2O = Modelica.Media.Water.WaterIF97_pT.saturationPressure(T);
 algorithm
+// print("mola_H2("+String(p_gas)+","+String(T-273.16)+") (solubility_H2_pTX_Chabab2020_molality)");
     b_H2 :=solubility_H2_pTb_Chabab2020_molality(
       p_gas + p_H2O,
       T,
       b_NaCl);                                                              // mole fraction b_H2 / b/H2O
+//    print("b_H2: "+String(b_H2));
 end solubility_H2_pTX_Chabab2020_molality;

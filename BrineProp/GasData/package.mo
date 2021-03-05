@@ -17,7 +17,7 @@ package GasData "Molar masses and ion numbers of gases"
   constant SI.MolarMass M_CH4 = Modelica.Media.IdealGases.SingleGases.CH4.data.MM
   "0.01604246 [kg/mol]";
   constant Integer nM_CH4 = 1 "number of ions per molecule";
-  constant SI.MolarMass M_H2 = Modelica.Media.IdealGases.SingleGases.CH4.data.MM
+  constant SI.MolarMass M_H2 = Modelica.Media.IdealGases.SingleGases.H2.data.MM
   "0.01604246 [kg/mol]";
   constant Integer nM_H2 = 2 "number of ions per molecule";
 
