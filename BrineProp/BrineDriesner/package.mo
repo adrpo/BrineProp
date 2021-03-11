@@ -13,7 +13,6 @@ package BrineDriesner "NaCl solution using Driesner density and enthalpy functio
       d:=Densities.density_Driesner2007_pTX(p,T,X);
   end density_pTX;
 
-
   redeclare function extends specificEnthalpy_pTX
   "enthalpy calculation according to Driesner 2007 et al: 0-1000degC; 0.1-500MPa (doi:10.1016/j.gca.2007.05.026)"
   //Pressure limited to 100 MPa by Modelica Water property function

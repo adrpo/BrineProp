@@ -91,13 +91,9 @@ package Brine3salts4gas
                                 liquid and vapour state heat capacities.</p>
                                 </html>"));
   end specificHeatCapacityCp_gas;
+
   redeclare function density_gas_pTX
     extends PartialBrineMultiSaltMultiGasTwoPhase.density_gas_pTX;
-  /*  input SI.Pressure p;
-  input SI.Temp_K T;
-  input MassFraction X[:] "nX_gas mass fraction";
-  input SI.MolarMass MM[:] "=MM_vec =fill(0,nX) molar masses of components";
-  output SI.Density d;*/
   algorithm
     d := BrineGas4Gas.density_pTX(p,T,X,MM);
   //   print("density_liquid_pTX: "+String(p*1e-5)+" bar,"+String(T)+" K->"+String(d)+"kg/m^3");

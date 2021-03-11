@@ -30,9 +30,12 @@ dBubbleEnthalpy_dPressure
 dDewEnthalpy_dPressure
 specificEnthalpy_pTX
 temperature_phX
+density
+density_liq
+density_ph
 density_phX
-temperature_psX
 density_psX
+temperature_psX
 specificEnthalpy_psX
 setState_pT
 setState_ph
@@ -41,7 +44,6 @@ setState_dT
 setState_px
 setState_Tx
 vapourQuality
-density_ph
 temperature_ph
 pressure_dT
 specificEnthalpy_dT
@@ -50,9 +52,9 @@ temperature_ps
 density_ps
 specificEnthalpy_pT
 density_pT
+specificEnthalpy
 specificEnthalpy_dTX
 pressure
-density_liq
 dynamicViscosity_liq
 dynamicViscosity_gas
 temperature

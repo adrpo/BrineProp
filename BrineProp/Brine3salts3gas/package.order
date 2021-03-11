@@ -1,6 +1,7 @@
 fugacity_H2O
 setState_pTX
 setState_phX
+setState_dTX
 solubilities_pTX
 density_liq_pTX
 density_gas_pTX

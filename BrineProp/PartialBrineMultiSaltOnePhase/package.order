@@ -19,3 +19,7 @@ setState_phX
 surfaceTension_T
 dynamicViscosity_pTX
 isobaricExpansionCoefficient
+temperature
+specificEnthalpy
+pressure
+density

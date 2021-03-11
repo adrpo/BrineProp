@@ -29,7 +29,9 @@ partial package PartialBrineMultiSaltOnePhase "Template medium for  one-phase aq
    final reducedX =  true,
    final singleState=false,
    reference_X=cat(1,fill(0,nX-1),{1}),
-   fluidConstants = BrineConstants);
+   fluidConstants = BrineConstants,
+   ThermoStates=Choices.IndependentVariables.pTX); //ThermoStates was added for compatibility with Modelica.Fluid, don't really know what it does
+
 
   constant FluidConstants[nS] BrineConstants(
      each chemicalFormula = "H2O+NaCl+KCl+CaCl2+MgCl2+SrCl2",
@@ -85,8 +87,6 @@ end ThermodynamicState;
   end dynamicViscosity_pTXd;
 
  redeclare model extends BaseProperties "Base properties of medium"
-    //   import BrineProp;
- //  BrineProp.Partial_Units.Molality y_vec[:]=BrineProp.massToMoleFractions(X,MM_vec);
    SI.MoleFraction y_vec[:]=Utilities.massToMoleFractions(X,MM_vec);
  equation
    d = density_pTX(p,T,X);
@@ -94,14 +94,12 @@ end ThermodynamicState;
  //  T = temperature_phX(p,h,X);
    u = h - p/d;
    MM = y_vec*MM_vec;
-   R  = 8.3144/MM;
+   R  = Modelica.Constants.R/MM;
 
    state.p = p;
    state.T = T;
    state.d = d;
    state.X = X;
- /*algorithm 
-  print("MM_vec: "+String(size(MM_vec,1)));*/
    annotation (Documentation(revisions="<html>
 
 </html>"));
@@ -119,9 +117,10 @@ end ThermodynamicState;
   end density_pTX;
 
   redeclare replaceable function specificEnthalpy_pTX
-     input SI.Pressure p;
+    input SI.Pressure p;
     input SI.Temp_K T;
     input MassFraction X[:] "mass fraction m_NaCl/m_Sol";
+    input Boolean ignoreTlimit=false;
     output SI.SpecificEnthalpy h;
 
   /*algorithm 
@@ -152,10 +151,9 @@ protected
        print("temperature_phX("+String(p)+","+String(h)+")");
     end if;
     //Find temperature with h above given h ->T_b
-    assert(h>specificEnthalpy_pTX(p,T_a,X),"h="+String(h/1e3)+" kJ/kg -> Enthalpy too low (< 0degC)");
+    assert(h>specificEnthalpy_pTX(p,T_a,X,ignoreTlimit=true),"h="+String(h/1e3)+" kJ/kg -> Enthalpy too low (< 0degC)");
     while true loop
-      h_T:=specificEnthalpy_pTX(p,T_b,X);
-  // print(String(p)+","+String(T_b)+" K->"+String(h_T)+" J/kg (PartialBrine_ngas_Newton.temperature_phX)");
+      h_T:=specificEnthalpy_pTX(p,T_b,X,ignoreTlimit=true);
       if h>h_T then
         T_a := T_b;
         T_b := T_b + 50;
@@ -170,7 +168,7 @@ protected
   //    print("T_b-T_a="+String(T_b-T_a)+", abs(h-h_T)/h="+String(abs(h-h_T)/h));
       T:=(T_a+T_b)/2 "Halbieren";
   //    print("T_neu="+String(T)+"K");
-      h_T:=specificEnthalpy_pTX(p,T,X);
+      h_T:=specificEnthalpy_pTX(p,T,X,ignoreTlimit=true);
       if h_T > h then
         T_b:=T;
   //      print("T_b="+String(T)+"K -> h="+String(h_T-h));
@@ -250,6 +248,30 @@ algorithm
 //  beta :=state.d*(1/state.d - 1/(density_pTX(state.p,state.T - Delta_T,state.X)))/Delta_T;
   beta :=(1 - state.d/(density_pTX(state.p,state.T - Delta_T,state.X)))/Delta_T;
 end isobaricExpansionCoefficient;
+
+redeclare replaceable function extends temperature
+    "returns density from state - seems useless, but good for compatibility between PartialMedium and PartialMixedMediumTwoPhase"
+algorithm
+  T := state.T;
+end temperature;
+
+    redeclare function extends specificEnthalpy "to avoid check error"
+    algorithm
+    h :=specificEnthalpy_pTX(state.p,state.T,state.X);
+    end specificEnthalpy;
+
+redeclare replaceable function extends pressure
+  /*  input ThermodynamicState state "Thermodynamic state record";
+  output Modelica.SIunits.Pressure p;
+  */
+algorithm
+  p := state.p;
+end pressure;
+
+   redeclare function extends density "density from state"
+   algorithm
+    d := state.d;
+   end density;
 
   annotation (Documentation(info="<html>
 <h5>Usage</h5>

@@ -126,11 +126,6 @@ partial package PartialBrineMultiSaltMultiGasTwoPhase "Template medium for aqueo
 </html>"));
   end ThermodynamicState;
 
-  redeclare function extends density "return density of ideal gas"
-  algorithm
-    d := state.d;
-  end density;
-
     redeclare function density_pTX "wrapper to extract d from state"
       //necessary for declaration of inverse function p(T,d)
       input SI.Pressure p;
@@ -387,7 +382,7 @@ protected
       //necessary for declaration of inverse function T(p,h)
       input SI.Pressure p;
       input SI.Temp_K T;
-      input MassFraction X[:] "mass fraction m_NaCl/m_Sol";
+      input MassFraction X[:];
       input FixedPhase phase=0
     "2 for two-phase, 1 for one-phase, 0 if not known";
       input Real[nX_gas+1] n_g_norm_start=fill(0.5,nX_gas+1)

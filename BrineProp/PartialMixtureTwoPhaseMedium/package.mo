@@ -1,5 +1,5 @@
 within BrineProp;
-partial package PartialMixtureTwoPhaseMedium "Template class for two phase medium of a mixture of substances "
+partial package PartialMixtureTwoPhaseMedium "Template class for two-phase medium of a mixture of substances "
 /*
   // Uncomment this for MSL 3.2
 type FixedPhase = Integer(min=0,max=2) "phase of the fluid: 1 for 1-phase, 2 for two-phase, 0 for not known, e.g. interactive use";
@@ -19,7 +19,7 @@ redeclare replaceable record SaturationProperties "MSL 3.2.1"
   extends Modelica.Icons.Record;
   AbsolutePressure psat "saturation pressure";
   Temperature Tsat "saturation temperature";
-  MassFraction X[nX] "Mass fractions";
+  MassFraction X[nX] "Mass fractions"; //causes downward incompatibility -> warnings (missing subtype)
   annotation (Documentation(info="<html></html>"));
 end SaturationProperties;
 
@@ -311,6 +311,35 @@ algorithm
   annotation (Documentation(info="<html></html>"));
 end temperature_phX;
 
+   redeclare function extends density "density from state"
+   algorithm
+    d := state.d;
+   end density;
+
+replaceable function density_liq
+  input ThermodynamicState state "Thermodynamic state record";
+  output Modelica.SIunits.Density d_l;
+algorithm
+  d_l := state.d_l;
+end density_liq;
+
+replaceable function density_ph "Return density from p and h"
+  extends Modelica.Icons.Function;
+  input AbsolutePressure p "Pressure";
+  input SpecificEnthalpy h "Specific enthalpy";
+  input FixedPhase phase=0 "2 for two-phase, 1 for one-phase, 0 if not known";
+  output Density d "Density";
+algorithm
+  assert(nX == 1,
+    "This function is not allowed for mixtures. Use density_phX() instead!");
+  d := density_phX(
+      p,
+      h,
+      fill(0, 0),
+      phase);
+  annotation (Documentation(info="<html></html>"));
+end density_ph;
+
 redeclare replaceable function density_phX
   "Return density from p, h, and X or Xi"
   extends Modelica.Icons.Function;
@@ -328,23 +357,6 @@ algorithm
   annotation (Documentation(info="<html></html>"));
 end density_phX;
 
-redeclare replaceable function temperature_psX
-  "Return temperature from p, s, and X or Xi"
-  extends Modelica.Icons.Function;
-  input AbsolutePressure p "Pressure";
-  input SpecificEntropy s "Specific entropy";
-  input MassFraction X[nX] "Mass fractions";
-  input FixedPhase phase=0 "2 for two-phase, 1 for one-phase, 0 if not known";
-  output Temperature T "Temperature";
-algorithm
-  T := temperature(setState_psX(
-      p,
-      s,
-      X,
-      phase));
-  annotation (Documentation(info="<html></html>"));
-end temperature_psX;
-
 redeclare replaceable function density_psX
   "Return density from p, s, and X or Xi"
   extends Modelica.Icons.Function;
@@ -361,6 +373,23 @@ algorithm
       phase));
   annotation (Documentation(info="<html></html>"));
 end density_psX;
+
+redeclare replaceable function temperature_psX
+  "Return temperature from p, s, and X or Xi"
+  extends Modelica.Icons.Function;
+  input AbsolutePressure p "Pressure";
+  input SpecificEntropy s "Specific entropy";
+  input MassFraction X[nX] "Mass fractions";
+  input FixedPhase phase=0 "2 for two-phase, 1 for one-phase, 0 if not known";
+  output Temperature T "Temperature";
+algorithm
+  T := temperature(setState_psX(
+      p,
+      s,
+      X,
+      phase));
+  annotation (Documentation(info="<html></html>"));
+end temperature_psX;
 
 redeclare replaceable function specificEnthalpy_psX
   "Return specific enthalpy from p, s, and X or Xi"
@@ -484,23 +513,6 @@ algorithm
     bubbleEnthalpy(setSat_pX(pressure(state), state.X)) + eps), 0), 1);
   annotation (Documentation(info="<html></html>"));
 end vapourQuality;
-
-replaceable function density_ph "Return density from p and h"
-  extends Modelica.Icons.Function;
-  input AbsolutePressure p "Pressure";
-  input SpecificEnthalpy h "Specific enthalpy";
-  input FixedPhase phase=0 "2 for two-phase, 1 for one-phase, 0 if not known";
-  output Density d "Density";
-algorithm
-  assert(nX == 1,
-    "This function is not allowed for mixtures. Use density_phX() instead!");
-  d := density_phX(
-      p,
-      h,
-      fill(0, 0),
-      phase);
-  annotation (Documentation(info="<html></html>"));
-end density_ph;
 
 replaceable function temperature_ph "Return temperature from p and h"
   extends Modelica.Icons.Function;
@@ -638,6 +650,11 @@ algorithm
   annotation (Documentation(info="<html></html>"));
 end density_pT;
 
+    redeclare function extends specificEnthalpy "to avoid check error"
+    algorithm
+    h :=state.h;
+    end specificEnthalpy;
+
 replaceable function specificEnthalpy_dTX
   "Return specific enthalpy from d, T, and X or Xi"
   extends Modelica.Icons.Function;
@@ -663,13 +680,6 @@ redeclare replaceable function extends pressure
 algorithm
   p := state.p;
 end pressure;
-
-replaceable function density_liq
-  input ThermodynamicState state "Thermodynamic state record";
-  output Modelica.SIunits.Density d_l;
-algorithm
-  d_l := state.d_l;
-end density_liq;
 
 replaceable function dynamicViscosity_liq "Viscosity of liquid phase"
   //  extends dynamicViscosity; Warum funzt das nicht? Er sagt "multiple algorithms"

@@ -16,12 +16,10 @@ package BrineDuan "NaCl solution using Duan density"
     h :=BrineDriesner.specificEnthalpy_pTX(p,T,X);
   end specificEnthalpy_pTX;
 
-
   redeclare function extends density_pTX
   algorithm
     d:=density_Duan2008_pTX(p,T,X,MM_vec,saltConstants);
   end density_pTX;
-
 
   redeclare function extends dynamicViscosity_pTX
   algorithm

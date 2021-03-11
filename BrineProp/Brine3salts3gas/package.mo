@@ -32,6 +32,15 @@ package Brine3salts3gas "Two-phase aqueous solution of NaCl, KCl, CaCl2, N2, CO2
   redeclare function extends setState_phX "to avoid check error"
   end setState_phX;
 
+  redeclare function extends setState_dTX
+  algorithm
+    assert(false,"Running dummy setState_dTX. Shouldn't be called.");
+    state := setState_pTX(
+      1e5,
+      T,
+      X) ",fluidnames)";
+  end setState_dTX;
+
   redeclare replaceable function extends solubilities_pTX
   "solubility calculation, returns gas concentration in kg/kg H2O"
   algorithm

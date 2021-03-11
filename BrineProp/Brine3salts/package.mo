@@ -19,6 +19,17 @@ package Brine3salts "One-phase (liquid) multisalt brine solution"
     final MM_salt = Salt_data.MM_salt,
     final nM_salt = Salt_data.nM_salt*/
 
+redeclare function extends setState_pTX
+  "Return thermodynamic state as function of p and T"
+algorithm
+  state := ThermodynamicState(
+    d=density_pTX(p, T, X),
+    T=T,
+    p=p,
+    X=X);
+//    h=specificEnthalpy_pTX(p,T,X),
+end setState_pTX;
+
   redeclare function extends density_pTX
   //  extends density_Duan2008_pTX(MM_vec=cat(1,MM_salt, {M_H2O}));
      //TODO should take MM_vec;
@@ -30,8 +41,9 @@ package Brine3salts "One-phase (liquid) multisalt brine solution"
   //  d := Modelica.Media.Water.WaterIF97_pT.density_pT(p,T)  "*(1+sum(X[1:nX_salt]))/X[end]";
   end density_pTX;
 
- redeclare function specificEnthalpy_pTX
-   extends specificEnthalpy_pTX_liq_Francke_cp(MM_vec=MM_salt);
+ redeclare function extends specificEnthalpy_pTX
+ algorithm
+      h :=specificEnthalpy_pTX_liq_Francke_cp(p,T,X,MM_vec=MM_salt,ignoreTlimit=ignoreTlimit);
  end specificEnthalpy_pTX;
 
  redeclare function extends dynamicViscosity_pTXd
@@ -94,6 +106,15 @@ protected
        MM_vec,
        saltConstants);
  end dynamicViscosity_pTX;
+
+  redeclare function extends setState_dTX
+  algorithm
+    assert(false,"Running dummy setState_dTX. Shouldn't be called.");
+    state := setState_pTX(
+      1e5,
+      T,
+      X) ",fluidnames)";
+  end setState_dTX;
 
   annotation (Documentation(info="<html>
 <p><b>BrineProp.Brine_5salts</b> is a medium package that provides properties of one-phase solution of five salts (NaCl, KCl, CaCl<sub>2</sub>, MgCl<sub>2</sub>, SrCl<sub>2</sub>).</p>
