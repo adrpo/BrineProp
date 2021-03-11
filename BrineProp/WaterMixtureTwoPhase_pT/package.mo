@@ -31,6 +31,7 @@ constant Integer nX_gas = 0;
      each dipoleMoment = 1);   
 */
 //   final extraPropertiesNames={"gas enthalpy","liquid enthalpy"},
+  extends PartialFlags;
 
   constant Modelica.SIunits.MolarMass M_H2O = 0.018015 "[kg/mol] TODO";
 
@@ -333,7 +334,7 @@ protected
    + eps), 0), 1);
 algorithm
 
-  if BrineProp.debugmode then
+  if debugmode then
     Modelica.Utilities.Streams.print("Running setState_phX(" + String(p/1e5) + " bar,"
        + String(h) + " J/kg,X)...");
   end if;
