@@ -20,6 +20,9 @@ model UnitTestsTwoPhase3Gas
   Medium.BaseProperties props;
   Medium.BaseProperties props_3s3g;
 equation
+  assert(abs(1.1766869-Medium.density_liq_pTX(1e5,300,props.X,Medium.MM_vec))<1e6,"density differs!");
+  assert(abs(0.00031644627-Medium.isobaricExpansionCoefficient_liq(props.state, props.d_l, Medium.MM_vec))<1e6,"density differs!");
+
   props.p = 200000;
   props.T = 300;
   props.Xi = Xi;
