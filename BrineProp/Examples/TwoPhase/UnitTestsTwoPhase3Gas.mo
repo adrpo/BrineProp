@@ -18,6 +18,7 @@ model UnitTestsTwoPhase3Gas
     Real[Medium.nXi] Xi= fill(0,0);*/
 
   Medium.BaseProperties props;
+  Medium.BaseProperties props_3s3g;
 equation
   props.p = 200000;
   props.T = 300;
@@ -25,6 +26,11 @@ equation
 
   assert(abs(props.GVF-0.32448128)<1e6,"GVF differs!");
   assert(abs(props.h-188780.97)<1e6,"GVF differs!");
+
+  props_3s3g.p = 455e5;
+  props_3s3g.T = 145+273.15;
+  props_3s3g.Xi = {0.082870031,0.00486001,0.125914128,1.6E-6, 465.6E-6, 49.9E-6};//-2313 m
+  assert(abs(props_3s3g.d-1127.8458262083673)<1e9, "Not the expecteded density!");
   annotation (experiment(StopTime=1, __Dymola_NumberOfIntervals=1),
       __Dymola_experimentSetupOutput);
 end UnitTestsTwoPhase3Gas;
