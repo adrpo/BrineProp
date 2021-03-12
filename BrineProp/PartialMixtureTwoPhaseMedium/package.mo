@@ -313,7 +313,7 @@ end temperature_phX;
 
    redeclare function extends density "density from state"
    algorithm
-    d := state.d;
+    d := density_pTX(state.p, state.T, state.X);
    end density;
 
 replaceable function density_liq
