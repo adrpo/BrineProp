@@ -15,8 +15,6 @@ nM_gas
 BaseProperties
 ThermodynamicState
 density_pTX
-density_liq_pTX
-density_gas_pTX
 saturationTemperature
 dewEnthalpy
 bubbleEnthalpy
@@ -36,5 +34,4 @@ setState_phX
 specificHeatCapacityCp
 specificHeatCapacityCp_liq
 specificHeatCapacityCp_gas
-isobaricExpansionCoefficient_liq
 specificEnthalpy

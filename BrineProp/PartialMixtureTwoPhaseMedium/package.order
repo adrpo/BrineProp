@@ -59,3 +59,6 @@ dynamicViscosity_liq
 dynamicViscosity_gas
 temperature
 pressure_dTX
+isobaricExpansionCoefficient_liq
+density_liq_pTX
+density_gas_pTX

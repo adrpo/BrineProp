@@ -736,6 +736,39 @@ algorithm
   annotation (Documentation(info="<html></html>"));
 end pressure_dTX;
 
+    replaceable function isobaricExpansionCoefficient_liq
+    //  extends isobaricExpansionCoefficient;
+      input ThermodynamicState state;
+      input SI.Density d_l;
+      input SI.MolarMass MM[:] "=MM_vec =fill(0,nX) molar masses of components";
+      output SI.LinearTemperatureCoefficient beta;
+protected
+      constant SI.Temperature Delta_T= 1;
+    algorithm
+    //  beta :=d_l*(1/d_l - 1/(density_liquid_pTX(state.p,state.T - Delta_T,state.X,MM_vec)))/Delta_T;
+      beta := (1 - d_l/(density_liq_pTX(
+        state.p,
+        state.T - Delta_T,
+        state.X,
+        MM)))/Delta_T;
+    end isobaricExpansionCoefficient_liq;
+
+   replaceable function density_liq_pTX "Density of the liquid phase"
+     input SI.Pressure p "TODO: Rename to density_liq_pTX";
+     input SI.Temp_K T;
+     input MassFraction X[nX] "mass fraction m_NaCl/m_Sol";
+     input SI.MolarMass MM[:] "=MM_vec =fill(0,nX) molar masses of components";
+     output SI.Density d;
+   end density_liq_pTX;
+
+   replaceable function density_gas_pTX "Density of the gas phase"
+     input SI.Pressure p;
+     input SI.Temp_K T;
+     input MassFraction X[:] "nX_gas mass fraction";
+     input SI.MolarMass MM[:] "=MM_vec =fill(0,nX) molar masses of components";
+     output SI.Density d;
+   end density_gas_pTX;
+
 annotation (Documentation(info="<html>
 <h4>PartialMixtureTwoPhaseMedium</h4>
 <p><br>This is a template for two phase medium of a mixture of substances and is used by REFPROPMedium.</p>
