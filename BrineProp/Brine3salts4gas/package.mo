@@ -1,6 +1,5 @@
 within BrineProp;
-package Brine3salts4gas
-    "Two-phase aqueous solution of NaCl, KCl, CaCl2, N2, CO2, CH4, H2"
+package Brine3salts4gas "Two-phase aqueous solution of NaCl, KCl, CaCl2, N2, CO2, CH4, H2"
   extends Brine3salts3gas(
     iH2=7,
     final gasNames = {"carbondioxide","nitrogen","methane","hydrogen"},
