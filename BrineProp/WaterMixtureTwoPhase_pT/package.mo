@@ -4,6 +4,8 @@ package WaterMixtureTwoPhase_pT "(incomplete) Water model from Modelica.Media co
 constant Integer nX_salt = 0;
 constant Integer nX_gas = 0;
 
+extends PartialFlags;
+                      //just for compatibility
 
  extends PartialMixtureTwoPhaseMedium(
     final mediumName="TwoPhaseMixtureWater",
