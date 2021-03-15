@@ -6,7 +6,7 @@ Attribute VB_Name = "GasData"
 
 
 ' by Henning Francke francke@gfz-potsdam.de
-' 2014 GFZ Potsdam
+' 2020 GFZ Potsdam
 
 Option Explicit
 Option Base 1
@@ -111,7 +111,24 @@ Function solubility_CO2_pTX_Duan2006(p As Double, T As Double, Xin, p_gas) 'CO2 
 '' Zhenhao Duan et al. (2006) An improved model for the calculation of CO2 solubility in aqueous
 '' solutions containing Na+,K+,Ca2+,Mg2+,Cl-, and SO4_2-. Marine Chemistry 98131-139.
 '' fugacity from doi10.1016/j.marchem.2005.09.001
-
+    
+    If Not p_gas > 0 Then
+       solubility_CO2_pTX_Duan2006 = 0
+       Exit Function
+    ElseIf p_gas < 0 Then
+       solubility_CO2_pTX_Duan2006 = "#p_gas negative! (solubility_CO2_pTX_Duan2006)"
+       Exit Function
+    ElseIf p_gas > p Then
+       solubility_CO2_pTX_Duan2006 = "#p_gas > p ! (solubility_CO2_pTX_Duan2006)"
+       Exit Function
+    End If
+    
+    If p < 0 Then
+       solubility_CO2_pTX_Duan2006 = "#p negative! (solubility_CO2_pTX_Duan2006)"
+       Exit Function
+    End If
+    
+ 
     Dim solu As Double 'CO2 solubility in mol_CO2/kg H2O
     Dim mu_l0_CO2_RT_c, lambda_CO2_Na_c, zeta_CO2_NaCl_c
     mu_l0_CO2_RT_c = Array(28.9447706, -0.0354581768, -4770.67077, 0.0000102782768, 33.8126098, 0.0090403714, -0.00114934031, -0.307405726, -0.0907301486, 0.000932713393, 0)
@@ -130,40 +147,36 @@ Function solubility_CO2_pTX_Duan2006(p As Double, T As Double, Xin, p_gas) 'CO2 
     Dim lambda_CO2_Na As Double
     Dim zeta_CO2_NaCl As Double
 
-    Dim X_
-    X_ = CheckMassVector(Xin, Brine.nX)
-    If VarType(X_) = vbString Then
-       solubility_CO2_pTX_Duan2006 = X_
+    Dim X
+    X = CheckMassVector(Xin, Brine.nX)
+    If VarType(X) = vbString Then
+       solubility_CO2_pTX_Duan2006 = X
        Exit Function
     End If
  
  'constant
     Dim molalities '() As Double ReDim molalities(nX)
-    molalities = massFractionsToMolalities(X_, Brine.MM_vec)
+    molalities = massFractionsToMolalities(X, Brine.MM_vec)
     Dim m_Cl As Double, m_Na As Double, m_K As Double, m_Ca As Double, m_Mg As Double, m_SO4 As Double
     m_Cl = molalities(i_NaCl) + molalities(i_KCl) + 2 * molalities(i_CaCl2)
     m_Na = molalities(i_NaCl)
     m_K = molalities(i_KCl)
     m_Ca = molalities(i_CaCl2)
     
-    If Not p_gas > 0 Then
-       solubility_CO2_pTX_Duan2006 = "#p_gas negative! (solubility_CO2_pTX_Duan2006)"
-    ElseIf Not p > 0 Then
-       solubility_CO2_pTX_Duan2006 = "#p negative! (solubility_CO2_pTX_Duan2006)"
-    Else
-        'equ. 9
-        phi = fugacity_CO2_Duan2006(p_gas + p_H2O, T)
-        If VarType(phi) = vbString Then 'if error
-            solubility_CO2_pTX_Duan2006 = phi & "(solubility_CO2_pTX_Duan2006)"
-            Exit Function
-        End If
-        mu_l0_CO2_RT = Par_CO2_Duan2003(p_gas + p_H2O, T, mu_l0_CO2_RT_c)
-        lambda_CO2_Na = Par_CO2_Duan2003(p_gas + p_H2O, T, lambda_CO2_Na_c)
-        zeta_CO2_NaCl = Par_CO2_Duan2003(p_gas + p_H2O, T, zeta_CO2_NaCl_c)
-       
-        solu = phi * p_gas / 10 ^ 5 * Exp(-mu_l0_CO2_RT - 2 * lambda_CO2_Na * (m_Na + m_K + 2 * m_Ca + 2 * m_Mg) - zeta_CO2_NaCl * m_Cl * (m_Na + m_K + m_Mg + m_Ca) + 0.07 * m_SO4 * 0)
-        solubility_CO2_pTX_Duan2006 = solu * M_CO2 * X_(Brine.nX) 'molality->mass fraction
+ 
+    'equ. 9
+    phi = fugacity_CO2_Duan2006(p_gas + p_H2O, T)
+    If VarType(phi) = vbString Then 'if error
+        solubility_CO2_pTX_Duan2006 = phi & "(solubility_CO2_pTX_Duan2006)"
+        Exit Function
     End If
+    mu_l0_CO2_RT = Par_CO2_Duan2003(p_gas + p_H2O, T, mu_l0_CO2_RT_c)
+    lambda_CO2_Na = Par_CO2_Duan2003(p_gas + p_H2O, T, lambda_CO2_Na_c)
+    zeta_CO2_NaCl = Par_CO2_Duan2003(p_gas + p_H2O, T, zeta_CO2_NaCl_c)
+   
+    solu = phi * p_gas / 10 ^ 5 * Exp(-mu_l0_CO2_RT - 2 * lambda_CO2_Na * (m_Na + m_K + 2 * m_Ca + 2 * m_Mg) - zeta_CO2_NaCl * m_Cl * (m_Na + m_K + m_Mg + m_Ca) + 0.07 * m_SO4 * 0)
+    solubility_CO2_pTX_Duan2006 = solu * M_CO2 * X(Brine.nX) 'molality->mass fraction
+    
 End Function
 
 
@@ -259,15 +272,15 @@ End Function
     ' http://www.geochem-model.org/wp-content/uploads/2009/09/46-FPE_248_103.pdf
     
     'Dim M_H2O As Double:M_H2O = H2O.MM
-    Dim X_: X_ = CheckMassVector(Xin, Brine.nX)
-    If VarType(X_) = vbString Then
-       solubility_N2_pTX_Mao2006_molality = X_
+    Dim X: X = CheckMassVector(Xin, Brine.nX)
+    If VarType(X) = vbString Then
+       solubility_N2_pTX_Mao2006_molality = X
        Exit Function
     End If
-    X_H2O = X_(Brine.nX) ' to be used in solubility_N2_pTX_Mao2006
+    X_H2O = X(Brine.nX) ' to be used in solubility_N2_pTX_Mao2006
     
     Dim molalities
-    molalities = ToDouble(massFractionsToMolalities(X_, Brine.MM_vec))
+    molalities = ToDouble(massFractionsToMolalities(X, Brine.MM_vec))
     If VarType(molalities) = vbString Then
         solubility_N2_pTX_Mao2006_molality = molalities
         Exit Function
@@ -360,6 +373,22 @@ End Function
     End If
 End Function
 Function solubility_N2_pTX_Mao2006(p As Double, T As Double, Xin, p_gas) 'solubility calculation of N2 in seawater Mao&Duan(2006)
+    If Not p_gas > 0 Then
+       solubility_N2_pTX_Mao2006 = 0
+       Exit Function
+    ElseIf p_gas < 0 Then
+       solubility_N2_pTX_Mao2006 = "#p_gas negative! (solubility_N2_pTX_Mao2006)"
+       Exit Function
+    ElseIf p_gas > p Then
+       solubility_N2_pTX_Mao2006 = "#p_gas > p ! (solubility_N2_pTX_Mao2006)"
+       Exit Function
+    End If
+    
+    If p < 0 Then
+       solubility_N2_pTX_Mao2006 = "#p negative! (solubility_N2_pTX_Mao2006)"
+       Exit Function
+    End If
+    
     Dim solu ' mol/kg_H2O
     Dim X_H2O As Double
     solu = solubility_N2_pTX_Mao2006_molality(p, T, Xin, p_gas, X_H2O)
@@ -444,6 +473,24 @@ Function solubility_CH4_pTX_Duan2006(p As Double, T As Double, Xin, p_gas) 'Duan
 ' http://dx.doi.org/10.1016/j.gca.2006.03.018TODO Umrechnung andere Salz in NaCl"
 '  output SI.MassFraction c_gas "gas concentration in kg_gas/kg_H2O"
 
+    
+    If Not p_gas > 0 Then
+       solubility_CH4_pTX_Duan2006 = 0
+       Exit Function
+    ElseIf p_gas < 0 Then
+       solubility_CH4_pTX_Duan2006 = "#p_gas negative! (solubility_CH4_pTX_Duan2006)"
+       Exit Function
+    ElseIf p_gas > p Then
+       solubility_CH4_pTX_Duan2006 = "#p_gas > p ! (solubility_CH4_pTX_Duan2006)"
+       Exit Function
+    End If
+    
+    If p < 0 Then
+       solubility_CH4_pTX_Duan2006 = "#p negative! (solubility_CH4_pTX_Duan2006)"
+       Exit Function
+    End If
+
+    
     Dim mu_l0_CH4_RT_c, lambda_CH4_Na_c, xi_CH4_NaCl_c
     mu_l0_CH4_RT_c = Array(8.3143711, -0.00072772168, 2148.9858, -0.000014019672, -667434.49, 0.007698589, -0.0000050253331, -3.0092013, 484.68502, 0)
     lambda_CH4_Na_c = Array(-0.81222036, 0.0010635172, 188.94036, 0, 0, 0.000044105635, 0, 0, 0, -4.6797718E-11)
@@ -464,9 +511,9 @@ Function solubility_CH4_pTX_Duan2006(p As Double, T As Double, Xin, p_gas) 'Duan
     End If
     Dim phi_CH4 As Double, mu_l0_CH4_RT As Double, lambda_CH4_Na As Double, xi_CH4_NaCl As Double
     
-    If Not p_gas > 0 Then
-        solubility_CH4_pTX_Duan2006 = 0
-    Else
+'    If Not p_gas > 0 Then
+'        solubility_CH4_pTX_Duan2006 = 0
+'    Else
         Dim msg As String
         If outOfRangeMode > 0 Then
             If 273 > T Or T > 273 + 250 Then
@@ -486,15 +533,15 @@ Function solubility_CH4_pTX_Duan2006(p As Double, T As Double, Xin, p_gas) 'Duan
             End If
         End If
         
-        Dim X_
-        X_ = CheckMassVector(Xin, Brine.nX)
-        If VarType(X_) = vbString Then
-            solubility_CH4_pTX_Duan2006 = X_
+        Dim X
+        X = CheckMassVector(Xin, Brine.nX)
+        If VarType(X) = vbString Then
+            solubility_CH4_pTX_Duan2006 = X
             Exit Function
         End If
 
         Dim molalities '(nX)
-        molalities = massFractionsToMolalities(X_, Brine.MM_vec)
+        molalities = massFractionsToMolalities(X, Brine.MM_vec)
         Dim m_Cl As Double, m_Na As Double, m_K As Double, m_Ca As Double, m_Mg As Double, m_SO4 As Double                 'Molality
         m_Cl = molalities(i_NaCl) + molalities(i_KCl) + 2 * molalities(i_CaCl2)  '+ 2 * molalities(i_MgCl2)
         m_Na = molalities(i_NaCl)
@@ -512,8 +559,8 @@ Function solubility_CH4_pTX_Duan2006(p As Double, T As Double, Xin, p_gas) 'Duan
         Dim solu As Double
         solu = p_gas / 10 ^ 5 * phi_CH4 * Exp(-mu_l0_CH4_RT - 2 * lambda_CH4_Na * (m_Na + m_K + 2 * m_Ca + 2 * m_Mg) - xi_CH4_NaCl * (m_Na + m_K + 2 * m_Ca + 2 * m_Mg) * (m_Cl + 2 * m_SO4) - 4 * 0.0332 * m_SO4)
         
-        solubility_CH4_pTX_Duan2006 = solu * M_CH4 * X_(Brine.nX) 'molality->mass fraction
-    End If
+        solubility_CH4_pTX_Duan2006 = solu * M_CH4 * X(Brine.nX) 'molality->mass fraction
+'    End If
 End Function
 
   

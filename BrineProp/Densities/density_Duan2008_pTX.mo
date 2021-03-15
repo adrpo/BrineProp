@@ -96,8 +96,8 @@ algorithm
   end if;
 //  print("nX_salts="+String(nX_salt)+", veclength="+String(size(ignoreLimitSalt_p,1)) + ", ignoreLimitSalt_p="+String(ignoreLimitSalt_p[1]));
 
-  assert(size(ignoreLimitSalt_p,1)==nX_salt,"Wrong length of ignoreLimitSalt_T ("+String(size(ignoreLimitSalt_p,1))+")"); //needed here, because flag vector with fewer than nX_salts elements causes "out of bounds" and is not caught elsewere
-  assert(size(ignoreLimitSalt_T,1)==nX_salt,"Wrong length of ignoreLimitSalt_p ("+String(size(ignoreLimitSalt_T,1))+")"); //should be in PartialFlags, but asserts can't be in packages
+  assert(size(ignoreLimitSalt_p,1)==nX_salt,"Wrong length of ignoreLimitSalt_p ("+String(size(ignoreLimitSalt_p,1))+")"); //needed here, because flag vector with fewer than nX_salts elements causes "out of bounds" and is not caught elsewere
+  assert(size(ignoreLimitSalt_T,1)==nX_salt,"Wrong length of ignoreLimitSalt_T ("+String(size(ignoreLimitSalt_T,1))+")"); //should be in PartialFlags, but asserts can't be in packages
   assert(size(ignoreLimitSalt_b,1)==nX_salt,"Wrong length of ignoreLimitSalt_b ("+String(size(ignoreLimitSalt_b,1))+")");
 
   rho_H2O := Modelica.Media.Water.WaterIF97_pT.density_pT(max(p, p_sat + 1), T)*1e-3

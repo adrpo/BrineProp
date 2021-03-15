@@ -1,7 +1,8 @@
+UsersGuide
 M_H2O
+nM_H2O
 DataDir
 OutputDir
-UnitTests
 Examples
 Utilities
 SaltData
@@ -21,9 +22,11 @@ Brine5salts
 GasData
 PartialBrineGas
 BrineGas3Gas
+BrineGas4Gas
 Vacuum
 PartialMixtureTwoPhaseMedium
 WaterMixtureTwoPhase_pT
 PartialBrineMultiSaltMultiGasTwoPhase
 Brine3salts3gas
 Brine5salts3gas
+Brine3salts4gas

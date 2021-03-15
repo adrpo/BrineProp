@@ -30,6 +30,9 @@ package PartialFlags
     constant Boolean ignoreLimitCH4_T=false;
     constant Boolean ignoreLimitCH4_p=false;
     constant Boolean ignoreLimitCH4_b=false;
+    constant Boolean ignoreLimitH2_T=false;
+    constant Boolean ignoreLimitH2_p=false;
+    constant Boolean ignoreLimitH2_b=false;
     constant Boolean ignoreNoCompositionInBrineGas=false;
 
 protected

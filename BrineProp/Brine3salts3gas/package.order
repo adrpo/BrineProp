@@ -3,6 +3,7 @@ setState_pTX
 setState_phX
 solubilities_pTX
 density_liq_pTX
+density_gas_pTX
 specificEnthalpy_liq_pTX
 specificEnthalpy_gas_pTX
 dynamicViscosity_liq

@@ -1,24 +1,23 @@
 within BrineProp;
 package BrineGas3Gas "Gas mixture of CO2+N2+CH4+H2O"
   extends PartialBrineGas(
-    final substanceNames={"carbondioxide","nitrogen","methane","water"},
-    final MM_vec = {M_CO2,M_N2,M_CH4,M_H2O},
-    final nM_vec = {nM_CO2,nM_N2,nM_CH4,nM_CH4});
-
+    substanceNames={"carbondioxide","nitrogen","methane","water"},
+    iCO2=1,
+    iN2=2,
+    iCH4=3,
+    MM_vec = {M_CO2,M_N2,M_CH4,M_H2O},
+    nM_vec = {nM_CO2,nM_N2,nM_CH4,nM_H2O});
 
   extends PartialFlags;
-
 
  redeclare model extends BaseProperties
  //Dummy for OM
  end BaseProperties;
-
 /* redeclare record extends ThermodynamicState
  //Dummy for OM
  end ThermodynamicState;
 */
   constant Boolean waterSaturated=false "activates water saturation";
-
 
   replaceable function waterSaturatedComposition_pTX
   "calculates the water saturated mass vector for a given Temperature"
@@ -51,7 +50,6 @@ protected
 
   end waterSaturatedComposition_pTX;
 
-
   redeclare function extends density "water-saturated density from state"
 
   algorithm
@@ -66,40 +64,45 @@ protected
   //  assert(lambda>0,"lambda="+String(lambda));
   end density;
 
+  replaceable function extends specificHeatCapacityCp_pTX
+    "calculation of specific heat capacities of gas mixture"
+    import Modelica.Media.IdealGases.Common.SingleGasNasa;
+    import Modelica.Media.IdealGases.SingleGases;
 
-  redeclare function extends density_pTX
-  "Density of an ideal mixture of ideal gases"
-  //    SpecificHeatCapacity R_gas; //= sum(Modelica.Constants.R*X ./ MM_vec);
-  //    MassFraction[:] X_=cat(1,fill(nX-1,0),{1});
-  //    MassFraction[size(X,1)] X_=cat(1,fill(size(X,1),0),{1});
+    import Modelica.Media.Water;
+
+protected
+      SingleGases.H2O.ThermodynamicState state=SingleGases.H2O.ThermodynamicState(p=0,T=T);
+      SI.SpecificHeatCapacity cp_CO2=SingleGases.CO2.specificHeatCapacityCp(state);
+      SI.SpecificHeatCapacity cp_N2=SingleGases.N2.specificHeatCapacityCp(state);
+      SI.SpecificHeatCapacity cp_CH4=SingleGases.CH4.specificHeatCapacityCp(state);
+      SI.SpecificHeatCapacity cp_H2O=Water.IF97_Utilities.cp_pT(min(p,Water.IF97_Utilities.BaseIF97.Basic.psat(T)-1),T=T)
+      "below psat -> gaseous";
+
+      SI.SpecificHeatCapacity cp_vec[:]={cp_CO2,cp_N2,cp_CH4,cp_H2O}; //the two-phase models rely on this order!
+
   algorithm
-  /*  if not R_gas >0 then
-    print("R_gas="+String(R_gas)+", (MM="+Modelica.Math.Matrices.toString({MM_vec})+", X="+Modelica.Math.Matrices.toString({X})+")");
-  end if;*/
-  //  print("size(X_,1)="+String(size(X_,1))+",size(X,1)="+String(size(X,1)));
     if debugmode then
-      print("Running density_pTX("+String(p/1e5)+" bar,"+String(T-273.15)+" degC, X="+Modelica.Math.Matrices.toString(transpose([X]))+")");
+      print("Running specificHeatCapacityCp_pTX("+String(p/1e5)+" bar,"+String(T-273.15)+" degC, X="+Modelica.Math.Matrices.toString(transpose([X]))+")");
     end if;
-  // assert(min(X)>0,"Cannot calculate with empty composition.");
-    if not min(X)>0 and not ignoreNoCompositionInBrineGas then
-      print("No gas composition, assuming water vapour.(BrineProp.BrineGas_3Gas.density_pTX)");
+
+    if not ignoreNoCompositionInBrineGas and not min(X)>0 then
+      print("No gas composition, assuming water vapour.(BrineProp.BrineGas_3Gas.specificHeatCapacityCp_pTX)");
     end if;
-    R_gas :=Modelica.Constants.R*sum(cat(1,X[1:end-1],{(if min(X)>0 then X[end] else 1)})./ MM_vec);
 
   /*  if waterSaturated then
-    R_gas :=sum(Modelica.Constants.R*waterSaturatedComposition_pTX(
-        p,
-        T,
-        X[end - nX + 1:end]) ./ MM_vec);
-    d :=p/(T*R_gas);
-  else*/
-        d :=p/(T*R_gas);
-  //  end if;
-  //  print("d="+String(d)+" kg/m^3");
-  end density_pTX;
+    cp := cp_vec * waterSaturatedComposition_pTX(p,T,X[end - nX+1:end]);
+  else */
+  //    cp := cp_vec * X[end - nX+1:end];
+    cp := cp_vec * cat(1,X[1:end-1],{if min(X)>0 then X[end] else 1});
+      //  end if;
 
+  /*  print("cp_CO2: "+String(cp_vec[1])+" J/kg");
+  print("cp_N2: "+String(cp_vec[2])+" J/kg");
+  print("cp_CH4: "+String(cp_vec[3])+" J/kg");
+  print("cp_H2O: "+String(cp_vec[4])+" J/kg"); */
 
-
+  end specificHeatCapacityCp_pTX;
 
   redeclare function extends dynamicViscosity
   "water-saturated  thermal conductivity of water"
@@ -115,7 +118,6 @@ protected
   //  assert(lambda>0,"lambda="+String(lambda));
   end dynamicViscosity;
 
-
   redeclare function extends dynamicViscosity_pTX
   "calculation of gas dynamic Viscosity"
   /*  import NG = Modelica.Media.IdealGases.Common.SingleGasNasa;
@@ -130,7 +132,6 @@ protected
       T=T,
       X={0,0}));
   end dynamicViscosity_pTX;
-
 
   redeclare function extends thermalConductivity
   "water-saturated  thermal conductivity of water"
@@ -150,7 +151,6 @@ protected
 
   end thermalConductivity;
 
-
   redeclare function extends thermalConductivity_pTX
   "calculation of gas thermal conductivity"
   /*  import NG = Modelica.Media.IdealGases.Common.SingleGasNasa;
@@ -163,8 +163,7 @@ protected
       Modelica.Media.Air.MoistAir.ThermodynamicState(p=0,T=T,X={0,0}));
   end thermalConductivity_pTX;
 
-
-  redeclare function specificEnthalpy_pTX
+  redeclare replaceable function specificEnthalpy_pTX
   "calculation of specific enthalpy of gas mixture"
   //  import Modelica.Media.IdealGases.Common.SingleGasNasa;
     import Modelica.Media.IdealGases.SingleGases;
@@ -183,7 +182,7 @@ protected
     SI.SpecificEnthalpy h_N2=SingleGases.N2.specificEnthalpy(state);
     SI.SpecificEnthalpy h_CH4=SingleGases.CH4.specificEnthalpy(state);
 
-    SI.SpecificEnthalpy[:] h_vec={h_CO2,h_N2,h_CH4,h_H2O};
+    SI.SpecificEnthalpy[:] h_vec={h_CO2,h_N2,h_CH4,h_H2O}; //the two-phase models rely on this order!
     SI.MassFraction X_[size(X,1)] "OM workaround for cat";
   algorithm
     X_[1:end-1]:=X[1:end-1] "OM workaround for cat";
@@ -208,7 +207,6 @@ protected
   */
   end specificEnthalpy_pTX;
 
-
   redeclare function extends specificEnthalpy
   "water-saturated specific enthalpy of gas phase"
   algorithm
@@ -221,7 +219,6 @@ protected
   //  else state.X[end - nX + 1:end]);
 
   end specificEnthalpy;
-
 
   annotation (Documentation(info="<html>
 <p><b>BrineGas_3Gas</b> is a medium package that, based on Brine.PartialBrineGas, defines a brine with 3 gases (CO<sub>2</sub>, N<sub>2</sub>, CH<sub>4</sub>), which are the main gases in the geofluid in Gross Schoenebeck, Germany.</p>

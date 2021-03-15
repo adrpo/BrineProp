@@ -9,4 +9,5 @@ package ComponentsOrder "to be defined in actual Medium package"
    constant Integer iN2;
    constant Integer iCO2;
    constant Integer iCH4;
+   constant Integer iH2;
 end ComponentsOrder;
