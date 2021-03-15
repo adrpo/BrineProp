@@ -355,7 +355,7 @@ protected
    + eps), 0), 1);
 algorithm
 
-  if BrineProp.debugmode then
+  if debugmode then
     Modelica.Utilities.Streams.print("Running setState_phX(" + String(p/1e5) + " bar,"
        + String(h) + " J/kg,X)...");
   end if;
