@@ -133,12 +133,18 @@ partial package PartialBrineMultiSaltMultiGasTwoPhase "Template medium for aqueo
     end dewEnthalpy;
 
 
-    redeclare function extends bubbleEnthalpy
-  "boiling curve specific enthalpy of water"
-    algorithm
-      hl := 2000;
-    end bubbleEnthalpy;
 
+
+    redeclare function extends bubbleEnthalpy
+      "boiling curve specific enthalpy of water"
+    algorithm
+      hl := specificEnthalpy_gas_pTX(
+        sat.psat,
+        sat.Tsat,
+        sat.X);
+    //  hl := Modelica.Media.Water.IF97_Utilities.BaseIF97.Regions.hl_p(sat.psat);
+
+    end bubbleEnthalpy;
 
     redeclare function extends saturationTemperature "saturation temperature"
     algorithm
@@ -869,6 +875,7 @@ protected
   algorithm
     d := state.d;
   end density;
+
 
 
     annotation (Documentation(info="<html>
