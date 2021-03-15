@@ -36,7 +36,10 @@ package Brine3salts3gas "Two-phase aqueous solution of NaCl, KCl, CaCl2, N2, CO2
   algorithm
   //  print("p_gas={"+String(p_gas[1])+", "+String(p_gas[2])+", "+String(p_gas[3])+"} (solubilities_pTX)");
     if debugmode then
-        print("Running solubilities_pTX("+String(p/1e5)+" bar,"+String(T-273.15)+" C, ignoreTlimit="+String(ignoreTlimit)+", X="+Modelica.Math.Matrices.toString(transpose([X]))+")");
+      print("Running solubilities_pTX("+String(p/1e5)+" bar,"+String(T-273.15)+" C, ignoreTlimit="+String(ignoreTlimit)+", X="+Modelica.Math.Matrices.toString(transpose([X]))+") ("+getInstanceName()+")");
+      print("k={"+String(solu[1]/p_gas[1])+", "+String(solu[2]/p_gas[2])+", "+String(solu[3]/p_gas[3])+"}(solubilities_pTX)");
+      print("solu={"+String(solu[1])+", "+String(solu[2])+", "+String(solu[3])+"}(solubilities_pTX)");
+      print(Modelica.Math.Matrices.toString({MM_vec}));
     end if;
       solu[1] := if X[nX_salt+1]>0 then solubility_CO2_pTX_Duan2006(p,T,X_l,MM_vec,p_gas[1],ignoreTlimit) else -1
     "aus GasData, mol/kg_H2O -> kg_CO2/kg_H2O";
@@ -47,16 +50,12 @@ package Brine3salts3gas "Two-phase aqueous solution of NaCl, KCl, CaCl2, N2, CO2
     "aus GasData, mol/kg_H2O -> kg_CH4/kg_H2O";
   //    solu[3] := if X[nX_salt+3]>0 then solubility_CH4_pTX_Harting(p,T,X_l,MM_vec,p_gas[3]) else -1
 
-  //  print("k={"+String(solu[1]/p_gas[1])+", "+String(solu[2]/p_gas[2])+", "+String(solu[3]/p_gas[3])+"}(solubilities_pTX)");
-  //  print("solu={"+String(solu[1])+", "+String(solu[2])+", "+String(solu[3])+"}(solubilities_pTX)");
-  //  print(Modelica.Math.Matrices.toString({MM_vec}));
   end solubilities_pTX;
 
   redeclare function extends density_liq_pTX
   //  extends density_Duan2008_pTX(MM_vec=cat(1,MM_salt, {M_H2O}));
      //TODO should take MM_vec;
 
-  //  PowerPlant.Media.Brine.Salt_Data_Duan.density_Duan2008_pTX;
 protected
     constant Integer[:] liqIndex=cat(1,1:nX_salt,{nX});
     Real X_[:] =  cat(1, X[1:nX_salt], {1-sum(X[1:nX_salt])}); //recalculate water mass fraction when gases are omitted (which they are in the density function)
@@ -66,9 +65,6 @@ protected
 
   //   print("density_liquid_pTX: "+String(p*1e-5)+" bar,"+String(T)+" K->"+String(d)+"kg/m^3");
   end density_liq_pTX;
- /*function extends density_Duan2008_pTX(nX_salt_=nX_salt, ignoreLimitSalt_p_=ignoreLimitSalt_p_global) 
-    "just to set the flags"
- end density_Duan2008_pTX;*/
 
  redeclare function extends specificEnthalpy_liq_pTX
  // Partial_Units.Molality molalities = massFractionsToMoleFractions(X, MM_vec);
