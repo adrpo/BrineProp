@@ -232,12 +232,6 @@ algorithm
 //    GVF=-1,
 end setState_pTX;
 
-  redeclare function extends setState_dTX
-  algorithm
-    assert(false,"Running dummy setState_dTX. Shouldn't be called.");
-    state := setState_pTX(1e5,T,X) ",fluidnames)";
-  end setState_dTX;
-
 redeclare function specificEntropy_pTX
   "Computes specific entropy as a function of pressure and temperature"
     extends Modelica.Icons.Function;
@@ -392,6 +386,7 @@ end setState_phX;
     annotation(Documentation(info="<html></html>"));
   end vapourQuality;
 //DUMMY FUNCTIONS  
+
   redeclare function extends temperature_ph "to avoid check error"
   end temperature_ph;
 
@@ -400,6 +395,12 @@ end setState_phX;
 
   redeclare function extends density_pT "to avoid check error"
   end density_pT;
+
+  redeclare function extends setState_dTX
+  algorithm
+    assert(false,"Running dummy setState_dTX. Shouldn't be called.");
+    state := setState_pTX(1e5,T,X) ",fluidnames)";
+  end setState_dTX;
 
  annotation (Documentation(info="<html>
   <h1>Water_MixtureTwoPhase_pT</h1>

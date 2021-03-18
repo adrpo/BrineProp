@@ -30,4 +30,4 @@ specificEnthalpy_pT
 density_pT
 setState_dTX
 specificEnthalpy
-density
+fugacity_H2O

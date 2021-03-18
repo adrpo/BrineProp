@@ -311,7 +311,7 @@ algorithm
   annotation (Documentation(info="<html></html>"));
 end temperature_phX;
 
-   redeclare function extends density "density from state"
+   redeclare replaceable function extends density "density from state"
    algorithm
     d := density_pTX(state.p, state.T, state.X);
    end density;
