@@ -141,10 +141,19 @@ partial package PartialBrineMultiSaltMultiGasTwoPhase "Template medium for aqueo
       if debugmode then
           print("Running density_pTX("+String(p/1e5)+","+String(T-273.15)+"degC, X="+Modelica.Math.Matrices.toString(transpose([X]))+")");
       end if;
-     d:=density(setState_pTX(p,T,X,phase,n_g_norm_start));
+      d:=density(setState_pTX(p,T,X,phase,n_g_norm_start));
 
      annotation(LateInline=true,inverse(p=pressure_dTX(d,T,X,phase,n_g_norm_start)));
     end density_pTX;
+
+    redeclare function density "density from state"
+      extends Modelica.Icons.Function;
+      input ThermodynamicState state "Thermodynamic state record";
+      output Density d "Density";
+    //  extends Modelica.Media.Interfaces.PartialMedium.density;
+    algorithm
+      d := state.d;
+    end density;
 
     redeclare function extends saturationTemperature "saturation temperature"
     algorithm

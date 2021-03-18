@@ -15,6 +15,7 @@ nM_gas
 BaseProperties
 ThermodynamicState
 density_pTX
+density
 saturationTemperature
 dewEnthalpy
 bubbleEnthalpy
