@@ -91,12 +91,14 @@ model BrineProps2phaseFull "Two-phase example demonstrating all features"
 Real g=1 "gas content multiplier";
 
 /*  parameter SI.Pressure p_set=20*1.01325e5;
-  parameter SI.Temperature T_set=273.15+30;*/
+parameter SI.Temperature T_set=273.15+30;*/
+
+SI.SpecificEnthalpy h_bubble = Medium.bubbleEnthalpy(props.sat);
 equation
   //DEFINE STATE (define 2 variables pT, ph or Td)
   //pT transient
   props.p = 10*1.01325e5;
-  props.T = 273.15+150 "+time";
+  props.T = 273.15+100 "+time";
 
 /*  //ph  
   props.p = 435e5;

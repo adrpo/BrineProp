@@ -13,7 +13,6 @@ specificEntropy
 specificEnthalpy_ps
 setState_psX
 setState_pTX
-setState_dTX
 specificEntropy_pTX
 thermalConductivity
 specificHeatCapacityCp
@@ -29,4 +28,6 @@ vapourQuality
 temperature_ph
 specificEnthalpy_pT
 density_pT
-fugacity_H2O
+setState_dTX
+specificEnthalpy
+density
