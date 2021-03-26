@@ -24,6 +24,7 @@ surfaceTension
 setState_phX
 density_pTX
 density_phX
+density_liq_pTX
 vapourQuality
 temperature_ph
 specificEnthalpy_pT
@@ -31,3 +32,4 @@ density_pT
 setState_dTX
 specificEnthalpy
 fugacity_H2O
+density_gas_pTX

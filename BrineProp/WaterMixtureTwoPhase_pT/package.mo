@@ -48,6 +48,8 @@ constant Integer nX_gas = 0;
     "(min=0,max=1) gas phase mass fraction";
  //  Integer phase_out "calculated phase";
    //END no gas case
+   SI.Pressure p_degas[1]={saturationPressure(T)}; //for compatibility with Brine, used in pipeAnnulus
+
  equation
    u = h - p/d;
    MM = M_H2O;
@@ -378,6 +380,11 @@ end setState_phX;
   //  annotation(LateInline=true,inverse(T = temperature_phX(p=p,h=h,X=X,phase=phase)));
   end density_phX;
 
+  redeclare function extends density_liq_pTX
+  algorithm
+    d:=Modelica.Media.Water.IF97_Utilities.rho_pT(p,T,region=1);
+  end density_liq_pTX;
+
   redeclare function vapourQuality "Return vapour quality"
     input ThermodynamicState state "Thermodynamic state record";
     output MassFraction x= state.x "Vapour quality";
@@ -401,6 +408,11 @@ end setState_phX;
     assert(false,"Running dummy setState_dTX. Shouldn't be called.");
     state := setState_pTX(1e5,T,X) ",fluidnames)";
   end setState_dTX;
+
+  redeclare function extends density_gas_pTX
+  algorithm
+    d:=Modelica.Media.Water.IF97_Utilities.rho_pT(p,T,region=2);
+  end density_gas_pTX;
 
  annotation (Documentation(info="<html>
   <h1>Water_MixtureTwoPhase_pT</h1>
