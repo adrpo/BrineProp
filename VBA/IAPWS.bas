@@ -4,7 +4,7 @@ Attribute VB_Name = "IAPWS"
 ' and from Modelica Standard Library (http://modelica.github.io/Modelica)
 
 ' by Henning Francke francke@gfz-potsdam.de
-' 2014 GFZ Potsdam
+' 2020 GFZ Potsdam
 
 ' Added non-private functions with Prefix "Water", that take an return values in SI units (function names as in Modelica.Media.Water.IF97_Utilities.BaseIF97.Basic.psat)
 Option Explicit
@@ -249,7 +249,7 @@ Public Function dynamicViscosity_pT(p_Pa, T) ' p in MPa, T in K
 
     Dim h0: h0 = Array(0.5132047, 0.3205656, 0, 0, -0.7782567, 0.1885447)
     Dim h1: h1 = Array(0.2151778, 0.7317883, 1.241044, 1.476783, 0, 0)
-    Dim h2: h2 = Array(-0.2818107, -1.070786, -1.263184, 0, 0, 0)
+    Dim H2: H2 = Array(-0.2818107, -1.070786, -1.263184, 0, 0, 0)
     Dim h3: h3 = Array(0.1778064, 0.460504, 0.2340379, -0.4924179, 0, 0)
     Dim h4: h4 = Array(-0.0417661, 0, 0, 0.1600435, 0, 0)
     Dim h5: h5 = Array(0, -0.01578386, 0, 0, 0, 0)
@@ -274,7 +274,7 @@ Public Function dynamicViscosity_pT(p_Pa, T) ' p in MPa, T in K
     For i = 0 To 5
         Sum = Sum + h0(i + 1) * (1 / Ts - 1) ^ i _
         + h1(i + 1) * (1 / Ts - 1) ^ i * (rhos - 1) ^ 1 _
-        + h2(i + 1) * (1 / Ts - 1) ^ i * (rhos - 1) ^ 2 _
+        + H2(i + 1) * (1 / Ts - 1) ^ i * (rhos - 1) ^ 2 _
         + h3(i + 1) * (1 / Ts - 1) ^ i * (rhos - 1) ^ 3 _
         + h4(i + 1) * (1 / Ts - 1) ^ i * (rhos - 1) ^ 4 _
         + h5(i + 1) * (1 / Ts - 1) ^ i * (rhos - 1) ^ 5 _
@@ -615,12 +615,12 @@ Private Function p4_T(T)
         p4_T = "#Temperature " & T & "K out of range (IAPWS.p4_T)"
         Exit Function
     End If
-    Dim teta As Double, A As Double, B As Double, C As Double
+    Dim teta As Double, a As Double, b As Double, c As Double
     teta = T - 0.23855557567849 / (T - 650.17534844798)
-    A = teta ^ 2 + 1167.0521452767 * teta - 724213.16703206
-    B = -17.073846940092 * teta ^ 2 + 12020.82470247 * teta - 3232555.0322333
-    C = 14.91510861353 * teta ^ 2 - 4823.2657361591 * teta + 405113.40542057
-    p4_T = (2 * C / (-B + (B ^ 2 - 4 * A * C) ^ 0.5)) ^ 4 'MPa
+    a = teta ^ 2 + 1167.0521452767 * teta - 724213.16703206
+    b = -17.073846940092 * teta ^ 2 + 12020.82470247 * teta - 3232555.0322333
+    c = 14.91510861353 * teta ^ 2 - 4823.2657361591 * teta + 405113.40542057
+    p4_T = (2 * c / (-b + (b ^ 2 - 4 * a * c) ^ 0.5)) ^ 4 'MPa
 End Function
 
 Function WaterTsat_p(p_Pa) 'Saturation temperature
@@ -630,12 +630,12 @@ Private Function T4_p(p) As Double
     ' Release on the IAPWS Industrial formulation 1997 for the Thermodynamic Properties of Water and Steam, September 1997
     ' Section 8.2 The Saturation-Temperature Equation
     ' Eq 31, Page 34
-    Dim beta As Double, E As Double, f As Double, G As Double, d As Double
+    Dim beta As Double, e As Double, f As Double, G As Double, d As Double
     beta = p ^ 0.25
-    E = beta ^ 2 - 17.073846940092 * beta + 14.91510861353
+    e = beta ^ 2 - 17.073846940092 * beta + 14.91510861353
     f = 1167.0521452767 * beta ^ 2 + 12020.82470247 * beta - 4823.2657361591
     G = -724213.16703206 * beta ^ 2 - 3232555.0322333 * beta + 405113.40542057
-    d = 2 * G / (-f - (f ^ 2 - 4 * E * G) ^ 0.5)
+    d = 2 * G / (-f - (f ^ 2 - 4 * e * G) ^ 0.5)
     T4_p = (650.17534844798 + d - ((650.17534844798 + d) ^ 2 - 4 * (-0.23855557567849 + 650.17534844798 * d)) ^ 0.5) / 2
 End Function
 

@@ -14,45 +14,49 @@ Option Base 1
 
 Public Const outOfRangeMode = 2 'on out of range: 0-ignore, 1-print warning, 2 - throw error
 Public Const DebugMode = False 'prints status messages
-Const ignoreLimitN2_T = False
-Const ignoreLimitN2_p = False
+Public Const ignoreLimitN2_T = False
+Public Const ignoreLimitN2_p = False
+Public Const ignoreLimitN2_b = False
+
+Public Const ignoreLimitCO2_p = False
+Public Const ignoreLimitCO2_T = False
+Public Const ignoreLimitCO2_b = False
+
+Public Const ignoreLimitCH4_p = False
+Public Const ignoreLimitCH4_T = False
+Public Const ignoreLimitCH4_b = False
+
+Public Const ignoreLimitH2_T = False
+Public Const ignoreLimitH2_p = False
+Public Const ignoreLimitH2_b = False
 Public Const ignoreResistivity_X = True
 
 
 Public Const nX = nX_salt + nX_gas + 1
-
-Public Const i_NaCl = 1 'reference number
-Public Const i_KCl = 2 'reference number
-Public Const i_CaCl2 = 3 'reference number
-'Public Const i_MgCl2 = 4 'reference number
-'Public Const i_SrCl2 = 5 'reference number
-Public Const i_CO2 = 4 'reference number
-Public Const i_N2 = 5 'reference number
-Public Const i_CH4 = 6 'reference number
-
+Public VLEisActive As Boolean
 
 Function saturationPressure_H2O(p As Double, T As Double, Xin, Optional ByRef p_H2O) 'brine water vapour pressure
     Dim ionMoleFractions '(nX) As Double
-    Dim X: X = CheckMassVector(Xin, nX)
-    If VarType(X) = vbString Then
-        saturationPressure_H2O = X & " (Brine.saturationPressure_H2O)"
+    Dim x: x = CheckMassVector(Xin, nX)
+    If VarType(x) = vbString Then
+        saturationPressure_H2O = x & " (Brine.saturationPressure_H2O)"
         Exit Function
     End If
     
     If DebugMode Then
-        Debug.Print ("Running saturationPressure_H2O(" & p / 100000# & " bar," & T - 273.15 & " °C, X=" & Vector2String(X) + ")")
+        Debug.Print ("Running saturationPressure_H2O(" & p / 100000# & " bar," & T - 273.15 & " °C, X=" & Vector2String(x) + ")")
     End If
     
-    If Application.Max(X) - 1 > 10 ^ -8 Then
-        saturationPressure_H2O = "#X =" & Application.Max(X) & " out of range (0...1) = saturationPressure_H2O()"
+    If Application.Max(x) - 1 > 10 ^ -8 Then
+        saturationPressure_H2O = "#X =" & Application.Max(x) & " out of range (0...1) = saturationPressure_H2O()"
         Exit Function
     End If
-    If Application.Min(X) < -10 ^ -8 Then
-        saturationPressure_H2O = "#X =" & Application.Min(X) & " out of range (0...1) = saturationPressure_H2O()"
+    If Application.Min(x) < -10 ^ -8 Then
+        saturationPressure_H2O = "#X =" & Application.Min(x) & " out of range (0...1) = saturationPressure_H2O()"
         Exit Function
     End If
-  If X(nX) > 0 Then
-    ionMoleFractions = VecProd(massFractionsToMoleFractions(X, MM_vec), nM_vec)
+  If x(nX) > 0 Then
+    ionMoleFractions = VecProd(massFractionsToMoleFractions(x, MM_vec), nM_vec)
     If VarType(ionMoleFractions) = vbString Then ' error
         saturationPressure_H2O = ionMoleFractions
         Exit Function
@@ -72,9 +76,9 @@ End Function
 
 Private Function saturationPressures(p As Double, T As Double, X_l_in, Xin)
     
-    Dim X: X = CheckMassVector(Xin, nX)
-    If VarType(X) = vbString Then
-        saturationPressures = X & " (Brine.saturationPressures)"
+    Dim x: x = CheckMassVector(Xin, nX)
+    If VarType(x) = vbString Then
+        saturationPressures = x & " (Brine.saturationPressures)"
         Exit Function
     End If
     
@@ -86,7 +90,7 @@ Private Function saturationPressures(p As Double, T As Double, X_l_in, Xin)
     
     Dim k '() As Double 'nX Henry coefficients
     Dim i As Integer
-    Dim p_H2O As Double: p_H2O = saturationPressure_H2O(p, T, X) 'partial pressure of water vapour pressure
+    Dim p_H2O As Double: p_H2O = saturationPressure_H2O(p, T, x) 'partial pressure of water vapour pressure
     Dim p_sat(1 To nX_gas + 1) As Double 'vector of degassing pressures
     Dim p_gas() As Double  'partial pressures of gases
 
@@ -97,7 +101,7 @@ Private Function saturationPressures(p As Double, T As Double, X_l_in, Xin)
     
     p_gas = fill(p / (nX_gas + 1), nX_gas + 1)
     
-    Dim solu: solu = solubilities_pTX(p, T, X_l, X, SubArray(p_gas, 1, nX_gas))
+    Dim solu: solu = solubilities_pTX(p, T, X_l, x, SubArray(p_gas, 1, nX_gas))
     If VarType(solu) = vbString Then
         saturationPressures = solu
         Exit Function
@@ -116,8 +120,8 @@ Private Function saturationPressures(p As Double, T As Double, X_l_in, Xin)
     saturationPressures = p_sat
 End Function
 
-'Function psat_T(p As Double, T As Double, X_)
-'    Dim p_sat: p_sat = saturationPressures(p, T, X_, X_) 'vector of degassing pressures
+'Function psat_T(p As Double, T As Double, X)
+'    Dim p_sat: p_sat = saturationPressures(p, T, X, X_) 'vector of degassing pressures
 '    If VarType(p_sat) = vbString Then
 '        psat_T = p_sat
 '        Exit Function
@@ -133,18 +137,46 @@ Function temperature(pOrVLEstate, Optional T As Double = -1, Optional Xi = -1, O
     temperature = getValueFromVLE(pOrVLEstate, T, Xi, phase, "T")
 End Function
 
+Function gasVolumeFraction(pOrVLEstate, Optional T As Double = -1, Optional Xi = -1, Optional phase As Integer = 0)
+'    gasVolumeFraction = getValueFromVLE(pOrVLEstate, T, Xi, phase, "GVF") 'doesn't work, because GVF is not calculated in VLE
+    If IsError(pOrVLEstate) Then
+        gasVolumeFraction = "#error in input VLE"
+        Exit Function
+    End If
+    
+    If VarType(pOrVLEstate) = vbString Then
+        If Left(pOrVLEstate, 1) = "#" Then
+            gasVolumeFraction = "#error in input VLE"
+            Exit Function
+        End If
+    End If
+    
+    Dim VLEstate As Dictionary: Set VLEstate = getVLEstate(pOrVLEstate, T, Xi, phase) 'calculate VLE or parse JSON string
+    If Len(VLEstate("error")) > 0 Then
+        gasVolumeFraction = VLEstate("error")
+'    ElseIf VLEstate.Exists("GVF") Then
+'        gasVolumeFraction = VLEstate("GVF") ' just extract
+    Else
+        Dim d, d_g As Double
+'        d = density(pOrVLEstate)
+        d = density(VLEstate, T, Xi, phase, d_g)
+        If VarType(d) = vbString Then 'if error
+            gasVolumeFraction = d
+            Exit Function
+        End If
+        gasVolumeFraction = IIf(VLEstate("x") > 0, VLEstate("x") * d / d_g, 0)
+    End If
+End Function
+
 Function gasMassFraction(pOrVLEstate, Optional T As Double = -1, Optional Xi = -1, Optional phase As Integer = 0)
-'    Dim VLEstate As Dictionary: Set VLEstate = getVLEstate(pOrVLEstate, T, Xi, phase)
-'    If Len(VLEstate("error")) > 0 Then
-'        gasMassFraction = VLEstate("error")
-'    Else
-'        gasMassFraction = VLEstate("x")
-'    End If
-    gasMassFraction = getValueFromVLE(pOrVLEstate, T, Xi, phase, "x")
+        gasMassFraction = getValueFromVLE(pOrVLEstate, T, Xi, phase, "x")
 End Function
 
 Function MassComposition_liq(pOrVLEstate, Optional T As Double = -1, Optional Xi = -1, Optional phase As Integer = 0)
-    MassComposition_liq = Vector2String(getValueFromVLE(pOrVLEstate, T, Xi, phase, "X_l"))
+    MassComposition_liq = getValueFromVLE(pOrVLEstate, T, Xi, phase, "X_l")
+    If Not VarType(MassComposition_liq) = vbString Then 'if not error
+        MassComposition_liq = Vector2String(MassComposition_liq)
+    End If
 End Function
 
 Function MassComposition_gas(pOrVLEstate, Optional T As Double = -1, Optional Xi = -1, Optional phase As Integer = 0)
@@ -163,52 +195,73 @@ Function phase(pOrVLEstate, Optional T As Double = -1, Optional Xi = -1)
     phase = getValueFromVLE(pOrVLEstate, T, Xi, 0, "phase")
 End Function
 
-Private Function solubilities_pTX(p As Double, T As Double, X_l, X, p_gas)
+Private Function solubilities_pTX(p As Double, T As Double, X_l, x, p_gas)
     'solubility calculation of CO2 in seawater Duan, Sun(2003), returns gas concentration in kg/kg H2O
-    If Length(p_gas) <> 3 Then
-      solubilities_pTX = "#Wrong number of degassing pressures"
+    If Length(p_gas) <> nX_gas Then
+      solubilities_pTX = "#Wrong number of degassing pressures (solubilities_pTX)"
       Exit Function
     End If
     Dim solu() As Double
     ReDim solu(1 To nX_gas)
-    If X(i_CO2) > 0 Then
-        solubilities_pTX = solubility_CO2_pTX_Duan2006(p, T, X_l, p_gas(1)) 'aus Partial_Gas_Data, mol/kg_H2O -> kg_CO2/kg_H2O
-        If VarType(solubilities_pTX) = vbString Then
-            Exit Function
+    
+    If i_CO2 > 0 Then
+        If x(i_CO2) > 0 Then
+            solubilities_pTX = solubility_CO2_pTX_Duan2006(p, T, X_l, p_gas(i_CO2 - nX_salt)) 'aus Partial_Gas_Data, mol/kg_H2O -> kg_CO2/kg_H2O
+            If VarType(solubilities_pTX) = vbString Then
+                Exit Function
+            Else
+                solu(i_CO2 - nX_salt) = solubilities_pTX
+            End If
         Else
-            solu(1) = solubilities_pTX
+            solu(i_CO2 - nX_salt) = 0
         End If
-    Else
-        solu(1) = 0
     End If
     
-    If X(i_N2) > 0 Then
-        solubilities_pTX = solubility_N2_pTX_Mao2006(p, T, X_l, p_gas(2)) 'aus Partial_Gas_Data, mol/kg_H2O -> kg_N2/kg_H2O
-        If VarType(solubilities_pTX) = vbString Then
-            Exit Function
+    If i_N2 > 0 Then
+        If x(i_N2) > 0 Then
+            solubilities_pTX = solubility_N2_pTX_Mao2006(p, T, X_l, p_gas(i_N2 - nX_salt)) 'aus Partial_Gas_Data, mol/kg_H2O -> kg_N2/kg_H2O
+            If VarType(solubilities_pTX) = vbString Then
+                Exit Function
+            Else
+                solu(i_N2 - nX_salt) = solubilities_pTX
+            End If
         Else
-            solu(2) = solubilities_pTX
+            solu(i_N2 - nX_salt) = 0
         End If
-    Else
-        solu(2) = 0
     End If
     
-    If X(i_CH4) > 0 Then
-         solubilities_pTX = solubility_CH4_pTX_Duan2006(p, T, X_l, p_gas(3)) 'aus Partial_Gas_Data, mol/kg_H2O -> kg_CH4/kg_H2O
-         If VarType(solubilities_pTX) = vbString Then
-            Exit Function
+    If i_CH4 > 0 Then
+        If x(i_CH4) > 0 Then
+             solubilities_pTX = solubility_CH4_pTX_Duan2006(p, T, X_l, p_gas(i_CH4 - nX_salt)) 'aus Partial_Gas_Data, mol/kg_H2O -> kg_CH4/kg_H2O
+             If VarType(solubilities_pTX) = vbString Then
+                Exit Function
+            Else
+                solu(i_CH4 - nX_salt) = solubilities_pTX
+            End If
         Else
-            solu(3) = solubilities_pTX
+            solu(i_CH4 - nX_salt) = 0
         End If
-   Else
-        solu(3) = 0
     End If
+     
+    If i_H2 > 0 Then
+        If x(i_H2) > 0 Then
+            solubilities_pTX = solubility_H2_pTX_Chabab2020(p, T, X_l, p_gas(i_H2 - nX_salt))
+'            solubilities_pTX = solubility_H2_pTX_Li2018(p, T, X_l, p_gas(i_H2 - nX_salt))
+            If VarType(solubilities_pTX) = vbString Then
+                Exit Function
+            Else
+                solu(i_H2 - nX_salt) = solubilities_pTX
+            End If
+        Else
+            solu(i_H2 - nX_salt) = 0
+        End If
+    End If
+
     solubilities_pTX = solu
 End Function
 
 
 ' BELOW GENERIC (for variable nX)
-
 Function MM_vec()
     MM_vec = cat(SubArray(Brine_liq.MM_vec, 1, 3), Brine_gas.MM_vec)
 End Function
@@ -231,8 +284,14 @@ Function specificEnthalpy(pOrVLEstate, Optional T As Double = -1, Optional Xi = 
         Exit Function
     End If
     
+    Dim x
+    If Application.DecimalSeparator = "," Then
+        x = CDbl(Replace(VLEstate("x"), ".", ","))
+    Else
+        x = CDbl(VLEstate("x"))
+    End If
     Dim h_g
-    If VLEstate("x") > 0 Then
+    If x > 0 Then
             h_g = Brine_gas.specificEnthalpy(VLEstate("p"), VLEstate("T"), ToDouble(SubArray(VLEstate("X_g"), 1, nX_gas)))     'gas specific enthalpy
         'Else
         '    specificEnthalpy_gas = 0 'no gas phase
@@ -241,7 +300,7 @@ Function specificEnthalpy(pOrVLEstate, Optional T As Double = -1, Optional Xi = 
         specificEnthalpy = h_g
         Exit Function
     End If
-    specificEnthalpy = VLEstate("x") * h_g + (1 - VLEstate("x")) * h_l
+    specificEnthalpy = x * h_g + (1 - x) * h_l
 End Function
 Function specificEnthalpy_liq(pOrVLEstate, Optional T As Double = -1, Optional Xi = -1, Optional phase As Integer = 0)
     Dim VLEstate As Dictionary: Set VLEstate = getVLEstate(pOrVLEstate, T, Xi, phase)
@@ -269,40 +328,23 @@ Function gasLiquidRatio(pOrVLEstate, Optional T As Double = -1, Optional Xi = -1
     gasLiquidRatio = GVF / (1 - GVF)
 End Function
 
-Function gasVolumeFraction(pOrVLEstate, Optional T As Double = -1, Optional Xi = -1, Optional phase As Integer = 0)
-    Dim VLEstate As Dictionary: Set VLEstate = getVLEstate(pOrVLEstate, T, Xi, phase) 'calculate VLE or parse JSON string
-    If Len(VLEstate("error")) > 0 Then
-        gasVolumeFraction = VLEstate("error")
-    ElseIf VLEstate.Exists("GVF") Then
-        gasVolumeFraction = VLEstate("GVF") ' just extract
-    Else
-        Dim d, d_g As Double
-'        d = density(pOrVLEstate)
-        d = density(VLEstate, T, Xi, phase, d_g)
-        If VarType(d) = vbString Then 'if error
-            gasVolumeFraction = d
-            Exit Function
-        End If
-        gasVolumeFraction = IIf(VLEstate("x") > 0, VLEstate("x") * d / d_g, 0)
-    End If
-End Function
 
 Function gasLiquidRatio_fullDegassing(p As Double, T As Double, Xi)
-    Dim X: X = CheckMassVector(Xi, nX)
-    If VarType(X) = vbString Then
-        gasLiquidRatio_fullDegassing = X & " (gasLiquidRatio_fullDegassing)"
+    Dim x: x = CheckMassVector(Xi, nX)
+    If VarType(x) = vbString Then
+        gasLiquidRatio_fullDegassing = x & " (gasLiquidRatio_fullDegassing)"
         Exit Function
     End If
     
     Dim i As Integer
     Dim gasVolume As Double
     For i = nX_salt + 1 To nX_salt + nX_gas
-        gasVolume = gasVolume + X(i) / MM_vec(i) * Constants.R * T / p
+        gasVolume = gasVolume + x(i) / MM_vec(i) * Constants.R * T / p
     Next i
-    Dim y_H2O: y_H2O = saturationPressure_H2O(p, T, X) / p
+    Dim y_H2O: y_H2O = saturationPressure_H2O(p, T, x) / p
 '    gasVolume = gasVolume + gasVolume / (1 - y_H2O) * y_H2O ' Add water vapour volume
     gasVolume = gasVolume / (1 - y_H2O)  ' Add water vapour volume
-    Dim liquidVolume: liquidVolume = 1 / density_liq(p, T, X) * (1 - Application.Sum(SubArray(X, nX_salt + 1, nX - 1)))
+    Dim liquidVolume: liquidVolume = 1 / density_liq(p, T, x) * (1 - Application.Sum(SubArray(x, nX_salt + 1, nX - 1)))
     
     gasLiquidRatio_fullDegassing = gasVolume / liquidVolume
 End Function
@@ -314,7 +356,7 @@ Function density(pOrVLEstate, Optional T As Double = -1, Optional Xi = -1, Optio
     Else
 
         'Dim d_l: d_l = IIf(VLEstate.x_ < 1, Brine_liq.density(VLEstate.p, VLEstate.T, VLEstate.Xi_l), -1) 'liquid density
-        Dim d_l: d_l = IIf(VLEstate("x") < 1, Brine_liq.density(VLEstate("p"), VLEstate("T"), ToDouble(SubArray(VLEstate("X_l"), 1, nX_salt))), -1) 'liquid density
+        Dim d_l: d_l = IIf(VLEstate("x") < 1, Brine_liq.density(VLEstate("p"), VLEstate("T"), ToDouble(SubArray(VLEstate("X_l"), 1, nX_salt))), -1) 'calculate liquid density unless no liquid present
         If VarType(d_l) = vbString Then 'if error
             density = d_l
             Exit Function
@@ -442,26 +484,36 @@ Private Function VLE(p As Double, T As Double, Xi, Optional phase As Integer = 0
     ' finds the VLE iteratively by varying the normalized quantity of gas in the gasphase, calculates the densities"
     ' Input: p,T,Xi
     ' Output: x, X_l, X_g -> JSON object
+    ' not to be called from worksheet, use VLEasJSON instead
+    
     Dim VLE_JSON As Object
     Set VLE_JSON = New Dictionary
+    
+    If Not GasDataSet Then
+        DefineGasData
+'        VLE_JSON("error") = "#GasData not loaded"
+'        GoTo EndFunction
+    End If
     
     Const zmax = 1000 'maximum number of iterations
     Dim nX_ As Integer ' () As Double
     
-    Dim X: X = CheckMassVector(Xi, nX)
-    If VarType(X) = vbString Then
-        VLE_JSON("error") = X & " (VLE)"
+    Dim x: x = CheckMassVector(Xi, nX)
+    If VarType(x) = vbString Then
+        VLE_JSON("error") = x & " (VLE)"
         GoTo EndFunction
     End If
 
+    ' Debug.Print Vector2String(X)
+    
     Dim n_g_norm_start(1 To nX_gas + 1) As Double 'start value, all gas in gas phase, all water liquid, set in BaseProps"
     Dim i As Integer, gamma As Integer, alpha As Integer
     For i = 1 To nX_gas + 1
         n_g_norm_start(i) = 0.5
     Next i
     Dim p_gas() As Double  'partial pressures of gases
-    Dim X_l() As Double: X_l = X 'MassFraction start value
-    Dim x_ As Double 'gas mass fraction
+    Dim X_l() As Double: X_l = x 'MassFraction start value
+    Dim X_ As Double 'gas mass fraction
     Dim p_H2O As Double 'partial pressure of water vapour pressure
     Dim p_H2O_0 As Double 'pure water vapour pressure
     Dim p_sat(1 To nX_gas + 1) As Double 'vector of degassing pressures
@@ -487,9 +539,9 @@ Private Function VLE(p As Double, T As Double, Xi, Optional phase As Integer = 0
         GoTo EndFunction
     End If
     
-        ' DEGASSING PRESSURE
+    ' DEGASSING PRESSURE
     Dim tmp
-    tmp = saturationPressure_H2O(p, T, X)
+    tmp = saturationPressure_H2O(p, T, x)
     If VarType(tmp) = vbString Then
         VLE_JSON("error") = tmp & "(VLE)"
         GoTo EndFunction
@@ -503,7 +555,7 @@ Private Function VLE(p As Double, T As Double, Xi, Optional phase As Integer = 0
     
     p_gas = fill(p / (nX_gas + 1), nX_gas + 1)
     
-    Dim solu: solu = solubilities_pTX(p, T, X_l, X, SubArray(p_gas, 1, nX_gas))
+    Dim solu: solu = solubilities_pTX(p, T, X_l, x, SubArray(p_gas, 1, nX_gas))
     If VarType(solu) = vbString Then
         VLE_JSON("error") = solu
         GoTo EndFunction
@@ -512,7 +564,7 @@ Private Function VLE(p As Double, T As Double, Xi, Optional phase As Integer = 0
         VLE_JSON("error") = "Error in solubility; solu=" & Vector2String(solu)
         GoTo EndFunction
     End If
-    
+        
     k = VecDiv(solu, SubArray(p_gas, 1, nX_gas))
     
     For i = 1 To nX_gas
@@ -525,42 +577,57 @@ Private Function VLE(p As Double, T As Double, Xi, Optional phase As Integer = 0
         If DebugMode Then
             Debug.Print ("1Phase-Liquid (VLE(" & p & "," & T & "))")
         End If
-    ElseIf Not Application.Max(SubArray(X, 1, nX - 1)) > 0 Then
+    ElseIf Not Application.Max(SubArray(x, 1, nX - 1)) > 0 Then
         Debug.Print "2-phase pure water at unknown VLE"
-        x_ = 1
+        X_ = 1
     Else
-        If Not Application.Max(SubArray(X, nX_salt + 1, nX - 1)) > 0 Then
+        If Not Application.Max(SubArray(x, nX_salt + 1, nX - 1)) > 0 Then
             VLE_JSON("error") = "#Phase equilibrium cannot be calculated without dissolved gas" ' at "+String(p/1e5)+" bar, "+String(T-273.15)+"°C with p_degas="+String(sum(p_degas)/1e5)+" bar.")
             GoTo EndFunction
         End If
-        n = VecDiv(SubArray(X, nX_salt + 1, nX), Brine_gas.MM_vec) 'total mole numbers per kg brine
-        n_g_norm = VecProd(n_g_norm_start, VecSgn(SubArray(X, nX_salt + 1, nX))) 'switch off unused salts
-        
-        Dim Z As Integer
-        Do While Z < 1 Or Application.Max(VecAbs(Delta_n_g_norm)) > 0.001
-            ' stop iteration when p-equlibrium is found or gas fraction is very low
-            Z = Z + 1 'count iterations
-            If Z >= zmax Then
-            VLE_JSON("error") = "#Reached maximum number of iterations (" & Z & "/" & zmax & ") for solution equilibrium calculation. (VLE)" '("+String(p/1e5)+"bar,"+String(T-273.16)+"°C))\nDeltaP="+String(max(abs(p_sat-p_gas))))
+        n = VecDiv(SubArray(x, nX_salt + 1, nX), Brine_gas.MM_vec) 'total mole numbers per kg brine
+        If VarType(n) = vbString Then
+            VLE_JSON("error") = n
             GoTo EndFunction
+        End If
+        n_g_norm = VecProd(n_g_norm_start, VecSgn(SubArray(x, nX_salt + 1, nX))) 'switch off unused salts
+        
+        VLEisActive = True
+        Dim Z As Integer, z_last As Integer: z_last = 0
+        Dim d As Double: d = 1 'damping factor
+        Dim lastres As Double, res As Double: res = 1000 ' residual
+        Do While Z < 1 Or res > 0.001
+            ' stop iteration when p-equlibrium is found or gas fraction is very low
+            If DebugMode Then
+                Debug.Print Z & ": res = " & (Application.Max(VecAbs(Delta_n_g_norm))) & "(VLE algorithm)"
             End If
             
+            Z = Z + 1 'count iterations
+            If Z >= zmax Then
+                VLE_JSON("error") = "#Reached maximum number of iterations (" & Z & "/" & zmax & ") for solution equilibrium calculation. (VLE)" '("+String(p/1e5)+"bar,"+String(T-273.16)+"°C))\nDeltaP="+String(max(abs(p_sat-p_gas))))
+                GoTo EndFunction
+'            ElseIf Z - z_last > zmax / 100 Then
+'                z_last = Z
+'                d = d * 0.9
+'                Debug.Print Z & ": Increasing  damping to d= " & (d) & "(VLE algorithm)"
+            End If
+                        
             n_g = VecProd(n_g_norm, n)
             n_l = VecDiff(n, n_g)
-            x_ = ScalProd(n_g, Brine_gas.MM_vec)
-            X_l = VecDiv(cat(SubArray(X, 1, nX_salt), VecProd(n_l, Brine_gas.MM_vec)), (1 - x_))
+            X_ = ScalProd(n_g, Brine_gas.MM_vec)
+            X_l = VecDiv(cat(SubArray(x, 1, nX_salt), VecProd(n_l, Brine_gas.MM_vec)), (1 - X_))
             ' PARTIAL PRESSURE
             p_gas = VecProd(p / Application.Sum(n_g), n_g)
             
             ' DEGASSING PRESSURE
             p_H2O = saturationPressure_H2O(p, T, X_l, p_H2O_0) 'X_l ändert sich
             If (p_H2O > p) Then
-                Debug.Print ("p_H2O(" & p / 10 ^ 5 & "bar," & T - 273.15 & "°C, " & Vector2String(X)) & ") = " & p_H2O / 100000# & "bar>p ! (VLE)"
-                x_ = 1
+                Debug.Print ("p_H2O(" & p / 10 ^ 5 & "bar," & T - 273.15 & "°C, " & Vector2String(x)) & ") = " & p_H2O / 100000# & "bar>p ! (VLE)"
+                X_ = 1
                 GoTo Break
             End If
             
-            solu = solubilities_pTX(p, T, X_l, X, SubArray(p_gas, 1, nX_gas))
+            solu = solubilities_pTX(p, T, X_l, x, SubArray(p_gas, 1, nX_gas))
             If VarType(solu) = vbString Then
               VLE_JSON("error") = solu
               GoTo EndFunction
@@ -579,7 +646,7 @@ Private Function VLE(p As Double, T As Double, Xi, Optional phase As Integer = 0
             
             f = VecDiff(p_gas, p_sat)
             
-            sum_n_ion = ScalProd(cat(VecDiv(SubArray(X, 1, nX_salt), SubArray(MM_vec, 1, nX_salt)), n_l), nM_vec)
+            sum_n_ion = ScalProd(cat(VecDiv(SubArray(x, 1, nX_salt), SubArray(MM_vec, 1, nX_salt)), n_l), nM_vec)
             
 ' GRADIENT analytisch df(gamma)/dc(gamma)
             
@@ -588,22 +655,36 @@ Private Function VLE(p As Double, T As Double, Xi, Optional phase As Integer = 0
                 If gamma = nX_gas + 1 Then
                   dp_degas_dng_norm = p_H2O_0 * n(nX_gas + 1) * (IIf(gamma = nX_gas + 1, -sum_n_ion, 0) + (1 - n_g_norm(nX_gas + 1)) * n(gamma)) / sum_n_ion ^ 2
                 Else
-                    dcdng_norm = n(gamma) * MM_vec(nX_salt + gamma) * ((x_ - 1) + (1 - n_g_norm(gamma)) * n(gamma) * MM_vec(nX_salt + gamma)) / (1 - x_) ^ 2
+                    dcdng_norm = n(gamma) * MM_vec(nX_salt + gamma) * ((X_ - 1) + (1 - n_g_norm(gamma)) * n(gamma) * MM_vec(nX_salt + gamma)) / (1 - X_) ^ 2
                     dp_degas_dng_norm = dcdng_norm / IIf(k(gamma) > 0, k(gamma), 10 ^ -10)  'degassing pressure
                 End If
                 dfdn_g_norm(gamma) = dp_gas_dng_norm - dp_degas_dng_norm
             Next gamma
             
+            If DebugMode Then
+                Debug.Print "n_g_norm: " & Vector2String(n_g_norm) & "(VLE algorithm)"
+                Debug.Print "Delta_n_g_norm: " & Vector2String(Delta_n_g_norm) & "(VLE algorithm)"
+            End If
             
             For alpha = 1 To nX_gas + 1
-            If X(nX_salt + alpha) > 0 Then
-              Delta_n_g_norm(alpha) = -f(alpha) / dfdn_g_norm(alpha)
-            Else
-              Delta_n_g_norm(alpha) = 0
-            End If
-            n_g_norm(alpha) = Application.Max(10 ^ -9, Application.Min(1, n_g_norm(alpha) + Delta_n_g_norm(alpha))) 'new concentration limited by all dissolved/none dissolved, 1e-9 to avoid k=NaN
+                If x(nX_salt + alpha) > 0 Then
+                  Delta_n_g_norm(alpha) = -f(alpha) / dfdn_g_norm(alpha) * d ' added damping to avoid oscillation for H2 case
+                Else
+                  Delta_n_g_norm(alpha) = 0 ' avoid numerical creation of cabsent component by keeping it at 0
+                End If
+                n_g_norm(alpha) = Application.Max(10 ^ -9, Application.Min(1, n_g_norm(alpha) + Delta_n_g_norm(alpha))) 'new concentration limited by all dissolved/none dissolved, 1e-9 to avoid k=NaN
             Next alpha
+           
+            lastres = res
+            res = Application.Max(VecAbs(Delta_n_g_norm))
+            If res > lastres Then 'progress?
+                d = d * 0.9
+                If DebugMode Then
+                    Debug.Print Z & ": Increasing  damping to d= " & (d) & "(VLE algorithm)"
+                End If
+            End If
         Loop 'End iterative solver
+        
         If DebugMode Then
             Debug.Print Z & " iterations in VLE algorithm"
         End If
@@ -613,16 +694,16 @@ Break:
     
     ' Gas composition
     Dim X_g() As Double
-    If x_ > 0 Then
+    If X_ > 0 Then
         X_g = VecDiv( _
                 VecDiff( _
-                    SubArray(X, nX_salt + 1, nX), _
+                    SubArray(x, nX_salt + 1, nX), _
                     VecProd( _
                         SubArray(X_l, nX_salt + 1, nX), _
-                        (1 - x_)) _
+                        (1 - X_)) _
                 ), _
-                x_)
-        If x_ = 1 Then
+                X_)
+        If X_ = 1 Then
             X_g = VecProd(X_g, 1 / Application.Sum(X_g)) 'Normalize
         End If
     Else
@@ -635,12 +716,13 @@ Break:
     
     VLE_JSON("p") = p
     VLE_JSON("T") = T
-    VLE_JSON("x") = x_ 'mass fraction
+    VLE_JSON("x") = X_ 'mass fraction
+'    VLE_JSON("GVF") = IIf(x_ > 0, x_ * d / d_g, 0) 'gas volume fraction not calculated here, because densities not known
     VLE_JSON("X_l") = X_l
     VLE_JSON("X_g") = X_g
     VLE_JSON("p_degas") = p_degas
     VLE_JSON("p_gas") = p_gas
-    VLE_JSON("phase") = IIf(x_ > 0 And x_ < 1, 2, 1)
+    VLE_JSON("phase") = IIf(X_ > 0 And X_ < 1, 2, 1)
     
 '    Dim VLEstate As Collection
 '    With VLEstate
@@ -655,6 +737,7 @@ Break:
     'VLE = VLEstate
 EndFunction:
     Set VLE = VLE_JSON
+    VLEisActive = False
 End Function
 
 
@@ -687,13 +770,20 @@ End Function
 Private Function getValueFromVLE(ByRef pOrVLEstate, T As Double, Xi, phase As Integer, Optional varname As String = "") 'get single var or calculate'make VLE struct from String or calculate
     Dim InputIsObjectContainingDesiredVariable As Boolean
     Dim VLE_object As Object
-    If VarType(pOrVLEstate) = vbObject Then ' VLEstate as Object with or without the desired variable
+    If IsError(pOrVLEstate) Then
+        getValueFromVLE = "#error in input VLE"
+        Exit Function
+    ElseIf VarType(pOrVLEstate) = vbObject Then ' VLEstate as Object with or without the desired variable
         Set VLE_object = pOrVLEstate
         ' InputIsObjectContainingDesiredVariable = VLE_object.Exists(varname)
         If Not VLE_object.Exists(varname) Then
             Set VLE_object = VLE(CDbl(VLE_object("p")), CDbl(VLE_object("T")), ToDouble(VLE_object("Xi")), CDbl(VLE_object("phase")))
         End If
     ElseIf VarType(pOrVLEstate) = vbString Then ' VLEstate as String or without the desired variable
+        If Left(pOrVLEstate, 1) = "#" Then
+            getValueFromVLE = "#error in input VLE"
+            Exit Function
+        End If
         Dim n As Integer
 '        Dim val: val = String2Vector(GetValueFromJSON(CStr(pOrVLEstate), varname), n)       'extract desired value from JSON string
 '         getValueFromVLE = IIf(n = 1, val(1), Vector2String(val))
@@ -718,9 +808,9 @@ Private Function getValueFromVLE(ByRef pOrVLEstate, T As Double, Xi, phase As In
     End If
 End Function
 
-Private Function massFractionsToMoleFractions(X, MM) 'Return mole_i/sum(mole_i) from mass fractions X
+Private Function massFractionsToMoleFractions(x, MM) 'Return mole_i/sum(mole_i) from mass fractions X
     Dim nX As Integer, nM As Integer, i As Integer
-    X = ToDouble(X, nX)
+    x = ToDouble(x, nX)
     Dim molefractions() As Double 'Molalities moles/m_H2O
     Dim molalities() As Double 'Molalities moles/m_H2O
     ReDim molefractions(1 To nX)
@@ -731,7 +821,7 @@ Private Function massFractionsToMoleFractions(X, MM) 'Return mole_i/sum(mole_i) 
     End If
 '    X = ToDouble(X)
     For i = 1 To nX
-      molalities(i) = IIf(X(nX) > 0, X(i) / (MM(i) * X(nX)), -1)
+      molalities(i) = IIf(x(nX) > 0, x(i) / (MM(i) * x(nX)), -1)
     Next i
     n_total = Application.Sum(molalities)
     For i = 1 To nX

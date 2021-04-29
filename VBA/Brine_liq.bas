@@ -4,13 +4,11 @@ Attribute VB_Name = "Brine_liq"
 ' uses IAPWS pure water properties
 '
 ' by Henning Francke francke@gfz-potsdam.de
-' 2014 GFZ Potsdam
+' 2020 GFZ Potsdam
 
 Option Explicit
 Option Base 1
-Public Const nX_salt = 3
 Public Const nX = nX_salt + 1
-
 
 Private ignoreLimitSalt_p(1 To nX_salt) As Boolean 'TODO Limithandling vereinheitlichen
 Private ignoreLimitSalt_T(1 To nX_salt) As Boolean
@@ -18,17 +16,38 @@ Private ignoreLimitSalt_visc(1 To nX_salt) As Boolean
 Private Const ignoreLimit_h_KCl_Tmin = False 'ignore Tmin in appMolarEnthalpy_KCl_White and appMolarHeatCapacity_KCl_White
 Private Const ignoreLimit_h_CaCl2_Tmin = False 'ignore Tmin in appMolarEnthalpy_CaCl2_White and appMolarHeatCapacity_CaCl2_White
 
-Public Salts(1 To 3) As SaltProps
+Public Salts(1 To nX_salt) As SaltProps
 
-Private Sub init()
-    'DefineSalts
-    Salts(1) = NaCl
-    Salts(2) = KCl
-    Salts(3) = CaCl2
-    DefineLimits
-End Sub
+Function MM_vec()
+ 'generates double vector of molar masses
+    If Salts(1).MM = 0 Then 'if Salt data not defined
+        a_FluidDefinition.DefineSalts
+    End If
+    If H2O.MM = 0 Then
+        DefineWater
+    End If
+ 
+    Dim MM(1 To nX_salt + 1) As Double
+    Dim i As Integer
+    For i = 1 To nX_salt
+        MM(i) = Salts(i).MM
+    Next i
+    MM(nX_salt + 1) = H2O.MM
+    MM_vec = MM
+End Function
 
-Private Sub DefineLimits()
+Function nM_vec() As Double()
+ 'generates double vector of molar masses
+    Dim nM(1 To nX_salt + 1) As Double
+    Dim i As Integer
+    For i = 1 To nX_salt
+        nM(i) = Salts(i).nM
+    Next i
+    nM(nX_salt + 1) = H2O.nM
+    nM_vec = nM
+End Function
+
+Sub DefineLimits()
     ignoreLimitSalt_p(1) = False
     ignoreLimitSalt_p(2) = False
     ignoreLimitSalt_p(3) = False
@@ -42,11 +61,11 @@ End Sub
 
 Function specificHeatCapacityCp(p As Double, T As Double, Xin, Optional ignore_Tlimit = False)  'calculation of liquid specific heat capacity from apparent molar heat capacities
     If DebugMode Then
-        Debug.Print "Running specificHeatCapacityCp(" & p / 10 ^ 5 & " bar," & T - 273.15 & " °C, X={" & Xin(1) & Xin(2) & Xin(3); "})"
+        Debug.Print "Running specificHeatCapacityCp(" & p / 10 ^ 5 & " bar," & T - 273.15 & " °C, X=" & Vector2String(Xin)
     End If
   
     If Salts(1).MM = 0 Then 'if Salt data not defined
-        init
+        a_FluidDefinition.DefineSalts
     End If
     
     Dim X_
@@ -68,7 +87,7 @@ Function specificHeatCapacityCp(p As Double, T As Double, Xin, Optional ignore_T
         Exit Function
     End If
     
-    Dim B: B = massFractionsToMolalities(X_, MM_vec)
+    Dim b: b = massFractionsToMolalities(X_, MM_vec)
 '    If b(1) = -1 Then
 '      specificHeatCapacityCp = "#Error in massFractionsToMolalities (no water nor pure NaCl)"
 '      Exit Function
@@ -76,23 +95,23 @@ Function specificHeatCapacityCp(p As Double, T As Double, Xin, Optional ignore_T
 
     Dim Cp_appmol: ReDim Cp_appmol(2 To nX_salt) 'Apparent molar heat capacity of salts
     'Cp_appmol(1) = 0
-    If B(2) > 0 Then
-        Cp_appmol(2) = appMolarHeatCapacity_KCl_White(T, B(2), ignore_Tlimit)
+    If b(2) > 0 Then
+        Cp_appmol(2) = appMolarHeatCapacity_KCl_White(T, b(2), ignore_Tlimit)
         If VarType(Cp_appmol(2)) = vbString Then
             specificHeatCapacityCp = Cp_appmol(2)
             Exit Function
         End If
 
     End If
-    If B(3) > 0 Then
-        Cp_appmol(3) = appMolarHeatCapacity_CaCl2_White(T, B(3), ignore_Tlimit)
+    If b(3) > 0 Then
+        Cp_appmol(3) = appMolarHeatCapacity_CaCl2_White(T, b(3), ignore_Tlimit)
         If VarType(Cp_appmol(3)) = vbString Then
             specificHeatCapacityCp = Cp_appmol(3)
             Exit Function
         End If
     End If
     
-    specificHeatCapacityCp = (X_(i_NaCl) + X_(nX)) * cp_Driesner + X_(nX) * (B(2) * Cp_appmol(2) + B(3) * Cp_appmol(3)) 'for length(H_appmol)=2
+    specificHeatCapacityCp = (X_(i_NaCl) + X_(nX)) * cp_Driesner + X_(nX) * (b(2) * Cp_appmol(2) + b(3) * Cp_appmol(3)) 'for length(H_appmol)=2
 End Function
 
 
@@ -106,8 +125,8 @@ Private Function appMolarX_KCl_White(T As Double, ByVal mola As Double, what As 
 'White, D., Ryan, M., Armstrong, M.C., Gates, J. and Wood, R. (1987b) 'Heat capacities of aqueous KCl
 'from 325 to 600 K at 17.9 MPa', The Journal of Chemical Thermodynamics, vol. 19, no. 10, oct, pp. 1023-1030,
 'DOI: 10.1016/0021-9614(87)90012-7.
-    Dim B As Double: B = 0.09818
-    Dim C As Double: C = -1.244
+    Dim b As Double: b = 0.09818
+    Dim c As Double: c = -1.244
     Dim k As Double: k = -327.9
     Dim l As Double: l = -1.31 * 10 ^ 5
     Dim M As Double: M = 628.8
@@ -128,10 +147,10 @@ Private Function appMolarX_KCl_White(T As Double, ByVal mola As Double, what As 
     End If
     
     If what = "cp" Then
-        appMolarX_KCl_White = (mola ^ B + C) * (k - l * (M - T) ^ (-1))
+        appMolarX_KCl_White = (mola ^ b + c) * (k - l * (M - T) ^ (-1))
     ElseIf what = "h" Then
         Const T0 = 293.16 'Temperature at which HeatOfSolution is taken
-        appMolarX_KCl_White = HeatOfSolution_KCl_Sanahuja1986(T0) + (mola ^ B + C) * (k * (T - T0) + l * Log((M - T) / (M - T0)))
+        appMolarX_KCl_White = HeatOfSolution_KCl_Sanahuja1986(T0) + (mola ^ b + c) * (k * (T - T0) + l * Log((M - T) / (M - T0)))
     End If
 End Function
 
@@ -145,8 +164,8 @@ Private Function appMolarX_CaCl2_White(T As Double, ByVal mola As Double, what A
 'White, D., Doberstein, A., Gates, J., Tillett, D. and Wood, R. (1987a) 'Heat capacity of aqueous CaCl2
 'from 306 to 603 K at 17.5 MPa', The Journal of Chemical Thermodynamics, vol. 19, no. 3, mar, pp. 251-259,
 'DOI: 10.1016/0021-9614(87)90132-7.
-    Dim B  As Double: B = -0.001977
-    Dim C  As Double: C = -0.9958
+    Dim b  As Double: b = -0.001977
+    Dim c  As Double: c = -0.9958
     Dim k  As Double: k = 1373
     Dim l  As Double: l = 6736000#
     Dim M  As Double: M = 628
@@ -167,11 +186,11 @@ Private Function appMolarX_CaCl2_White(T As Double, ByVal mola As Double, what A
     End If
     
     If what = "cp" Then
-        appMolarX_CaCl2_White = (mola ^ B + C) * (k - l * (M - T) ^ (-1))
+        appMolarX_CaCl2_White = (mola ^ b + c) * (k - l * (M - T) ^ (-1))
     ElseIf what = "h" Then
         Const T0 = 298.15 'Temperature at which HeatOfSolution is taken
         Const Delta_h_solution_CaCl2 = 81850 '[J/mol_CaCl2] @ 298.15K Sinke1985 http://dx.doi.org/10.1016/0021-9614(85)90083-7
-        appMolarX_CaCl2_White = Delta_h_solution_CaCl2 + (mola ^ B + C) * (k * (T - T0) + l * Log((M - T) / (M - T0)))
+        appMolarX_CaCl2_White = Delta_h_solution_CaCl2 + (mola ^ b + c) * (k * (T - T0) + l * Log((M - T) / (M - T0)))
     End If
 End Function
 
@@ -234,7 +253,7 @@ Private Function T_Scale_h_Driesner(p As Double, T As Double, X_NaCl_ As Double,
   If X_NaCl_ = 0 Then
     X_NaCl = 0
   Else
-    X_NaCl = 1 / (M_NaCl / M_H2O * (1 / X_NaCl_ - 1) + 1) 'mass fraction -> mol fraction
+    X_NaCl = 1 / (M_NaCl / H2O.MM * (1 / X_NaCl_ - 1) + 1) 'mass fraction -> mol fraction
   End If
 
 'CALCULATION OF EQUIVALENT TEMPERATURE_h
@@ -264,7 +283,7 @@ Function specificEnthalpy(p As Double, T As Double, Xin, Optional ignore_plimit 
     End If
 
     If Salts(1).MM = 0 Then 'if Salt data not defined
-      init
+      a_FluidDefinition.DefineSalts
     End If
     Dim X_
     X_ = CheckMassVector(Xin, nX)
@@ -273,8 +292,8 @@ Function specificEnthalpy(p As Double, T As Double, Xin, Optional ignore_plimit 
         Exit Function
     End If
     
-    Dim B '() As Double:
-    B = massFractionsToMolalities(X_, MM_vec)
+    Dim b '() As Double:
+    b = massFractionsToMolalities(X_, MM_vec)
     
     Dim h_Driesner: h_Driesner = SpecificEnthalpy_Driesner(p, T, X_(1) / (X_(1) + X_(nX)), ignore_plimit, ignore_Tlimit, ignore_Xlimit)
     
@@ -297,14 +316,14 @@ Function specificEnthalpy(p As Double, T As Double, Xin, Optional ignore_plimit 
     
     'H_appmol(1) = 0 'included in Driesner enthalpy
     If X_(2) > 0 Then
-        H_appmol(2) = appMolarEnthalpy_KCl_White(T, B(2), ignore_Tlimit)
+        H_appmol(2) = appMolarEnthalpy_KCl_White(T, b(2), ignore_Tlimit)
         If VarType(H_appmol(2)) = vbString Then
             specificEnthalpy = H_appmol(2)
             Exit Function
         End If
     End If
     If X_(3) > 0 Then
-        H_appmol(3) = appMolarEnthalpy_CaCl2_White(T, B(3), ignore_Tlimit)
+        H_appmol(3) = appMolarEnthalpy_CaCl2_White(T, b(3), ignore_Tlimit)
         If VarType(H_appmol(3)) = vbString Then
             specificEnthalpy = H_appmol(3)
             Exit Function
@@ -312,7 +331,7 @@ Function specificEnthalpy(p As Double, T As Double, Xin, Optional ignore_plimit 
     End If
 
 '    SpecificEnthalpy = (X(i_NaCl) + X(nX)) * h_Driesner + X(nX) * ScalProd(SubArray(b, 2, 3), SubArray(H_appmol, 2, 3))
-    specificEnthalpy = (X_(i_NaCl) + X_(nX)) * h_Driesner + X_(nX) * (B(2) * H_appmol(2) + B(3) * H_appmol(3)) 'for length(H_appmol)=2
+    specificEnthalpy = (X_(i_NaCl) + X_(nX)) * h_Driesner + X_(nX) * (b(2) * H_appmol(2) + b(3) * H_appmol(3)) 'for length(H_appmol)=2
 
 End Function
 
@@ -334,31 +353,6 @@ Private Function HeatOfSolution_KCl_Sanahuja1986(T As Double)
 End Function
 
 
-Function MM_vec()
- 'generates double vector of molar masses
-    If Salts(1).MM = 0 Then 'if Salt data not defined
-        init
-    End If
-
-    Dim MM(1 To nX_salt + 1) As Double
-    Dim i As Integer
-    For i = 1 To nX_salt
-        MM(i) = Salts(i).MM
-    Next i
-    MM(nX_salt + 1) = M_H2O
-    MM_vec = MM
-End Function
-
-Function nM_vec() As Double()
- 'generates double vector of molar masses
-    Dim nM(1 To nX_salt + 1) As Double
-    Dim i As Integer
-    For i = 1 To nX_salt
-        nM(i) = Salts(i).nM
-    Next i
-    nM(nX_salt + 1) = H2O.nM
-    nM_vec = nM
-End Function
 
 'ABOVE COMPOSITION SPECIFIC
 'BELOW GENERIC=============================================================================
@@ -371,7 +365,7 @@ Function dynamicViscosity(p_Pa As Double, T As Double, Xin) 'brine density
     End If
     
     If Salts(1).MM = 0 Then
-      init
+      a_FluidDefinition.DefineSalts
     End If
     
     Dim T_C As Double: T_C = T - 273.15
@@ -442,8 +436,8 @@ Function dynamicViscosity(p_Pa As Double, T As Double, Xin) 'brine density
            End If
          End If
     
-    Dim C As Double 'Molarity_molperliter
-    Dim B As Double 'Molality
+    Dim c As Double 'Molarity_molperliter
+    Dim b As Double 'Molality
     Dim phi As Double:
     Dim A_ As Double
     Dim B_ As Double
@@ -460,15 +454,15 @@ Function dynamicViscosity(p_Pa As Double, T As Double, Xin) 'brine density
          phi = molalities(i) / (Application.Sum(molalities) - molalities(UBound(molalities))) 'geometric mean mixture rule weighted with mass fraction (as in Laliberté)
            If i = 3 Then
            'Zhang (available for NaCl, KCl and CaCl)
-          C = X_(i) / Salts(i).MM * CDbl(rho) / 1000 / phi 'component molarity (molperliter)
-            eta_relative = 1 + Salts(i).Zh_A * C ^ 0.5 + Salts(i).Zh_B * C + Salts(i).Zh_D * C ^ 2 + 0.0001 * Salts(i).Zh_E * C ^ 3.5 + 0.00001 * Salts(i).Zh_F * C ^ 7
+          c = X_(i) / Salts(i).MM * CDbl(rho) / 1000 / phi 'component molarity (molperliter)
+            eta_relative = 1 + Salts(i).Zh_A * c ^ 0.5 + Salts(i).Zh_B * c + Salts(i).Zh_D * c ^ 2 + 0.0001 * Salts(i).Zh_E * c ^ 3.5 + 0.00001 * Salts(i).Zh_F * c ^ 7
          Else
            'Duan (available for NaCl and KCl)
-           B = molalities(i) / phi
-           A_ = Salts(i).A(1) + Salts(i).A(2) * T + Salts(i).A(3) * T ^ 2
-           B_ = Salts(i).B(1) + Salts(i).B(2) * T + Salts(i).B(3) * T ^ 2
-           C_ = Salts(i).C(1) + Salts(i).C(2) * T
-           eta_relative = Exp(A_ * B + B_ * B ^ 2 + C_ * B ^ 3) 'Mixture is composed of binary solutions of the same molality
+           b = molalities(i) / phi
+           A_ = Salts(i).a(1) + Salts(i).a(2) * T + Salts(i).a(3) * T ^ 2
+           B_ = Salts(i).b(1) + Salts(i).b(2) * T + Salts(i).b(3) * T ^ 2
+           C_ = Salts(i).c(1) + Salts(i).c(2) * T
+           eta_relative = Exp(A_ * b + B_ * b ^ 2 + C_ * b ^ 3) 'Mixture is composed of binary solutions of the same molality
          End If
          eta = eta * eta_relative ^ phi
     
@@ -485,21 +479,22 @@ Function density(p As Double, T As Double, Xin, Optional ignore_plimit = False, 
 ' http://dx.doi.org/10.1016/j.jct.2008.03.005
 ' http://www.geochem-model.org/wp-content/uploads/2009/09/55-JCT_40_1046.pdf
 ' Problems: Brine has the same evaporation temperature as pure water"
+
     If DebugMode Then
-        Debug.Print "Running Density_vec(" & p / 10 ^ 5 & " bar," & T - 273.15 & " °C" ', X={" & Xin(1) & Xin(2) & Xin(3); "})"
+        Debug.Print "Running density(" & p / 10 ^ 5 & " bar," & T - 273.15 & " °C)" ', X={" & Xin(1) & Xin(2) & Xin(3); "})"
     End If
   
     If Salts(1).MM = 0 Then 'if Salt data not defined
-        init
+        a_FluidDefinition.DefineSalts
     End If
   
-    If p = 0 Then
-      density = "#p is 0"
+    If Not p > 0 Then
+      density = "#p <= 0 (Brine_liq.Density)"
       Exit Function
     End If
     
     If T = 0 Then
-      density = "#T is 0"
+      density = "#T <= 0 (Brine_liq.Density)"
       Exit Function
     End If
     
@@ -517,7 +512,7 @@ Function density(p As Double, T As Double, Xin, Optional ignore_plimit = False, 
 '    End If
     
     Dim v_ As Double
-    Dim B As Double: B = 1.2
+    Dim b As Double: b = 1.2
     Dim U(1 To 9) As Double 'dielectric constant D of pure water according to Bradley and Pitzer (1979)
     U(1) = 342.79
     U(2) = -0.0050866
@@ -530,7 +525,7 @@ Function density(p As Double, T As Double, Xin, Optional ignore_plimit = False, 
     U(9) = 2.1417
               
     Dim N_0 As Double: N_0 = 6.0221415E+23    'Avogadro constant in [1/mol]
-    Dim E As Double: E = 1.60217733E-19 * 10 * 299792458 'elementary charge in [esu]
+    Dim e As Double: e = 1.60217733E-19 * 10 * 299792458 'elementary charge in [esu]
     Dim k As Double: k = 1.3806505E-16 'Boltzmann constant in [erg/K]
     Dim R As Double: R = 8.314472 'Gas constant [J/mol*K]
     Dim p_bar As Double: p_bar = p / 10 ^ 5
@@ -576,8 +571,8 @@ Function density(p As Double, T As Double, Xin, Optional ignore_plimit = False, 
     Dim v_plus As Double
     Dim v_minus As Double
     
-    Dim C() As Double
-    ReDim C(1 To 23)
+    Dim c() As Double
+    ReDim c(1 To 23)
     
     
     If Application.Max(X_) <= 0.1 ^ 12 Then 'for pure water skip the whole calculation and return water density
@@ -596,38 +591,45 @@ Function density(p As Double, T As Double, Xin, Optional ignore_plimit = False, 
         If Not X_(j) > 0 Then
             M_salt(j) = 1 'To avoid division by zero at the end
         Else
-            If outOfRangeMode > 0 Then
-              Dim MsgTxt As String
-                If Not (ignore_Xlimit Or (M(j) >= 0 And M(j) <= Salts(j).mola_max_rho)) Then
-                  MsgTxt = Salts(j).name & " molality " & M(j) & " out of limits {0..." & Salts(j).mola_max_rho & "} mol/kg (Density)"
-                  Debug.Print MsgTxt
-                  If outOfRangeMode = 1 Then
-                    Debug.Print MsgTxt
-                  ElseIf outOfRangeMode = 2 Then
-                    density = MsgTxt
-                    Exit Function
-                  End If
-                End If
-                If Not (ignore_plimit Or ignoreLimitSalt_p(j) Or (p >= Salts(j).p_min_rho And p <= Salts(j).p_max_rho)) Then
-                  MsgTxt = "#p=" & p_bar & " bar, but for " & Salts(j).name & " must be within " & Salts(j).p_min_rho * 0.00001 & "..." & Salts(j).p_max_rho * 0.00001 & " bar (Density)"
-                  Debug.Print MsgTxt
-                  If outOfRangeMode = 1 Then
-                    Debug.Print MsgTxt
-                  ElseIf outOfRangeMode = 2 Then
-                    density = MsgTxt
-                    Exit Function
-                  End If
-                End If
-                If Not (ignore_Tlimit Or ignoreLimitSalt_T(j) Or (T >= Salts(j).T_min_rho And T <= Salts(j).T_max_rho)) Then
-                  MsgTxt = "#T=" & T - 273.15 & "°C but for " & Salts(j).name & " must be within " & Salts(j).T_min_rho - 273.15 & "..." & Salts(j).T_max_rho - 273.15 & "°C (Density)"
-                  If outOfRangeMode = 1 Then
-                    Debug.Print MsgTxt
-                  ElseIf outOfRangeMode = 2 Then
-                    density = MsgTxt
-                    Exit Function
-                  End If
-                End If
+            Dim msg As String
+            msg = RangeCheck_pTb(p, T, CDbl(M(j)), ignore_plimit Or ignoreLimitSalt_p(j), ignore_Tlimit Or ignoreLimitSalt_T(j), CBool(ignore_Xlimit), Salts(j).p_min_rho, Salts(j).p_max_rho, Salts(j).T_min_rho, Salts(j).T_max_rho, Salts(j).mola_max_rho, "Brine_liq.Density#" & Salts(j).name)
+            If Len(msg) > 0 Then
+                density = msg
+                Exit Function
             End If
+        
+'            If outOfRangeMode > 0 Then
+'              Dim MsgTxt As String
+'                If Not (ignore_Xlimit Or (M(j) >= 0 And M(j) <= Salts(j).mola_max_rho)) Then
+'                  MsgTxt = Salts(j).name & " molality " & M(j) & " out of limits {0..." & Salts(j).mola_max_rho & "} mol/kg (Density)"
+'                  Debug.Print MsgTxt
+'                  If outOfRangeMode = 1 Then
+'                    Debug.Print MsgTxt
+'                  ElseIf outOfRangeMode = 2 Then
+'                    density = MsgTxt
+'                    Exit Function
+'                  End If
+'                End If
+'                If Not (ignore_plimit Or ignoreLimitSalt_p(j) Or (p >= Salts(j).p_min_rho And p <= Salts(j).p_max_rho)) Then
+'                  MsgTxt = "#p=" & p_bar & " bar, but for " & Salts(j).name & " must be within " & Salts(j).p_min_rho * 0.00001 & "..." & Salts(j).p_max_rho * 0.00001 & " bar (Density)"
+'                  Debug.Print MsgTxt
+'                  If outOfRangeMode = 1 Then
+'                    Debug.Print MsgTxt
+'                  ElseIf outOfRangeMode = 2 Then
+'                    density = MsgTxt
+'                    Exit Function
+'                  End If
+'                End If
+'                If Not (ignore_Tlimit Or ignoreLimitSalt_T(j) Or (T >= Salts(j).T_min_rho And T <= Salts(j).T_max_rho)) Then
+'                  MsgTxt = "#T=" & T - 273.15 & "°C but for " & Salts(j).name & " must be within " & Salts(j).T_min_rho - 273.15 & "..." & Salts(j).T_max_rho - 273.15 & "°C (Density)"
+'                  If outOfRangeMode = 1 Then
+'                    Debug.Print MsgTxt
+'                  ElseIf outOfRangeMode = 2 Then
+'                    density = MsgTxt
+'                    Exit Function
+'                  End If
+'                End If
+'            End If
             
             M_salt(j) = Salts(j).MM * 1000 'in g/mol
             m_r = Salts(j).m_r
@@ -635,7 +637,7 @@ Function density(p As Double, T As Double, Xin, Optional ignore_plimit = False, 
             z_minus = Salts(j).z_minus
             v_plus = Salts(j).v_plus
             v_minus = Salts(j).v_minus
-            C = Salts(j).Coeff
+            c = Salts(j).Coeff
             
             V = v_plus + v_minus
             
@@ -646,24 +648,24 @@ Function density(p As Double, T As Double, Xin, Optional ignore_plimit = False, 
             I_mr = 1 / 2 * (m_r * v_plus * z_plus ^ 2 + m_r * v_minus * z_minus ^ 2)
             
             'Equation 4:
-            h = Application.Log10(1 + B * I_ ^ (0.5)) / (2 * B)
-            h_mr = Application.Log10(1 + B * I_mr ^ (0.5)) / (2 * B)
+            h = Application.Log10(1 + b * I_ ^ (0.5)) / (2 * b)
+            h_mr = Application.Log10(1 + b * I_mr ^ (0.5)) / (2 * b)
             
             '---------------------------------------------------
             ' equations using empirically fitted coefficients
             '---------------------------------------------------
             
             'Equation 10: solution volume at reference molality
-            V_m_r = C(1) + C(2) * T + C(3) * T ^ 2 + C(4) * T ^ 3 + p_MPa * (C(5) + C(6) * T + C(7) * T ^ 2 + C(8) * T ^ 3)
+            V_m_r = c(1) + c(2) * T + c(3) * T ^ 2 + c(4) * T ^ 3 + p_MPa * (c(5) + c(6) * T + c(7) * T ^ 2 + c(8) * T ^ 3)
             
             'Check: solution density at reference molality
             rho_sol_r = (1000 + m_r * M_salt(j)) / V_m_r
             
             'Equation 11: second virial coefficient. depends on temperature and pressure
-            B_v = C(9) / (T - 227) + C(10) + C(11) * T + C(12) * T ^ 2 + C(13) / (647 - T) + p_MPa * (C(14) / (T - 227) + C(15) + C(16) * T + C(17) * T ^ 2 + C(18) / (647 - T))
+            B_v = c(9) / (T - 227) + c(10) + c(11) * T + c(12) * T ^ 2 + c(13) / (647 - T) + p_MPa * (c(14) / (T - 227) + c(15) + c(16) * T + c(17) * T ^ 2 + c(18) / (647 - T))
             
             'Equation 12: third virial coefficient. depends on temperature
-            C_v = C(19) / (T - 227) + C(20) + C(21) * T + C(22) * T ^ 2 + C(23) / (647 - T)
+            C_v = c(19) / (T - 227) + c(20) + c(21) * T + c(22) * T ^ 2 + c(23) / (647 - T)
             
             '---------------------------------------------------
             ' Appendix A: Debye-Hückel limiting law slopes'
@@ -675,7 +677,7 @@ Function density(p As Double, T As Double, Xin, Optional ignore_plimit = False, 
             d = D_1000 + Cc * Log((BB + p_bar) / (BB + 1000))
             
             'DH-slope for osmotic coefficient according to Bradley and Pitzer (1979)
-            A_Phi = 1 / 3 * ((2 * Application.Pi() * N_0 * rho_H2O) / 1000) ^ (1 / 2) * (E ^ 2 / (d * k * T)) ^ (3 / 2)
+            A_Phi = 1 / 3 * ((2 * Application.Pi() * N_0 * rho_H2O) / 1000) ^ (1 / 2) * (e ^ 2 / (d * k * T)) ^ (3 / 2)
             
             'numeric differentiation per dp
             dp = 0.001 * p_bar
@@ -688,8 +690,8 @@ Function density(p As Double, T As Double, Xin, Optional ignore_plimit = False, 
             
             rho_H2O_minus = rho_H2O
               'Modelica.Media.Water.WaterIF97_base.density_pT(p_minus_bar*1e5, T) * 1e-3 kg/m³->kg/dm³
-            A_Phi_plus = 1 / 3 * (2 * Application.Pi() * N_0 * rho_H2O_plus / 1000) ^ (1 / 2) * (E ^ 2 / (D_plus * k * T)) ^ (3 / 2)
-            A_Phi_minus = 1 / 3 * (2 * Application.Pi() * N_0 * rho_H2O_minus / 1000) ^ (1 / 2) * (E ^ 2 / (D_minus * k * T)) ^ (3 / 2)
+            A_Phi_plus = 1 / 3 * (2 * Application.Pi() * N_0 * rho_H2O_plus / 1000) ^ (1 / 2) * (e ^ 2 / (D_plus * k * T)) ^ (3 / 2)
+            A_Phi_minus = 1 / 3 * (2 * Application.Pi() * N_0 * rho_H2O_minus / 1000) ^ (1 / 2) * (e ^ 2 / (D_minus * k * T)) ^ (3 / 2)
             dA_Phi = (A_Phi_plus - A_Phi_minus)
             
             'DH-slope for apparent molar volume according to Rogers and Pitzer (1982)
@@ -785,7 +787,7 @@ Function resistivity(p As Double, T As Double, Xin, Optional ignore_plimit = Fal
 End Function
 
 Function Conductivity_Ucok1980_Tcd(T As Double, c_vec, d As Double) As Variant 'electrical density'
-  Dim B_NaCl As Variant: B_NaCl = Array( _
+  Dim b_NaCl As Variant: b_NaCl = Array( _
     Array(3.47, -59.21, 0.4551, -0.0000935, -0.00000177), _
     Array(-6.65, 198.1, -0.2058, 0.0000737, 0.000000877), _
     Array(2.633, -64.8, 0.005799, 0.0000674, -0.000000214))
@@ -797,11 +799,11 @@ Function Conductivity_Ucok1980_Tcd(T As Double, c_vec, d As Double) As Variant '
     Array(-34.62, 780.3, 1.05, -0.002459, 0.000000999), _
     Array(24.64, -492.3, -0.5922, 0.001461, -0.000000711), _
     Array(-3.907, 64.59, 0.06735, -0.000122, -0.00000000473))
-  Dim BB As Variant: BB = Array(B_NaCl, B_KCl, B_CaCl2)
+  Dim BB As Variant: BB = Array(b_NaCl, B_KCl, B_CaCl2)
     
   Dim T_C As Double: T_C = T - 273.15
   Dim T_vec As Variant: T_vec = Array(1, 1 / T_C, T_C, T_C ^ 2, T_C ^ 3)
-  Dim C As Double
+  Dim c As Double
   Dim C_ As Variant
   Dim D_ As Variant
   Dim i As Integer
@@ -809,11 +811,11 @@ Function Conductivity_Ucok1980_Tcd(T As Double, c_vec, d As Double) As Variant '
   Dim offset As Integer: offset = LBound(c_vec) - 1
   
     For i = 1 To 3
-    C = c_vec(i + offset)
-    If Not C > 0 Then
+    c = c_vec(i + offset)
+    If Not c > 0 Then
       gamma(i) = 0 ' gamma
     Else
-      C_ = Array(C, C * Sqr(C), C * C * Log(C))
+      C_ = Array(c, c * Sqr(c), c * c * Log(c))
       D_ = WorksheetFunction.MMult(C_, BB(i))
       gamma(i) = WorksheetFunction.SumProduct(D_, T_vec)  ' gamma
     End If
