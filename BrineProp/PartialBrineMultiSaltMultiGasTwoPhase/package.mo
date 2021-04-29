@@ -126,6 +126,11 @@ partial package PartialBrineMultiSaltMultiGasTwoPhase "Template medium for aqueo
 </html>"));
   end ThermodynamicState;
 
+  redeclare function extends density "return density of ideal gas"
+  algorithm
+    d := state.d;
+  end density;
+
     redeclare function density_pTX "wrapper to extract d from state"
       //necessary for declaration of inverse function p(T,d)
       input SI.Pressure p;
@@ -141,19 +146,26 @@ partial package PartialBrineMultiSaltMultiGasTwoPhase "Template medium for aqueo
       if debugmode then
           print("Running density_pTX("+String(p/1e5)+","+String(T-273.15)+"degC, X="+Modelica.Math.Matrices.toString(transpose([X]))+")");
       end if;
-      d:=density(setState_pTX(p,T,X,phase,n_g_norm_start));
+     d:=density(setState_pTX(p,T,X,phase,n_g_norm_start));
 
      annotation(LateInline=true,inverse(p=pressure_dTX(d,T,X,phase,n_g_norm_start)));
     end density_pTX;
 
-    redeclare function density "density from state"
-      extends Modelica.Icons.Function;
-      input ThermodynamicState state "Thermodynamic state record";
-      output Density d "Density";
-    //  extends Modelica.Media.Interfaces.PartialMedium.density;
-    algorithm
-      d := state.d;
-    end density;
+   replaceable function density_liq_pTX "Density of the liquid phase"
+     input SI.Pressure p "TODO: Rename to density_liq_pTX";
+     input SI.Temp_K T;
+     input MassFraction X[nX] "mass fraction m_NaCl/m_Sol";
+     input SI.MolarMass MM[:] "=MM_vec =fill(0,nX) molar masses of components";
+     output SI.Density d;
+   end density_liq_pTX;
+
+   replaceable function density_gas_pTX "Density of the gas phase"
+     input SI.Pressure p;
+     input SI.Temp_K T;
+     input MassFraction X[:] "nX_gas mass fraction";
+     input SI.MolarMass MM[:] "=MM_vec =fill(0,nX) molar masses of components";
+     output SI.Density d;
+   end density_gas_pTX;
 
     redeclare function extends saturationTemperature "saturation temperature"
     algorithm
@@ -375,7 +387,7 @@ protected
       //necessary for declaration of inverse function T(p,h)
       input SI.Pressure p;
       input SI.Temp_K T;
-      input MassFraction X[:];
+      input MassFraction X[:] "mass fraction m_NaCl/m_Sol";
       input FixedPhase phase=0
     "2 for two-phase, 1 for one-phase, 0 if not known";
       input Real[nX_gas+1] n_g_norm_start=fill(0.5,nX_gas+1)
@@ -679,10 +691,10 @@ protected
           h_g := -1;
         end if;
         d_l :=if not x < 1 then -1 else density_liq_pTX(
-            p,
-            T2,
-            X_l,
-            MM_vec)   "no 1-phase gas";
+              p,
+              T2,
+              X_l,
+              MM_vec) "no 1-phase gas";
         h_l := specificEnthalpy_liq_pTX(p,T,X_l,ignoreTlimit);
       end if "TwoPhaseWater";
 
@@ -819,6 +831,22 @@ protected
          fill(-1,nX);
       SI.SpecificHeatCapacity cp_vec[nX_gas+1];
     end specificHeatCapacityCp_gas;
+
+    replaceable function isobaricExpansionCoefficient_liq
+    //  extends isobaricExpansionCoefficient;
+      input ThermodynamicState state;
+      input SI.Density d_l;
+      output SI.LinearTemperatureCoefficient beta;
+protected
+      constant SI.Temperature Delta_T= 1;
+    algorithm
+    //  beta :=d_l*(1/d_l - 1/(density_liquid_pTX(state.p,state.T - Delta_T,state.X,MM_vec)))/Delta_T;
+      beta :=(1 - d_l/(density_liq_pTX(
+            state.p,
+            state.T - Delta_T,
+            state.X,
+            MM_vec)))/Delta_T;
+    end isobaricExpansionCoefficient_liq;
 
   redeclare replaceable function specificEnthalpy
     input ThermodynamicState state "Thermodynamic state record";
