@@ -131,6 +131,10 @@ algorithm
         print("m["+String(i)+"]= "+String(m[i])+"");
       end if;
 
+      if debugmode then
+        print("m["+String(i)+"]= "+String(m[i])+"");
+      end if;
+
       M_salt[i] := salt.M_salt*1000 "in g/mol";
       m_r := salt.m_r;
       z_plus := salt.z_plus;
