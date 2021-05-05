@@ -127,8 +127,9 @@ partial package PartialBrineMultiSaltMultiGasTwoPhase "Template medium for aqueo
   end ThermodynamicState;
 
   redeclare function extends density "return density of ideal gas"
-  algorithm
-    d := state.d;
+  /*algorithm 
+d := state.d;
+*/
   end density;
 
     redeclare function density_pTX "wrapper to extract d from state"

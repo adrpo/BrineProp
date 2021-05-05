@@ -178,7 +178,6 @@ protected
 
   redeclare function extends specificHeatCapacityCp_gas
   "calculation of gas specific heat capacity"
-  import SG = Modelica.Media.IdealGases.SingleGases;
   algorithm
     if state.x>0 then
 

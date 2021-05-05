@@ -6,6 +6,55 @@ package BrineGas4Gas "\"Gas mixture of CO2+N2+CH4+H2+H2O\""
     final MM_vec = {M_CO2,M_N2,M_CH4,M_H2,M_H2O},
     final nM_vec = {nM_CO2,nM_N2,nM_CH4,nM_H2,nM_H2O});
 
+  redeclare function specificHeatCapacityCp_pTX
+    "calculation of specific heat capacities of gas mixture"
+    input SI.Pressure p;
+    input SI.Temp_K T;
+    input SI.MassFraction X[nX]=reference_X "Mass fractions";
+    output SI.SpecificHeatCapacity cp
+    "Specific heat capacity at constant pressure";
+    import SG = Modelica.Media.IdealGases.SingleGases;
+    import IF97=Modelica.Media.Water.IF97_Utilities;
+protected
+      SG.H2O.ThermodynamicState state=SG.H2O.ThermodynamicState(p=0,T=T);
+      SI.SpecificHeatCapacity cp_CO2=SG.CO2.specificHeatCapacityCp(state);
+      SI.SpecificHeatCapacity cp_N2=SG.N2.specificHeatCapacityCp(state);
+      SI.SpecificHeatCapacity cp_CH4=SG.CH4.specificHeatCapacityCp(state);
+      SI.SpecificHeatCapacity cp_H2=SG.H2.specificHeatCapacityCp(state);
+      SI.SpecificHeatCapacity cp_H2O=IF97.cp_pT(min(p,IF97.BaseIF97.Basic.psat(T)-1),T=T)
+      "below psat -> gaseous";
+
+      SI.SpecificHeatCapacity cp_vec[nX]; //={cp_CO2,cp_N2,cp_CH4,cp_H2,cp_H2O};
+
+  algorithm
+    cp_vec[iCO2]:=cp_CO2;
+    cp_vec[iN2]:=cp_N2;
+    cp_vec[iCH4]:=cp_CH4;
+    cp_vec[iH2]:=cp_H2;
+    cp_vec[iCO2]:=cp_H2O; //the two-phase models rely on this order!
+
+    if debugmode then
+      print("Running specificHeatCapacityCp_pTX("+String(p/1e5)+" bar,"+String(T-273.15)+" degC, X="+Modelica.Math.Matrices.toString(transpose([X]))+")");
+    end if;
+
+    if not ignoreNoCompositionInBrineGas and not min(X)>0 then
+      print("No gas composition, assuming water vapour.(BrineProp.BrineGas_3Gas.specificHeatCapacityCp_pTX)");
+    end if;
+
+  /*  if waterSaturated then
+    cp := cp_vec * waterSaturatedComposition_pTX(p,T,X[end - nX+1:end]);
+  else */
+  //    cp := cp_vec * X[end - nX+1:end];
+    cp := cp_vec * cat(1,X[1:end-1],{if min(X)>0 then X[end] else 1});
+      //  end if;
+
+  /*  print("cp_CO2: "+String(cp_vec[1])+" J/kg");
+  print("cp_N2: "+String(cp_vec[2])+" J/kg");
+  print("cp_CH4: "+String(cp_vec[3])+" J/kg");
+  print("cp_H2O: "+String(cp_vec[4])+" J/kg"); */
+
+  end specificHeatCapacityCp_pTX;
+
   redeclare function specificEnthalpy_pTX
     "calculation of specific enthalpy of gas mixture"
   //  import Modelica.Media.IdealGases.Common.SingleGasNasa;

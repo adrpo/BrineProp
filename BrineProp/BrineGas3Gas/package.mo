@@ -66,17 +66,14 @@ protected
 
   replaceable function extends specificHeatCapacityCp_pTX
     "calculation of specific heat capacities of gas mixture"
-    import Modelica.Media.IdealGases.Common.SingleGasNasa;
-    import Modelica.Media.IdealGases.SingleGases;
-
-    import Modelica.Media.Water;
-
+    import SG = Modelica.Media.IdealGases.SingleGases;
+    import IF97=Modelica.Media.Water.IF97_Utilities;
 protected
-      SingleGases.H2O.ThermodynamicState state=SingleGases.H2O.ThermodynamicState(p=0,T=T);
-      SI.SpecificHeatCapacity cp_CO2=SingleGases.CO2.specificHeatCapacityCp(state);
-      SI.SpecificHeatCapacity cp_N2=SingleGases.N2.specificHeatCapacityCp(state);
-      SI.SpecificHeatCapacity cp_CH4=SingleGases.CH4.specificHeatCapacityCp(state);
-      SI.SpecificHeatCapacity cp_H2O=Water.IF97_Utilities.cp_pT(min(p,Water.IF97_Utilities.BaseIF97.Basic.psat(T)-1),T=T)
+      SG.H2O.ThermodynamicState state=SG.H2O.ThermodynamicState(p=0,T=T);
+      SI.SpecificHeatCapacity cp_CO2=SG.CO2.specificHeatCapacityCp(state);
+      SI.SpecificHeatCapacity cp_N2=SG.N2.specificHeatCapacityCp(state);
+      SI.SpecificHeatCapacity cp_CH4=SG.CH4.specificHeatCapacityCp(state);
+      SI.SpecificHeatCapacity cp_H2O=IF97.cp_pT(min(p,IF97.BaseIF97.Basic.psat(T)-1),T=T)
       "below psat -> gaseous";
 
       SI.SpecificHeatCapacity cp_vec[:]={cp_CO2,cp_N2,cp_CH4,cp_H2O}; //the two-phase models rely on this order!
