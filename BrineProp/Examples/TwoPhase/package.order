@@ -5,9 +5,9 @@ PureWaterFlashing
 BrineProps2PhaseMinimal
 DegassingByHeating
 DegassingByDecompression
-BrineProps2PhaseMinimal_ph
-BrineProps2phaseFull
-BrineProps2PhaseMinimal_state
+BrineProps2Phase3gas_Minimal_ph
+BrineProps2phase3gasFull
+BrineProps2Phase3gasMinimal_state
 ConvertBrineComposition
 InitializationTest
 DeepWellSampleTakingGasIncrease

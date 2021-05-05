@@ -1,5 +1,5 @@
 within BrineProp.Examples.TwoPhase;
-model BrineProps2PhaseMinimal_state
+model BrineProps2Phase3gasMinimal_state
   "Using the state record instead of Baseproperties"
   //needs "Advanced.PedanticModelica:=false" to run
 
@@ -14,4 +14,4 @@ package Medium = BrineProp.Brine5salts3gas(ignoreLimitN2_T=true);
 
   annotation (experiment(StopTime=100, __Dymola_NumberOfIntervals=100),
       __Dymola_experimentSetupOutput);
-end BrineProps2PhaseMinimal_state;
+end BrineProps2Phase3gasMinimal_state;

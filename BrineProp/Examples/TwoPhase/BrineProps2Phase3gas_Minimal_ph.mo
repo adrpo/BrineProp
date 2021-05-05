@@ -1,5 +1,5 @@
 within BrineProp.Examples.TwoPhase;
-model BrineProps2PhaseMinimal_ph
+model BrineProps2Phase3gas_Minimal_ph
   "Minimal inversion (h(p,T) -> T(p,h)) example for 2-phase brine property model"
   //needs "Advanced.PedanticModelica:=false" to run
 
@@ -31,4 +31,4 @@ equation
   props.Xi = Xi;
   annotation (experiment(StopTime=80, __Dymola_NumberOfIntervals=100),
       __Dymola_experimentSetupOutput);
-end BrineProps2PhaseMinimal_ph;
+end BrineProps2Phase3gas_Minimal_ph;

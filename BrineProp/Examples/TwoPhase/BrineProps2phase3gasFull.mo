@@ -1,5 +1,5 @@
 within BrineProp.Examples.TwoPhase;
-model BrineProps2phaseFull "Two-phase example demonstrating all features"
+model BrineProps2phase3gasFull "Two-phase example demonstrating all features"
   //needs "Advanced.PedanticModelica:=false" to run
 
 //SPECIFY MEDIUM
@@ -136,4 +136,4 @@ algorithm
 //  print("k="+Modelica.Math.Matrices.toString(transpose([Brine_5salts_TwoPhase_3gas.solubilities_pTX(props.p, props.T, props.X_l, props.X, props.p_gas[1:3]) ./ props.p_gas[1:3]])));
   annotation (experiment(StopTime=100, __Dymola_NumberOfIntervals=100),
       __Dymola_experimentSetupOutput);
-end BrineProps2phaseFull;
+end BrineProps2phase3gasFull;
