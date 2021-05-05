@@ -754,7 +754,7 @@ protected
     end isobaricExpansionCoefficient_liq;
 
    replaceable function density_liq_pTX "Density of the liquid phase"
-     input SI.Pressure p "TODO: Rename to density_liq_pTX";
+     input SI.Pressure p;
      input SI.Temp_K T;
      input MassFraction X[nX] "mass fraction m_NaCl/m_Sol";
      input SI.MolarMass MM[:] "=MM_vec =fill(0,nX) molar masses of components";

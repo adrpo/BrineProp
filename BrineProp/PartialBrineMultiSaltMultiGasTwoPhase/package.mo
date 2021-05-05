@@ -152,13 +152,6 @@ d := state.d;
      annotation(LateInline=true,inverse(p=pressure_dTX(d,T,X,phase,n_g_norm_start)));
     end density_pTX;
 
-   replaceable function density_liq_pTX "Density of the liquid phase"
-     input SI.Pressure p "TODO: Rename to density_liq_pTX";
-     input SI.Temp_K T;
-     input MassFraction X[nX] "mass fraction m_NaCl/m_Sol";
-     input SI.MolarMass MM[:] "=MM_vec =fill(0,nX) molar masses of components";
-     output SI.Density d;
-   end density_liq_pTX;
 
    replaceable function density_gas_pTX "Density of the gas phase"
      input SI.Pressure p;
@@ -203,16 +196,6 @@ d := state.d;
       output MassFraction solu[nX_gas] "gas concentration in kg_gas/kg_fluid";
     end solubilities_pTX;
 
-    replaceable function fugacity_pTX
-    "Calculation of nitrogen fugacity coefficient extracted from EES"
-      input SI.Pressure p;
-      input SI.Temp_K T;
-      input MassFraction X[:]=reference_X "Mass fractions";
-      input String substancename;
-      output Real phi;
-protected
-    Types.Pressure_bar p_bar=SI.Conversions.to_bar(p);
-    end fugacity_pTX;
 
   redeclare function vapourQuality
   "Returns vapour quality, needs to be defined to overload function defined in PartialMixtureTwoPhaseMedium"
@@ -833,21 +816,6 @@ protected
       SI.SpecificHeatCapacity cp_vec[nX_gas+1];
     end specificHeatCapacityCp_gas;
 
-    replaceable function isobaricExpansionCoefficient_liq
-    //  extends isobaricExpansionCoefficient;
-      input ThermodynamicState state;
-      input SI.Density d_l;
-      output SI.LinearTemperatureCoefficient beta;
-protected
-      constant SI.Temperature Delta_T= 1;
-    algorithm
-    //  beta :=d_l*(1/d_l - 1/(density_liquid_pTX(state.p,state.T - Delta_T,state.X,MM_vec)))/Delta_T;
-      beta :=(1 - d_l/(density_liq_pTX(
-            state.p,
-            state.T - Delta_T,
-            state.X,
-            MM_vec)))/Delta_T;
-    end isobaricExpansionCoefficient_liq;
 
   redeclare replaceable function specificEnthalpy
     input ThermodynamicState state "Thermodynamic state record";

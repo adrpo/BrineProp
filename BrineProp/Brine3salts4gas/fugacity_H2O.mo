@@ -1,4 +1,4 @@
-within BrineProp.Brine3salts3gas;
+within BrineProp.Brine3salts4gas;
 function fugacity_H2O
   "Calculation of fugacity coefficient according to (Duan 2003)"
   extends partial_fugacity_pTX;

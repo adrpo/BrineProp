@@ -1,4 +1,3 @@
-fugacity_H2O
 setState_pTX
 setState_phX
 setState_dTX
@@ -14,3 +13,4 @@ thermalConductivity
 surfaceTension
 specificHeatCapacityCp_liq
 specificHeatCapacityCp_gas
+fugacity_H2O
