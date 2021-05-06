@@ -4,7 +4,7 @@ PureWaterMinimal
 PureWaterFlashing
 BrineProps2PhaseMinimal
 DegassingByHeating
-DegassingByDecompression
+DegassingByDecompression_3gas
 BrineProps2Phase3gas_Minimal_ph
 BrineProps2phase3gasFull
 BrineProps2Phase3gasMinimal_state
@@ -14,3 +14,5 @@ DeepWellSampleTakingGasIncrease
 SolubilityValidation
 MethaneSolubility
 BrineProps2Phase4gasMinimal
+DegassingByDecompression_4gas
+SlugWithdrawal
