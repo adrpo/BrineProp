@@ -359,11 +359,11 @@ algorithm
 end setState_phX;
 
   redeclare function density_pTX
-    input Modelica.SIunits.Pressure p;
-    input Modelica.SIunits.Temp_K T;
+    input SI.Pressure p;
+    input SI.Temp_K T;
     input MassFraction X[:]=fill(0,0) "mass fraction m_NaCl/m_Sol";
     input FixedPhase phase=0 "2 for two-phase, 1 for one-phase, 0 if not known";
-    output Modelica.SIunits.Density d=Modelica.Media.Water.WaterIF97_pT.density_pT(p,T);
+    output SI.Density d;//=Modelica.Media.Water.WaterIF97_pT.density_pT(p,T);
   algorithm
   //  Modelica.Utilities.Streams.print("density_pTX("+String(p)+","+String(T)+")");
   //  annotation(LateInline=true,inverse(T = temperature_phX(p=p,h=h,X=X,phase=phase)));
