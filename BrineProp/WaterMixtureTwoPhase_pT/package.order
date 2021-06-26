@@ -1,5 +1,9 @@
 nX_salt
 nX_gas
+cp_constant
+cp_set
+rho_constant
+rho_set
 M_H2O
 BaseProperties
 specificEnthalpy_pTX

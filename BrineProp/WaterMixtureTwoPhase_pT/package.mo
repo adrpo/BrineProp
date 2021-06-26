@@ -3,7 +3,10 @@ package WaterMixtureTwoPhase_pT "(incomplete) Water model from Modelica.Media co
 
 constant Integer nX_salt = 0;
 constant Integer nX_gas = 0;
-
+constant Boolean cp_constant = false;
+constant Real cp_set= 4190;
+constant Boolean rho_constant = false;
+constant Real rho_set= 1000;
 
  extends PartialMixtureTwoPhaseMedium(
     final mediumName="TwoPhaseMixtureWater",
@@ -59,7 +62,7 @@ constant Integer nX_gas = 0;
 
  //DENSITY
  //  q = vapourQuality(state);
-     d = Modelica.Media.Water.WaterIF97_pT.density_ph(p,h);
+     d = if rho_constant then rho_set else Modelica.Media.Water.WaterIF97_pT.density_ph(p,h);
  //  d = d_l/(1-q*(1-d_l/d_g));
  //End DENSITY
 
@@ -260,7 +263,9 @@ end specificEntropy_pTX;
   "specific heat capacity at constant pressure of water"
 
   algorithm
-    if Modelica.Media.Water.WaterIF97_pT.dT_explicit then
+    if cp_constant then
+      cp :=cp_set;
+    elseif Modelica.Media.Water.WaterIF97_pT.dT_explicit then
       cp := Modelica.Media.Water.IF97_Utilities.cp_dT(
           state.d,
           state.T,
@@ -365,17 +370,21 @@ end setState_phX;
     input FixedPhase phase=0 "2 for two-phase, 1 for one-phase, 0 if not known";
     output SI.Density d;//=Modelica.Media.Water.WaterIF97_pT.density_pT(p,T);
   algorithm
+    d :=if rho_constant then rho_set else
+      Modelica.Media.Water.WaterIF97_pT.density_pT(p, T);
   //  Modelica.Utilities.Streams.print("density_pTX("+String(p)+","+String(T)+")");
   //  annotation(LateInline=true,inverse(T = temperature_phX(p=p,h=h,X=X,phase=phase)));
   end density_pTX;
 
   redeclare function density_phX
-    input Modelica.SIunits.Pressure p;
+    input SI.Pressure p;
     input SpecificEnthalpy h;
     input MassFraction X[:]=fill(0,0) "mass fraction m_NaCl/m_Sol";
     input FixedPhase phase=0 "2 for two-phase, 1 for one-phase, 0 if not known";
-    output Modelica.SIunits.Density d=Modelica.Media.Water.WaterIF97_pT.density_ph(p,h);
+    output SI.Density d; //=Modelica.Media.Water.WaterIF97_pT.density_ph(p,h);
   algorithm
+    d :=if rho_constant then rho_set else
+      Modelica.Media.Water.WaterIF97_pT.density_ph(p, h);
   //  Modelica.Utilities.Streams.print("density_phX("+String(p)+","+String(h)+")");
   //  annotation(LateInline=true,inverse(T = temperature_phX(p=p,h=h,X=X,phase=phase)));
   end density_phX;
