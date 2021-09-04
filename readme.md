@@ -1,6 +1,6 @@
 BrineProp
 =========
-BrineProp is a modelica package that calculates the thermodynamic properties of a specified brine, i.e., an aqueous solution of salts and gases, with a potential gas phase, including degassing/evaporation and solution/condensation.
+BrineProp is a modelica package that calculates the thermodynamic properties of a specified brine, i.e., an aqueous solution of salts (NaCl,KCl,CaCl2) and gases (CO2,N2,CH4,H2), with a potential gas phase, including degassing/evaporation and solution/condensation.
 
 An Excel version is available in the [download section](https://gitext.gfz-potsdam.de/francke/BrineProp/tags). Its VBA code can also be found in `/VBA`.
 
